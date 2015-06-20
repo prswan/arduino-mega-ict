@@ -1,5 +1,5 @@
 # Arduino ICT
-An Arduino Mega based In Circuit Tester for various 8-bit CPU's targetting video arcade games.
+An Arduino Mega based In Circuit Tester to aid in the repair of various 8-bit CPU systems, primarily targetting video arcade games.
 
 Full details can be found: http://www.paulswan.me/arcade/ArduinoMegaICT.htm
 
