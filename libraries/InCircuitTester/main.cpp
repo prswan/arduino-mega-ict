@@ -64,7 +64,7 @@ static int s_currentSelection;
 // When set (none-zero) causes the select to repeat the selection callback
 // for the set number of seconds.
 //
-bool s_repeatSelectTimeInS;
+int s_repeatSelectTimeInS;
 
 //
 // Handler for the configuration callback to set options.

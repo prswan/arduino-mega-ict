@@ -32,7 +32,7 @@
 // When set (none-zero) causes the select to repeat the selection callback
 // for the set number of seconds.
 //
-extern bool s_repeatSelectTimeInS;
+extern int s_repeatSelectTimeInS;
 
 
 PERROR
