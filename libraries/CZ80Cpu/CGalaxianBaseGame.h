@@ -40,6 +40,13 @@ class CGalaxianBaseGame : public CGame
         );
 
         //
+        // Custom function to clear the video display to blank.
+        //
+        static PERROR clearVideo(
+            void *context
+        );
+
+        //
         // Custom function for testing the shell/missile hardware.
         //
         static PERROR shellMissileTest(

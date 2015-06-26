@@ -126,6 +126,7 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
 // Custom functions implemented for this game.
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
+                                                            {CGalaxianBaseGame::clearVideo,       "Clear Vid."},
                                                             {CGalaxianBaseGame::shellMissileTest, "Shell Mis."},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
@@ -234,10 +235,10 @@ CGalaxianBaseGame::interruptCheck(
 
 
 //
-// Custom function for testing the shell/missile hardware.
+// Clear the video display to blank (background & sprites)
 //
 PERROR
-CGalaxianBaseGame::shellMissileTest(
+CGalaxianBaseGame::clearVideo(
     void *context
 )
 {
@@ -252,7 +253,6 @@ CGalaxianBaseGame::shellMissileTest(
     static const UINT32 bkVRamStart  = 0x105000;
     static const UINT32 bkVRamLen    = 0x400;
     static const UINT8  bkVBlankChar = (0x160 >> 3); // 8x8
-    static const UINT32 intEnable    = 0x7001L;
 
     //
     // Clear the background RAM to a blank character.
@@ -269,6 +269,25 @@ CGalaxianBaseGame::shellMissileTest(
     {
         (void) cpu->memoryWrite(objRamStart + count, objBlankChar);
     }
+
+    return error;
+}
+
+//
+// Custom function for testing the shell/missile hardware.
+//
+PERROR
+CGalaxianBaseGame::shellMissileTest(
+    void *context
+)
+{
+    CGalaxianBaseGame *thisGame = (CGalaxianBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+    UINT32 count;
+
+    static const UINT32 objRamStart  = 0x5800;
+    static const UINT32 intEnable    = 0x7001L;
 
     for (count = 0 ; ((count < 10) && !FAILED(error)) ; count++)
     {
@@ -292,9 +311,13 @@ CGalaxianBaseGame::shellMissileTest(
 
             //
             // Set shell X+Y to be the same to cause a diagonal sweep.
-            // This will take 255 VBLANKS and thus a few seconds. The 7
-            // shells and 1 missile are separated by 1 line to make them
-            // easier to see individually.
+            // This will take 255 VBLANKs and thus a few seconds. The 7
+            // shells (white) and 1 missile (yellow) are separated by 1 line
+            // to make them easier to see individually.
+            //
+            // Note that the first 3 white shells match Y-1 and thus on screen
+            // there is a diagnonal group of 3, a gap, and then a diagonal
+            // group of 4 white shells plus the yellow missile.
             //
             for (projectile = 0 ; projectile < 8 ; projectile++)
             {

@@ -816,7 +816,7 @@ CGame::onCustomKeyMove(
         const CUSTOM_FUNCTION *customFunction = &m_customFunction[m_customSelect];
 
         errorCustom->code        = ERROR_SUCCESS;
-        errorCustom->description = "-";
+        errorCustom->description = " ";
         errorCustom->description += customFunction->description;
     }
 
