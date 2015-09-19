@@ -7,6 +7,8 @@
 //
 // 1. Redistributions of source code must retain the above copyright notice,
 //    this list of conditions and the following disclaimer.
+// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
 //
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
@@ -16,26 +18,34 @@
 // OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 // COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
 // HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef PinMap_h
-#define PinMap_h
+#include <LiquidCrystal.h>
+#include <main.h>
+#include <DFR_Key.h>
+#include <zutil.h>
 
-#include "Arduino.h"
-#include "Types.h"
-
-//
-// The 40-pin DIL probe head connector.
-//
-extern const UINT8 g_pinMap40DIL[];
+#include <C6809ECpu.h>
+#include <CStarWarsGame.h>
 
 //
-// The 8-pin auxiliary IO connector, J14
+// The initial selector to select the game to test.
 //
-extern const UINT8 g_pinMap8Aux[];
+static SELECTOR s_gameSelector[] = {//0123456789abcde
+                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),               false},
+                                    {"Star Wars      ",  onSelectGame,   (void*) (CStarWarsGame::createInstance),        false},
+                                    { 0, 0 }
+                                   };
 
-#endif
+void setup()
+{
+  mainSetup(s_gameSelector);
+}
+
+void loop()
+{
+  mainLoop();
+}
+

@@ -22,20 +22,29 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef PinMap_h
-#define PinMap_h
+#ifndef CStarWarsBaseGame_h
+#define CStarWarsBaseGame_h
 
-#include "Arduino.h"
-#include "Types.h"
+#include "CGame.h"
 
-//
-// The 40-pin DIL probe head connector.
-//
-extern const UINT8 g_pinMap40DIL[];
 
-//
-// The 8-pin auxiliary IO connector, J14
-//
-extern const UINT8 g_pinMap8Aux[];
+class CStarWarsBaseGame : public CGame
+{
+    public:
+
+        //
+        // CStarWarsBaseGame
+        //
+
+    protected:
+
+        CStarWarsBaseGame(
+            const ROM_REGION *romRegion
+        );
+
+        ~CStarWarsBaseGame(
+        );
+};
 
 #endif
+

@@ -77,6 +77,22 @@ const UINT8 g_pinMap40DIL[] = { 0xFF,   //  0 - Not used
                               };
 
 /*
+ * Production Shield V1.00
+ *  J14, 1 - 8
+ *
+*/
+const UINT8 g_pinMap8Aux[] = { 0xFF,   //  0 - Not used
+                               54+ 8,  //  A8
+                               54+ 9,  //  A9
+                               54+10,  //  A10
+                               54+11,  //  A11
+                               54+12,  //  A12
+                               54+13,  //  A13
+                               54+14,  //  A14
+                               54+15   //  A15
+                             };
+
+/*
  * Shield Prototype pinout
  *
  * 40 - 1

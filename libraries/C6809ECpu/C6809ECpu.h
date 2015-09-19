@@ -22,20 +22,95 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef PinMap_h
-#define PinMap_h
+#ifndef C6809ECpu_h
+#define C6809ECpu_h
 
 #include "Arduino.h"
-#include "Types.h"
+#include "ICpu.h"
+#include "CBus.h"
+#include "CFast8BitBus.h"
+#include "CFastPin.h"
 
-//
-// The 40-pin DIL probe head connector.
-//
-extern const UINT8 g_pinMap40DIL[];
 
-//
-// The 8-pin auxiliary IO connector, J14
-//
-extern const UINT8 g_pinMap8Aux[];
+class C6809ECpu : public ICpu
+{
+    public:
+
+        //
+        // Constructor
+        //
+
+        C6809ECpu(
+        );
+
+        // ICpu Interface
+        //
+
+        virtual
+        PERROR
+        idle(
+        );
+
+        virtual
+        PERROR
+        check(
+        );
+
+        virtual
+        PERROR
+        memoryRead(
+            UINT32 address,
+            UINT8  *data
+        );
+
+        virtual
+        PERROR
+        memoryWrite(
+            UINT32 address,
+            UINT8  data
+        );
+
+        virtual
+        PERROR
+        waitForInterrupt(
+            Interrupt interrupt,
+            UINT16    timeoutInMs
+        );
+
+        virtual
+        PERROR
+        acknowledgeInterrupt(
+            UINT8 *response
+        );
+
+        //
+        // C6809ECpu Interface
+        //
+
+        void
+        clockPulse(
+        );
+
+    private:
+
+        PERROR
+        memoryReadWrite(
+            UINT32 address,
+            UINT8  *data,
+            int    readWrite
+        );
+
+    private:
+
+        CBus          m_busA;
+        CFast8BitBus  m_busD;
+
+        CFastPin      m_pinRW;
+        CFastPin      m_pinE;
+        CFastPin      m_pinQ;
+
+        CFastPin      m_pinClock;
+
+};
 
 #endif
