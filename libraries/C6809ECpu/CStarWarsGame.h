@@ -38,6 +38,9 @@ class CStarWarsGame : public CStarWarsBaseGame
         static IGame* createInstance(
         );
 
+        static IGame* createInstanceSetO(
+        );
+
         //
         // IGame Interface - wholly implemented in the Base game.
         //

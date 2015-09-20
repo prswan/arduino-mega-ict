@@ -36,6 +36,14 @@ class CStarWarsBaseGame : public CGame
         // CStarWarsBaseGame
         //
 
+        static PERROR onBankSwitchMPAGE0(
+            void *cStarWarsBaseGame
+        );
+
+        static PERROR onBankSwitchMPAGE1(
+            void *cStarWarsBaseGame
+        );
+
     protected:
 
         CStarWarsBaseGame(

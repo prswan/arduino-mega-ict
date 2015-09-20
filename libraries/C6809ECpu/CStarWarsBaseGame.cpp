@@ -44,6 +44,13 @@
 //
 
 //
+// Programmatically used definitions
+//
+static const UINT32 c_MPAGE_A  = 0x4684;
+static const UINT8  c_MPAGE_D  = 0x80;
+
+
+//
 // RAM region is the same for all versions.
 //
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
@@ -64,10 +71,11 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 //
 // Output region is the same for all versions.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x4700L, 0xFF, 0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
-                                                        {NO_BANK_SWITCH, 0x4701L, 0x01, 0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
-                                                        {NO_BANK_SWITCH, 0x4702L, 0xFF, 0x00,  "   ", "MW2-BI"}, // MW2 - MP Block Index BIC0-BIC7
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                            "012", "012345"
+                                                        {NO_BANK_SWITCH, c_MPAGE_A, c_MPAGE_D, 0x00,  "9LM", "MPAGE"},  // MPAGE ROM bank switch
+                                                        {NO_BANK_SWITCH, 0x4700L,   0xFF,      0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
+                                                        {NO_BANK_SWITCH, 0x4701L,   0x01,      0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
+                                                        {NO_BANK_SWITCH, 0x4702L,   0xFF,      0x00,  "   ", "MW2-BI"}, // MW2 - MP Block Index BIC0-BIC7
                                                         {0}
                                                       }; // end of list
 
@@ -109,4 +117,32 @@ CStarWarsBaseGame::~CStarWarsBaseGame(
     delete m_cpu;
     m_cpu = (ICpu *) NULL;
 }
+
+
+//
+// The program memory is banked.
+//
+PERROR
+CStarWarsBaseGame::onBankSwitchMPAGE0(
+    void *cStarWarsBaseGame
+)
+{
+    CStarWarsBaseGame *thisGame  = (CStarWarsBaseGame *) cStarWarsBaseGame;
+    ICpu              *cpu       = thisGame->m_cpu;
+
+    return cpu->memoryWrite(c_MPAGE_A, 0x00);
+}
+
+
+PERROR
+CStarWarsBaseGame::onBankSwitchMPAGE1(
+    void *cStarWarsBaseGame
+)
+{
+    CStarWarsBaseGame *thisGame  = (CStarWarsBaseGame *) cStarWarsBaseGame;
+    ICpu              *cpu       = thisGame->m_cpu;
+
+    return cpu->memoryWrite(c_MPAGE_A, c_MPAGE_D);
+}
+
 
