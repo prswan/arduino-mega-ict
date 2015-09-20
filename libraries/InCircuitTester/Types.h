@@ -341,6 +341,47 @@ typedef struct _INTERRUPT_DEFINITION {
     }                                                  \
 
 //
+// Macro perform a CPU memory read and exit on error
+//
+#define CHECK_CPU_READ_EXIT(error, cpu, address, data)                      \
+    {                                                                       \
+        error = cpu->memoryRead(address, data);                             \
+        if (error->code != ERROR_SUCCESS)                                   \
+        {                                                                   \
+            goto Exit;                                                      \
+        }                                                                   \
+    }                                                                       \
+
+//
+// Macro perform a CPU memory write and exit on error
+//
+#define CHECK_CPU_WRITE_EXIT(error, cpu, address, data)                     \
+    {                                                                       \
+        error = cpu->memoryWrite(address, data);                            \
+        if (error->code != ERROR_SUCCESS)                                   \
+        {                                                                   \
+            goto Exit;                                                      \
+        }                                                                   \
+    }                                                                       \
+
+//
+// Macro to check a 16-bit value and exit with an error if it's wrong.
+//
+#define CHECK_UINT16_VALUE_EXIT(error, message, recValue, expValue)         \
+    {                                                                       \
+        if (recValue != expValue)                                           \
+        {                                                                   \
+            error = errorCustom;                                            \
+            error->code = ERROR_FAILED;                                     \
+            error->description = "E:";                                      \
+            error->description += message;                                  \
+            STRING_UINT16_HEX(error->description, expValue);                \
+            STRING_UINT16_HEX(error->description, recValue);                \
+            goto Exit;                                                      \
+        }                                                                   \
+    }                                                                       \
+
+//
 // Macro to check a literal value and exit with an error if it's wrong.
 //
 #define CHECK_LITERAL_VALUE_EXIT(error, connection, recValue, expValue)     \

@@ -44,6 +44,26 @@ class CStarWarsBaseGame : public CGame
             void *cStarWarsBaseGame
         );
 
+        static PERROR test21(
+            void   *context
+        );
+
+        static PERROR test22(
+            void   *context
+        );
+
+        static PERROR test23(
+            void   *context
+        );
+
+        static PERROR test24(
+            void   *context
+        );
+
+        static PERROR test25(
+            void   *context
+        );
+
     protected:
 
         CStarWarsBaseGame(
@@ -52,6 +72,16 @@ class CStarWarsBaseGame : public CGame
 
         ~CStarWarsBaseGame(
         );
+
+    private:
+
+        static PERROR testDivider(
+            void   *context,
+            UINT16 dividend,
+            UINT16 divisor,
+            UINT16 quotient
+        );
+
 };
 
 #endif

@@ -46,8 +46,20 @@
 //
 // Programmatically used definitions
 //
+
+// ROM bank switching
 static const UINT32 c_MPAGE_A  = 0x4684;
 static const UINT8  c_MPAGE_D  = 0x80;
+
+// Divider
+static const UINT32 c_REH_A    = 0x4700; // Quotient Hi
+static const UINT32 c_REL_A    = 0x4701; // Quotient Lo
+
+static const UINT32 c_DVSRH_A  = 0x4704; // Divisor Hi, also clears quotient, loads dividend shift register
+static const UINT32 c_DVSRL_A  = 0x4705; // Divisor Lo, also starts the divider
+
+static const UINT32 c_DVDDH_A  = 0x4706; // Dividend Hi
+static const UINT32 c_DVDDL_A  = 0x4707; // Dividend Lo
 
 
 //
@@ -64,7 +76,8 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
                                                       {NO_BANK_SWITCH, 0x4320L, 0x80,  "9H ", "MB RUN"}, // MATHRUN
-                                                      {NO_BANK_SWITCH, 0x4700L, 0xFF,  "4J ", "REH   "}, // REH
+                                                      {NO_BANK_SWITCH, c_REH_A, 0xFF,  "4J ", "REH   "}, // REH Hi - Quotient Hi
+                                                      {NO_BANK_SWITCH, c_REL_A, 0xFF,  "4K ", "REL   "}, // REH Lo - Quotient Lo
                                                       {0}
                                                     }; // end of list
 
@@ -72,10 +85,14 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 // Output region is the same for all versions.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                            "012", "012345"
-                                                        {NO_BANK_SWITCH, c_MPAGE_A, c_MPAGE_D, 0x00,  "9LM", "MPAGE"},  // MPAGE ROM bank switch
+                                                        {NO_BANK_SWITCH, c_MPAGE_A, c_MPAGE_D, 0x00,  "9LM", "MPAGE "},  // MPAGE ROM bank switch
                                                         {NO_BANK_SWITCH, 0x4700L,   0xFF,      0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
                                                         {NO_BANK_SWITCH, 0x4701L,   0x01,      0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
                                                         {NO_BANK_SWITCH, 0x4702L,   0xFF,      0x00,  "   ", "MW2-BI"}, // MW2 - MP Block Index BIC0-BIC7
+                                                        {NO_BANK_SWITCH, c_DVSRH_A, 0xFF,      0x00,  "45P", "DVSRH "}, // DVSRH - Divisor Hi, Q clear, load div.
+                                                        {NO_BANK_SWITCH, c_DVSRL_A, 0xFF,      0x00,  "6PL", "DVSRL "}, // DVSRL - Divisor Lo, start
+                                                        {NO_BANK_SWITCH, c_DVDDH_A, 0xFF,      0x00,  "4L ", "DVDDH "}, // DVDDH - Dividend Hi
+                                                        {NO_BANK_SWITCH, c_DVDDL_A, 0xFF,      0x00,  "5L ", "DVDDL "}, // DVDDL - Dividend Lo
                                                         {0}
                                                       }; // end of list
 
@@ -88,6 +105,11 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Custom functions implemented for this game.
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
+                                                            {CStarWarsBaseGame::test21,           "DV Test 21"},
+                                                            {CStarWarsBaseGame::test22,           "DV Test 22"},
+                                                            {CStarWarsBaseGame::test23,           "DV Test 23"},
+                                                            {CStarWarsBaseGame::test24,           "DV Test 24"},
+                                                            {CStarWarsBaseGame::test25,           "DV Test 25"},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -145,4 +167,97 @@ CStarWarsBaseGame::onBankSwitchMPAGE1(
     return cpu->memoryWrite(c_MPAGE_A, c_MPAGE_D);
 }
 
+
+PERROR
+CStarWarsBaseGame::testDivider(
+    void   *context,
+    UINT16 dividend,
+    UINT16 divisor,
+    UINT16 quotient
+)
+{
+    CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+    UINT8  recData;
+    UINT16 recQuotient = 0;
+
+    // Load dividend
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_DVDDH_A, (dividend >> 8) & 0xFF);
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_DVDDL_A, (dividend >> 0) & 0xFF);
+
+    // Load divisor
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRH_A, (divisor >> 8) & 0xFF);
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRL_A, (divisor >> 0) & 0xFF);
+
+    // Wait for a few clocks.
+    // There is no indication to the CPU that the divide is actually complete,
+    // therefore we'll just execute a dummy read to run the master clock.
+    // There's a counter at 8R loaded with 0001 that counts up at 3MHz and pops
+    // out a ripple signal, thus ~16 3MHz clocks maybe?
+    // 16 CPU reads (at 1 x 1.5MHz cycle each) should be more than enough to
+    // complete the operation.
+    //
+    for (int x = 0 ; x < 16 ; x++)
+    {
+        CHECK_CPU_READ_EXIT(error, cpu, 0xFFFF, &recData);
+    }
+
+    // Read quotient
+    CHECK_CPU_READ_EXIT(error, cpu, c_REH_A, &recData);
+    recQuotient |= ((UINT16) recData) << 8;
+    CHECK_CPU_READ_EXIT(error, cpu, c_REL_A, &recData);
+    recQuotient |= ((UINT16) recData) << 0;
+
+    // Check the result is what we expect
+    CHECK_UINT16_VALUE_EXIT(error, "DV", recQuotient, quotient);
+
+Exit:
+    return error;
+}
+
+
+PERROR
+CStarWarsBaseGame::test21(
+    void   *context
+)
+{
+    return testDivider(context, 0x4000, 0x4000, 0x4000);
+}
+
+
+PERROR
+CStarWarsBaseGame::test22(
+    void   *context
+)
+{
+    return testDivider(context, 0x5555, 0x4000, 0x5555);
+}
+
+
+PERROR
+CStarWarsBaseGame::test23(
+    void   *context
+)
+{
+    return testDivider(context, 0x2AAA, 0x4000, 0x2AAA);
+}
+
+
+PERROR
+CStarWarsBaseGame::test24(
+    void   *context
+)
+{
+    return testDivider(context, 0x2AAA, 0x2AAA, 0x4000);
+}
+
+
+PERROR
+CStarWarsBaseGame::test25(
+    void   *context
+)
+{
+    return testDivider(context, 0x5555, 0x5555, 0x4000);
+}
 
