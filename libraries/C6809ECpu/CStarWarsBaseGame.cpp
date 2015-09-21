@@ -61,23 +61,32 @@ static const UINT32 c_DVSRL_A  = 0x4705; // Divisor Lo, also starts the divider
 static const UINT32 c_DVDDH_A  = 0x4706; // Dividend Hi
 static const UINT32 c_DVDDL_A  = 0x4707; // Dividend Lo
 
+// Matrix
+static const UINT32 c_MBRAM_A  = 0x5000; // Matrix RAM base address
+
+static const UINT32 c_MBRUN_A  = 0x4320; // Matrix MATH RUN
+static const UINT32 c_MBRUN_D  = 0x80;   // Matrix MATH RUN bit
+
+static const UINT32 c_MW0_A    = 0x4700; // Matrix Write 0 (Program Address MPA2-MPA9)
+static const UINT32 c_MW1_A    = 0x4701; // Matrix Write 1 (Block Index Hi BIC8)
+static const UINT32 c_MW2_A    = 0x4702; // Matrix Write 2 (Block Index Lo BIC0-BIC7)
 
 //
 // RAM region is the same for all versions.
 //
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
                                                   {NO_BANK_SWITCH, 0x4800,      0x4FFF,      0xFF, "2FH", "Prog. "}, // "Program RAM, 6116, CPU"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0xFF, "5FH", "MB AB "}, // "Mathbox RAM 2x6116, 16-bit, CPU"
+                                                  {NO_BANK_SWITCH, c_MBRAM_A,   0x5FFF,      0xFF, "5FH", "MB AB "}, // "Matrix RAM 2x6116, 16-bit, CPU"
                                                   {0}
                                                 }; // end of list
 
 //
 // Input region is the same for all versions.
 //
-static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
-                                                      {NO_BANK_SWITCH, 0x4320L, 0x80,  "9H ", "MB RUN"}, // MATHRUN
-                                                      {NO_BANK_SWITCH, c_REH_A, 0xFF,  "4J ", "REH   "}, // REH Hi - Quotient Hi
-                                                      {NO_BANK_SWITCH, c_REL_A, 0xFF,  "4K ", "REL   "}, // REH Lo - Quotient Lo
+static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                      "012", "012345"
+                                                      {NO_BANK_SWITCH, c_MBRUN_A, c_MBRUN_D,  "9H ", "MB RUN"}, // MATHRUN
+                                                      {NO_BANK_SWITCH, c_REH_A,   0xFF,       "4J ", "REH   "}, // REH Hi - Quotient Hi
+                                                      {NO_BANK_SWITCH, c_REL_A,   0xFF,       "4K ", "REL   "}, // REH Lo - Quotient Lo
                                                       {0}
                                                     }; // end of list
 
@@ -85,10 +94,10 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 // Output region is the same for all versions.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                            "012", "012345"
-                                                        {NO_BANK_SWITCH, c_MPAGE_A, c_MPAGE_D, 0x00,  "9LM", "MPAGE "},  // MPAGE ROM bank switch
-                                                        {NO_BANK_SWITCH, 0x4700L,   0xFF,      0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
-                                                        {NO_BANK_SWITCH, 0x4701L,   0x01,      0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
-                                                        {NO_BANK_SWITCH, 0x4702L,   0xFF,      0x00,  "   ", "MW2-BI"}, // MW2 - MP Block Index BIC0-BIC7
+                                                        {NO_BANK_SWITCH, c_MPAGE_A, c_MPAGE_D, 0x00,  "9LM", "MPAGE "}, // MPAGE ROM bank switch
+                                                        {NO_BANK_SWITCH, c_MW0_A,   0xFF,      0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
+                                                        {NO_BANK_SWITCH, c_MW1_A,   0x01,      0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
+                                                        {NO_BANK_SWITCH, c_MW2_A,   0xFF,      0x00,  "   ", "MW2-BI"}, // MW2 - MP Block Index BIC0-BIC7
                                                         {NO_BANK_SWITCH, c_DVSRH_A, 0xFF,      0x00,  "45P", "DVSRH "}, // DVSRH - Divisor Hi, Q clear, load div.
                                                         {NO_BANK_SWITCH, c_DVSRL_A, 0xFF,      0x00,  "6PL", "DVSRL "}, // DVSRL - Divisor Lo, start
                                                         {NO_BANK_SWITCH, c_DVDDH_A, 0xFF,      0x00,  "4L ", "DVDDH "}, // DVDDH - Dividend Hi
@@ -105,6 +114,17 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Custom functions implemented for this game.
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
+                                                            {CStarWarsBaseGame::test10,           "MX Test 10"},
+                                                            {CStarWarsBaseGame::test11,           "MX Test 11"},
+                                                            {CStarWarsBaseGame::test12,           "MX Test 12"},
+                                                            {CStarWarsBaseGame::test13,           "MX Test 13"},
+                                                            {CStarWarsBaseGame::test14,           "MX Test 14"},
+                                                            {CStarWarsBaseGame::test15,           "MX Test 15"},
+                                                            {CStarWarsBaseGame::test16,           "MX Test 16"},
+                                                            {CStarWarsBaseGame::test17,           "MX Test 17"},
+                                                            {CStarWarsBaseGame::test18,           "MX Test 18"},
+                                                            {CStarWarsBaseGame::test19,           "MX Test 19"},
+                                                            {CStarWarsBaseGame::test20,           "MX Test 20"},
                                                             {CStarWarsBaseGame::test21,           "DV Test 21"},
                                                             {CStarWarsBaseGame::test22,           "DV Test 22"},
                                                             {CStarWarsBaseGame::test23,           "DV Test 23"},
@@ -169,6 +189,104 @@ CStarWarsBaseGame::onBankSwitchMPAGE1(
 
 
 PERROR
+CStarWarsBaseGame::waitForMathRunLo(
+)
+{
+    PERROR error = errorSuccess;
+    UINT8 recData;
+
+    // Poll the math run flag
+    for (int x = 0; x < 128 ; x++)
+    {
+        CHECK_CPU_READ_EXIT(error, m_cpu, c_MBRUN_A, &recData);
+
+        if ((recData & c_MBRUN_D) == 0x00)
+        {
+            break;
+        }
+    }
+
+    // Math Run is still active
+    if (!((recData & c_MBRUN_D) == 0x00))
+    {
+        error = errorCustom;
+        error->code = ERROR_FAILED;
+        error->description = "E: MATH RUN Hi";
+    }
+
+Exit:
+    return error;
+}
+
+
+PERROR
+CStarWarsBaseGame::testMatrix(
+    void   *context,
+    int    srcDataLength,
+    UINT32 *srcDataAddress,
+    UINT16 *srcData,
+    int    expDataLength,
+    UINT32 *expDataAddress,
+    UINT16 *expData,
+    UINT16 programAddress
+)
+{
+    CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+    UINT8  recData;
+    UINT16 recResult = 0;
+
+    // Make sure the matrix processor is idle
+    error = thisGame->waitForMathRunLo();
+    if (FAILED(error))
+    {
+        goto Exit;
+    }
+
+    // Load the source data words
+    for (int x = 0 ; x < srcDataLength ; x++)
+    {
+        CHECK_CPU_WRITE_EXIT(error, cpu, c_MBRAM_A + (srcDataAddress[x] << 1) | 0, (srcData[x] >> 8) & 0xFF);
+        CHECK_CPU_WRITE_EXIT(error, cpu, c_MBRAM_A + (srcDataAddress[x] << 1) | 1, (srcData[x] >> 0) & 0xFF);
+    }
+
+    // Make sure the result words are set to something so we know something happened
+    for (int x = 0 ; x < expDataLength ; x++)
+    {
+        CHECK_CPU_WRITE_EXIT(error, cpu, c_MBRAM_A + (expDataAddress[x] << 1) | 0, 0x12);
+        CHECK_CPU_WRITE_EXIT(error, cpu, c_MBRAM_A + (expDataAddress[x] << 1) | 1, 0x34);
+    }
+
+    // Write the program address to start
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_MW0_A, (programAddress >> 2) & 0xFF);
+
+    // Wait for the matrix processor to become idle again.
+    error = thisGame->waitForMathRunLo();
+    if (FAILED(error))
+    {
+        goto Exit;
+    }
+
+    // Check all the result words
+    for (int x = 0 ; x < expDataLength ; x++)
+    {
+        recResult = 0;
+
+        CHECK_CPU_READ_EXIT(error, cpu, c_MBRAM_A + (expDataAddress[x] << 1) | 0, &recData);
+        recResult |= ((UINT16) recData) << 8;
+        CHECK_CPU_READ_EXIT(error, cpu, c_MBRAM_A + (expDataAddress[x] << 1) | 1, &recData);
+        recResult |= ((UINT16) recData) << 0;
+
+        CHECK_UINT16_VALUE_EXIT(error, "MX", recResult, expData[x]);
+    }
+
+Exit:
+    return error;
+}
+
+
+PERROR
 CStarWarsBaseGame::testDivider(
     void   *context,
     UINT16 dividend,
@@ -214,6 +332,166 @@ CStarWarsBaseGame::testDivider(
 
 Exit:
     return error;
+}
+
+
+PERROR
+CStarWarsBaseGame::test10(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x0F  };
+    UINT16 srcData[]    = {0x5555};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               0, (UINT32*) NULL, (UINT16*) NULL,
+                               0x15C);
+}
+
+
+PERROR
+CStarWarsBaseGame::test11(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x0F  };
+    UINT16 srcData[]    = {0xAAAA};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               0, (UINT32*) NULL, (UINT16*) NULL,
+                               0x160);
+}
+
+
+PERROR
+CStarWarsBaseGame::test12(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x0F  };
+    UINT16 srcData[]    = {0x5555};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               0, (UINT32*) NULL, (UINT16*) NULL,
+                               0x164);
+}
+
+
+PERROR
+CStarWarsBaseGame::test13(
+    void   *context
+)
+{
+    return testMatrix(context, 0, (UINT32*) NULL, (UINT16*) NULL,
+                               0, (UINT32*) NULL, (UINT16*) NULL,
+                               0x168);
+}
+
+
+PERROR
+CStarWarsBaseGame::test14(
+    void   *context
+)
+{
+    return testMatrix(context, 0, (UINT32*) NULL, (UINT16*) NULL,
+                               0, (UINT32*) NULL, (UINT16*) NULL,
+                               0x16C);
+}
+
+
+PERROR
+CStarWarsBaseGame::test15(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x00  };
+    UINT16 srcData[]    = {0x5555};
+    UINT32 expAddress[] = {0x01  };
+    UINT16 expData[]    = {0x5555};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               ARRAYSIZE(expAddress), expAddress, expData,
+                               0x170); // -> 171
+}
+
+
+PERROR
+CStarWarsBaseGame::test16(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x00  };
+    UINT16 srcData[]    = {0xAAAA};
+    UINT32 expAddress[] = {0x01  };
+    UINT16 expData[]    = {0xAAAA};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               ARRAYSIZE(expAddress), expAddress, expData,
+                               0x170); // -> 171
+}
+
+
+PERROR
+CStarWarsBaseGame::test17(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x0C,   0x0D,   0x0E  };
+    UINT16 srcData[]    = {0x5555, 0x0000, 0x4000};
+    UINT32 expAddress[] = {0x00  };
+    UINT16 expData[]    = {0x5555};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               ARRAYSIZE(expAddress), expAddress, expData,
+                               0x174); // -> 177
+}
+
+
+PERROR
+CStarWarsBaseGame::test18(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x0C,   0x0D,   0x0E  };
+    UINT16 srcData[]    = {0x0000, 0x5555, 0xC000};
+    UINT32 expAddress[] = {0x00  };
+    UINT16 expData[]    = {0x5555};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               ARRAYSIZE(expAddress), expAddress, expData,
+                               0x174); // -> 177
+}
+
+
+PERROR
+CStarWarsBaseGame::test19(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x0C,   0x0D,   0x0E  };
+    UINT16 srcData[]    = {0x2AAA, 0x0000, 0x4000};
+    UINT32 expAddress[] = {0x00  };
+    UINT16 expData[]    = {0x2AAA};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               ARRAYSIZE(expAddress), expAddress, expData,
+                               0x174); // -> 177
+}
+
+
+PERROR
+CStarWarsBaseGame::test20(
+    void   *context
+)
+{
+    UINT32 srcAddress[] = {0x0C,   0x0D,   0x0E  };
+    UINT16 srcData[]    = {0x0000, 0x2AAA, 0xC000};
+    UINT32 expAddress[] = {0x00  };
+    UINT16 expData[]    = {0x2AAA};
+
+    return testMatrix(context, ARRAYSIZE(srcAddress), srcAddress, srcData,
+                               ARRAYSIZE(expAddress), expAddress, expData,
+                               0x174); // -> 177
 }
 
 

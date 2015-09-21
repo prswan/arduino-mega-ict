@@ -44,6 +44,50 @@ class CStarWarsBaseGame : public CGame
             void *cStarWarsBaseGame
         );
 
+        static PERROR test10(
+            void   *context
+        );
+
+        static PERROR test11(
+            void   *context
+        );
+
+        static PERROR test12(
+            void   *context
+        );
+
+        static PERROR test13(
+            void   *context
+        );
+
+        static PERROR test14(
+            void   *context
+        );
+
+        static PERROR test15(
+            void   *context
+        );
+
+        static PERROR test16(
+            void   *context
+        );
+
+        static PERROR test17(
+            void   *context
+        );
+
+        static PERROR test18(
+            void   *context
+        );
+
+        static PERROR test19(
+            void   *context
+        );
+
+        static PERROR test20(
+            void   *context
+        );
+
         static PERROR test21(
             void   *context
         );
@@ -74,6 +118,20 @@ class CStarWarsBaseGame : public CGame
         );
 
     private:
+
+        PERROR waitForMathRunLo(
+        );
+
+        static PERROR testMatrix(
+            void   *context,
+            int    srcDataLength,
+            UINT32 *srcDataAddress,
+            UINT16 *srcData,
+            int    expDataLength,
+            UINT32 *expDataAddress,
+            UINT16 *expData,
+            UINT16 programAddress
+        );
 
         static PERROR testDivider(
             void   *context,
