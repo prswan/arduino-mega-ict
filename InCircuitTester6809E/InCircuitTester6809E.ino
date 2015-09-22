@@ -35,6 +35,7 @@
 //
 static SELECTOR s_gameSelector[] = {//0123456789abcde
                                     {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),               false},
+                                    {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),                 false},
                                     {"Star Wars      ",  onSelectGame,   (void*) (CStarWarsGame::createInstance),        false},
                                     {"Star Wars (O)  ",  onSelectGame,   (void*) (CStarWarsGame::createInstanceSetO),    false},
                                     { 0, 0 }

@@ -67,6 +67,11 @@ static int s_currentSelection;
 int s_repeatSelectTimeInS;
 
 //
+// When true causes the repeat to ignore any reported error and continue the repeat
+//
+bool s_repeatIgnoreError;
+
+//
 // Handler for the configuration callback to set options.
 //
 PERROR
@@ -83,12 +88,32 @@ onSelectConfig(
         {
             s_repeatSelectTimeInS = 5;
         }
+        else if (s_repeatSelectTimeInS == 5)
+        {
+            s_repeatSelectTimeInS = 20;
+        }
         else
         {
             s_repeatSelectTimeInS = 0;
         }
 
         errorCustom->description = String("OK: Repeat ") + String(s_repeatSelectTimeInS, DEC) + String("S");
+        errorCustom->code = ERROR_SUCCESS;
+    }
+
+    if (context == (void *) &s_repeatIgnoreError)
+    {
+        if (s_repeatIgnoreError == false)
+        {
+            s_repeatIgnoreError = true;
+            errorCustom->description = "OK: Ignore err";
+        }
+        else
+        {
+            s_repeatIgnoreError = false;
+            errorCustom->description = "OK: Stop on err";
+        }
+
         errorCustom->code = ERROR_SUCCESS;
     }
 
@@ -259,9 +284,9 @@ void mainLoop()
                                s_currentSelector[s_currentSelection].context,
                                currentKey );
                 }
-                while ( SUCCESS(error) &&                 // No failures.
-                        (millis() < endTime) &&           // Times not up.
-                        (inSelector != s_gameSelector) ); // The input selector wasn't the game selector.
+                while ( (s_repeatIgnoreError || SUCCESS(error)) &&  // Ignoring or no failures
+                        (millis() < endTime)                    &&  // Times not up.
+                        (inSelector != s_gameSelector) );           // The input selector wasn't the game selector.
 
                 //
                 // The selection may have changed so update the whole display.

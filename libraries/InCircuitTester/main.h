@@ -34,6 +34,11 @@
 //
 extern int s_repeatSelectTimeInS;
 
+//
+// When true causes the repeat to ignore any reported error and continue the repeat
+//
+extern bool s_repeatIgnoreError;
+
 
 PERROR
 onSelectConfig(

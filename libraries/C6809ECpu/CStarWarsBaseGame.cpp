@@ -113,23 +113,25 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 //
 // Custom functions implemented for this game.
 //
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
-                                                            {CStarWarsBaseGame::test10,           "MX Test 10"},
-                                                            {CStarWarsBaseGame::test11,           "MX Test 11"},
-                                                            {CStarWarsBaseGame::test12,           "MX Test 12"},
-                                                            {CStarWarsBaseGame::test13,           "MX Test 13"},
-                                                            {CStarWarsBaseGame::test14,           "MX Test 14"},
-                                                            {CStarWarsBaseGame::test15,           "MX Test 15"},
-                                                            {CStarWarsBaseGame::test16,           "MX Test 16"},
-                                                            {CStarWarsBaseGame::test17,           "MX Test 17"},
-                                                            {CStarWarsBaseGame::test18,           "MX Test 18"},
-                                                            {CStarWarsBaseGame::test19,           "MX Test 19"},
-                                                            {CStarWarsBaseGame::test20,           "MX Test 20"},
-                                                            {CStarWarsBaseGame::test21,           "DV Test 21"},
-                                                            {CStarWarsBaseGame::test22,           "DV Test 22"},
-                                                            {CStarWarsBaseGame::test23,           "DV Test 23"},
-                                                            {CStarWarsBaseGame::test24,           "DV Test 24"},
-                                                            {CStarWarsBaseGame::test25,           "DV Test 25"},
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                               "0123456789"
+                                                            {CStarWarsBaseGame::test10,                      "MX Test 10"},
+                                                            {CStarWarsBaseGame::test11,                      "MX Test 11"},
+                                                            {CStarWarsBaseGame::test12,                      "MX Test 12"},
+                                                            {CStarWarsBaseGame::test13,                      "MX Test 13"},
+                                                            {CStarWarsBaseGame::test14,                      "MX Test 14"},
+                                                            {CStarWarsBaseGame::test15,                      "MX Test 15"},
+                                                            {CStarWarsBaseGame::test16,                      "MX Test 16"},
+                                                            {CStarWarsBaseGame::test17,                      "MX Test 17"},
+                                                            {CStarWarsBaseGame::test18,                      "MX Test 18"},
+                                                            {CStarWarsBaseGame::test19,                      "MX Test 19"},
+                                                            {CStarWarsBaseGame::test20,                      "MX Test 20"},
+                                                            {CStarWarsBaseGame::test21,                      "DV Test 21"},
+                                                            {CStarWarsBaseGame::test22,                      "DV Test 22"},
+                                                            {CStarWarsBaseGame::test23,                      "DV Test 23"},
+                                                            {CStarWarsBaseGame::test24,                      "DV Test 24"},
+                                                            {CStarWarsBaseGame::test25,                      "DV Test 25"},
+                                                            {CStarWarsBaseGame::testRepeatLastMatrixProgram, "Repeat MX "},
+                                                            {CStarWarsBaseGame::testClockPulse,              "Clk Pulse "},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -140,7 +142,9 @@ CStarWarsBaseGame::CStarWarsBaseGame(
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,
-           s_customFunction )
+           s_customFunction ),
+    m_clockPulseCount(0),
+    m_lastMatrixProgramAddress(0)
 {
     m_cpu = new C6809ECpu();
     m_cpu->idle();
@@ -260,6 +264,8 @@ CStarWarsBaseGame::testMatrix(
 
     // Write the program address to start
     CHECK_CPU_WRITE_EXIT(error, cpu, c_MW0_A, (programAddress >> 2) & 0xFF);
+    thisGame->m_lastMatrixProgramAddress = programAddress;
+    thisGame->m_clockPulseCount = 0;
 
     // Wait for the matrix processor to become idle again.
     error = thisGame->waitForMathRunLo();
@@ -307,6 +313,7 @@ CStarWarsBaseGame::testDivider(
     // Load divisor
     CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRH_A, (divisor >> 8) & 0xFF);
     CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRL_A, (divisor >> 0) & 0xFF);
+    thisGame->m_clockPulseCount = 0;
 
     // Wait for a few clocks.
     // There is no indication to the CPU that the divide is actually complete,
@@ -537,5 +544,49 @@ CStarWarsBaseGame::test25(
 )
 {
     return testDivider(context, 0x5555, 0x5555, 0x4000);
+}
+
+
+PERROR
+CStarWarsBaseGame::testRepeatLastMatrixProgram(
+    void   *context
+)
+{
+    CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+
+    if (thisGame->m_lastMatrixProgramAddress == 0)
+    {
+        error = errorUnexpected;
+        goto Exit;
+    }
+
+    // Write the program address to start
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_MW0_A, (thisGame->m_lastMatrixProgramAddress >> 2) & 0xFF);
+    thisGame->m_clockPulseCount = 0;
+
+Exit:
+    return error;
+}
+
+
+PERROR
+CStarWarsBaseGame::testClockPulse(
+    void   *context
+)
+{
+    CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
+    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    PERROR error = errorCustom;
+
+    cpu->clockPulse();
+    thisGame->m_clockPulseCount++;
+
+    errorCustom->code = ERROR_SUCCESS;
+    errorCustom->description = "OK: Count ";
+    errorCustom->description += String(thisGame->m_clockPulseCount, DEC);
+
+    return error;
 }
 

@@ -108,6 +108,14 @@ class CStarWarsBaseGame : public CGame
             void   *context
         );
 
+        static PERROR testRepeatLastMatrixProgram(
+            void   *context
+        );
+
+        static PERROR testClockPulse(
+            void   *context
+        );
+
     protected:
 
         CStarWarsBaseGame(
@@ -139,6 +147,9 @@ class CStarWarsBaseGame : public CGame
             UINT16 divisor,
             UINT16 quotient
         );
+
+        UINT32 m_clockPulseCount;
+        UINT16 m_lastMatrixProgramAddress;
 
 };
 
