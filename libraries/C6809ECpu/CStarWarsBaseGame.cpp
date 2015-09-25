@@ -24,7 +24,6 @@
 //
 #include "CStarWarsBaseGame.h"
 #include "C6809ECpu.h"
-#include <DFR_Key.h>
 
 //
 // Notes
@@ -132,6 +131,7 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                  
                                                             {CStarWarsBaseGame::test25,                      "DV Test 25"},
                                                             {CStarWarsBaseGame::testRepeatLastMatrixProgram, "Repeat MX "},
                                                             {CStarWarsBaseGame::testClockPulse,              "Clk Pulse "},
+                                                            {CStarWarsBaseGame::testCapture,                 "Capture   "},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -589,4 +589,63 @@ CStarWarsBaseGame::testClockPulse(
 
     return error;
 }
+
+//
+// Prototype signal capture
+//
+#include "PinMap.h"
+
+//
+// External capture input on J14 AUX pin 1.
+//
+static const CONNECTION s_AUX1_i = {1, "AUX1"};
+
+//
+// Prototype Signal Capture
+// ------------------------
+// Capture the clocked input of aux pin 1 and display the hex result.
+// The 4 hex digits covers 32 clocks.
+// See StarWarsCaptures.txt for reference results.
+//
+
+PERROR
+CStarWarsBaseGame::testCapture(
+    void   *context
+)
+{
+    CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
+    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    PERROR error = errorCustom;
+    UINT8 capture[4] = {0,0,0,0};
+
+    ::pinMode(g_pinMap8Aux[s_AUX1_i.pin], INPUT);
+
+    for (int byte = 0 ; byte < 4 ; byte++)
+    {
+        for (int bit = 0 ; bit < 8 ; bit++)
+        {
+            cpu->clockPulse();
+            thisGame->m_clockPulseCount++;
+
+            int value = ::digitalRead(g_pinMap8Aux[s_AUX1_i.pin]);
+
+            capture[byte] = capture[byte] << 1;
+            if (value == HIGH)
+            {
+                capture[byte] |= 1;
+            }
+        }
+    }
+
+    errorCustom->code = ERROR_SUCCESS;
+    errorCustom->description = "OK: ";
+
+    for (int byte = 0 ; byte < 4 ; byte++)
+    {
+        STRING_UINT8_HEX(error->description, capture[byte]);
+    }
+
+    return error;
+}
+
 

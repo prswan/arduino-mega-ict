@@ -1,0 +1,30 @@
+
+/****************************************************
+* Attach Aux pin 1 to the signal to capture then    *
+* run the test, repeat the test and capture one or *
+* more times to run the system clock and record the *
+* state of pin 1.                                   *
+*                                                   *
+* The returned state is a hexadecimal byte stream   *
+* from left to right, each comprising a bit stream  *
+* from left (bit 7) to right (bit 0).               *
+*                                                   *
+* e.g. 12 34 56 78                                  *
+*      0001 0010 0011 0101 0110 0111 1000           *
+*      ^                                ^           *
+*   clock 1                          clock 32       *
+*                                                   *
+*****************************************************/
+
+/****************************************************
+* MX Test 17 -> MX: Repeat -> Capture -> Capture    *
+*****************************************************
+* IC 8B (74LS385) pin  1: ff fc 00 00 - 00 01 ff ff
+* IC 8B (74LS385) pin  6: 00 00 00 02 - aa a8 00 00
+* IC 8B (74LS385) pin  7: 00 00 00 00 - 00 00 00 00
+* IC 8B (74LS385) pin  9: 00 00 00 01 - 55 54 00 00
+* IC 8B (74LS385) pin 12: 00 01 55 54 - 00 00 00 00
+* IC 8B (74LS385) pin 14: 00 00 00 00 - 00 00 00 00
+* IC 8B (74LS385) pin 15: 1f fe aa a8 - 00 00 00 00
+* IC 7A (74LS165) pin 10: 1f fe a8 00 - 00 00 00 00
+*/

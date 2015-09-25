@@ -116,6 +116,10 @@ class CStarWarsBaseGame : public CGame
             void   *context
         );
 
+        static PERROR testCapture(
+            void   *context
+        );
+
     protected:
 
         CStarWarsBaseGame(
