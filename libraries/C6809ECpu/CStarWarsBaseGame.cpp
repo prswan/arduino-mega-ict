@@ -70,6 +70,13 @@ static const UINT32 c_MW0_A    = 0x4700; // Matrix Write 0 (Program Address MPA2
 static const UINT32 c_MW1_A    = 0x4701; // Matrix Write 1 (Block Index Hi BIC8)
 static const UINT32 c_MW2_A    = 0x4702; // Matrix Write 2 (Block Index Lo BIC0-BIC7)
 
+// ADC
+static const UINT32 c_ADC_A       = 0x4380; // ADC read address
+
+static const UINT32 c_ADCSTART0_A = 0x46C0; // ADC start channel 0
+static const UINT32 c_ADCSTART1_A = 0x46C1; // ADC start channel 1
+static const UINT32 c_ADCSTART2_A = 0x46C2; // ADC start channel 2
+
 //
 // RAM region is the same for all versions.
 //
@@ -83,6 +90,11 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 // Input region is the same for all versions.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                      "012", "012345"
+                                                      {NO_BANK_SWITCH, 0x4300,    0xFF,       "9J ", "IN0   "}, // Input port 0
+                                                      {NO_BANK_SWITCH, 0x4320,    0xFF,       "9H ", "IN1   "}, // Input port 1
+                                                      {NO_BANK_SWITCH, 0x4340,    0xFF,       "9E ", "OPT0  "}, // DIP Switch 10D
+                                                      {NO_BANK_SWITCH, 0x4360,    0xFF,       "9F ", "OPT1  "}, // DIP Switch 10E/F
+                                                      {NO_BANK_SWITCH, c_ADC_A,   0xFF,       "9K ", "ADC   "}, // Yoke analog inputs
                                                       {NO_BANK_SWITCH, c_MBRUN_A, c_MBRUN_D,  "9H ", "MB RUN"}, // MATHRUN
                                                       {NO_BANK_SWITCH, c_REH_A,   0xFF,       "4J ", "REH   "}, // REH Hi - Quotient Hi
                                                       {NO_BANK_SWITCH, c_REL_A,   0xFF,       "4K ", "REL   "}, // REH Lo - Quotient Lo
@@ -92,15 +104,18 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 //
 // Output region is the same for all versions.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                            "012", "012345"
-                                                        {NO_BANK_SWITCH, c_MPAGE_A, c_MPAGE_D, 0x00,  "9LM", "MPAGE "}, // MPAGE ROM bank switch
-                                                        {NO_BANK_SWITCH, c_MW0_A,   0xFF,      0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
-                                                        {NO_BANK_SWITCH, c_MW1_A,   0x01,      0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
-                                                        {NO_BANK_SWITCH, c_MW2_A,   0xFF,      0x00,  "   ", "MW2-BI"}, // MW2 - MP Block Index BIC0-BIC7
-                                                        {NO_BANK_SWITCH, c_DVSRH_A, 0xFF,      0x00,  "45P", "DVSRH "}, // DVSRH - Divisor Hi, Q clear, load div.
-                                                        {NO_BANK_SWITCH, c_DVSRL_A, 0xFF,      0x00,  "6PL", "DVSRL "}, // DVSRL - Divisor Lo, start
-                                                        {NO_BANK_SWITCH, c_DVDDH_A, 0xFF,      0x00,  "4L ", "DVDDH "}, // DVDDH - Dividend Hi
-                                                        {NO_BANK_SWITCH, c_DVDDL_A, 0xFF,      0x00,  "5L ", "DVDDL "}, // DVDDL - Dividend Lo
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                                "012", "012345"
+                                                        {NO_BANK_SWITCH, c_ADCSTART0_A, 0x00,      0x00,  "9K ", "ADCS0 "}, // ADC start channel 0 (pitch,  J)
+                                                        {NO_BANK_SWITCH, c_ADCSTART1_A, 0x00,      0x00,  "9K ", "ADCS1 "}, // ADC start channel 0 (yaw,    K)
+                                                        {NO_BANK_SWITCH, c_ADCSTART2_A, 0x00,      0x00,  "9K ", "ADCS2 "}, // ADC start channel 0 (thrust, 9)
+                                                        {NO_BANK_SWITCH, c_MPAGE_A,     c_MPAGE_D, 0x00,  "9LM", "MPAGE "}, // MPAGE ROM bank switch
+                                                        {NO_BANK_SWITCH, c_MW0_A,       0xFF,      0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
+                                                        {NO_BANK_SWITCH, c_MW1_A,       0x01,      0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
+                                                        {NO_BANK_SWITCH, c_MW2_A,       0xFF,      0x00,  "   ", "MW2-BI"}, // MW2 - MP Block Index BIC0-BIC7
+                                                        {NO_BANK_SWITCH, c_DVSRH_A,     0xFF,      0x00,  "45P", "DVSRH "}, // DVSRH - Divisor Hi, Q clear, load div.
+                                                        {NO_BANK_SWITCH, c_DVSRL_A,     0xFF,      0x00,  "6PL", "DVSRL "}, // DVSRL - Divisor Lo, start
+                                                        {NO_BANK_SWITCH, c_DVDDH_A,     0xFF,      0x00,  "4L ", "DVDDH "}, // DVDDH - Dividend Hi
+                                                        {NO_BANK_SWITCH, c_DVDDL_A,     0xFF,      0x00,  "5L ", "DVDDL "}, // DVDDL - Dividend Lo
                                                         {0}
                                                       }; // end of list
 
@@ -113,6 +128,7 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Custom functions implemented for this game.
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                               "0123456789"
+                                                            {CStarWarsBaseGame::testADC,                     "Test ADC  "},
                                                             {CStarWarsBaseGame::test10,                      "MX Test 10"},
                                                             {CStarWarsBaseGame::test11,                      "MX Test 11"},
                                                             {CStarWarsBaseGame::test12,                      "MX Test 12"},
@@ -338,6 +354,50 @@ CStarWarsBaseGame::testDivider(
     CHECK_UINT16_VALUE_EXIT(error, "DV", recQuotient, quotient);
 
 Exit:
+    return error;
+}
+
+
+PERROR
+CStarWarsBaseGame::testADC(
+    void   *context
+)
+{
+    CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
+    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    PERROR error = errorCustom;
+    UINT8  data[4] = {0,0,0,0};
+
+    for (UINT32 channel = 0 ; channel < 4 ; channel++)
+    {
+        // Start the conversion
+        CHECK_CPU_WRITE_EXIT(error, cpu, (c_ADCSTART0_A + channel), 0);
+
+        // Wait for a few clocks.
+        // There is no indication to the CPU when the conversion is actually complete.
+        // The datasheet states that the maximum conversion time is 116us @ 640KHz so
+        // we'll convert 116uS into the equivalent number of 12MHz clock pulses:
+        //  12MHz === 83.33ns
+        //  116us/83.33ns = 1,392 clock pulses.
+        //
+        for (int x = 0 ; x < 1392 ; x++)
+        {
+            cpu->clockPulse();
+        }
+
+        CHECK_CPU_READ_EXIT(error, cpu, c_ADC_A, &data[channel]);
+    }
+
+    error->code = ERROR_SUCCESS;
+    error->description = "OK: ";
+
+    for (int byte = 0 ; byte < 4 ; byte++)
+    {
+        STRING_UINT8_HEX(error->description, data[byte]);
+    }
+
+Exit:
+
     return error;
 }
 
@@ -637,8 +697,8 @@ CStarWarsBaseGame::testCapture(
         }
     }
 
-    errorCustom->code = ERROR_SUCCESS;
-    errorCustom->description = "OK: ";
+    error->code = ERROR_SUCCESS;
+    error->description = "OK: ";
 
     for (int byte = 0 ; byte < 4 ; byte++)
     {

@@ -44,6 +44,10 @@ class CStarWarsBaseGame : public CGame
             void *cStarWarsBaseGame
         );
 
+        static PERROR testADC(
+            void   *context
+        );
+
         static PERROR test10(
             void   *context
         );
