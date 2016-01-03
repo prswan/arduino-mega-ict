@@ -693,17 +693,24 @@ CGame::custom(
     int key
 )
 {
-    PERROR error = errorSuccess;
+    PERROR error = errorNotImplemented;
 
-    if (key == SELECT_KEY)
+    //
+    // Only handle custom functions if custom functions have been
+    // implemented
+    //
+    if (m_customFunction[0].function != NULL)
     {
-        CustomFunctionCallback function = m_customFunction[m_customSelect].function;
+        if (key == SELECT_KEY)
+        {
+            CustomFunctionCallback function = m_customFunction[m_customSelect].function;
 
-        error = function(this);
-    }
-    else
-    {
-        error = onCustomKeyMove(key);
+            error = function(this);
+        }
+        else
+        {
+            error = onCustomKeyMove(key);
+        }
     }
 
     return error;

@@ -86,6 +86,34 @@ static const ROM_REGION s_romRegionSet3[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0
                                                       {NO_BANK_SWITCH, 0x3000, 0x0400, s_romData2n_13L,     0x882cdb87, "13L"},
                                                       {0} }; // end of list
 
+//
+// Found on one board sent in for repair, a pristine board with all ROMS factory hand labelled "02"
+// The set is mostly completely different from all the prior known sets.
+//
+//                                             01   02   04   08   10   20   40   80  100  200
+static const UINT8 s_romData2nSet02__8H[] = {0x00,0xf1,0x05,0x00,0x00,0x00,0x0a,0xd1,0xbb,0x1c};//
+static const UINT8 s_romData2nSet02_10H[] = {0x54,0xe6,0x1c,0x01,0xf1,0xe5,0xcf,0x03,0xcf,0x0f};//
+static const UINT8 s_romData2nSet02_11H[] = {0xe4,0xe3,0xf2,0xe5,0xeb,0xeb,0x03,0x12,0xcf,0x5a};//
+static const UINT8 s_romData2nSet02_13H[] = {0x14,0x54,0xd9,0x17,0x14,0x01,0x54,0xdf,0x0d,0x14};//
+static const UINT8 s_romData2nSet02__8I[] = {0x0f,0x74,0x14,0x44,0xe3,0x01,0x1c,0x20,0x99,0xd0};//
+static const UINT8 s_romData2nSet02_10I[] = {0x00,0x00,0xFC,0x00,0x54,0x5E,0x05,0x60,0x8C,0x04};//
+static const UINT8 s_romData2nSet02_11I[] = {0x1b,0x1a,0x08,0x9a,0x10,0xb3,0x04,0xb2,0x1a,0x23};//
+static const UINT8 s_romData2nSet02_13I[] = {0xf2,0xf2,0xf2,0x6c,0xf6,0x69,0x00,0x3b,0xf8,0x08};//
+static const UINT8 s_romData2nSet02_11L[] = {0x4d,0xcf,0xae,0x09,0x53,0xbb,0x94,0x1a,0x24,0xab};//
+static const UINT8 s_romData2nSet02_13L[] = {0x14,0x5f,0x04,0x94,0x99,0xff,0x00,0x03,0x66,0xcc};//
+
+static const ROM_REGION s_romRegionSet02[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0x0400, s_romData2nSet02__8H, 0x73D45B59, " 8H"},
+                                                       {NO_BANK_SWITCH, 0x0400, 0x0400, s_romData2nSet02_10H, 0x01C471CF, "10H"},
+                                                       {NO_BANK_SWITCH, 0x0800, 0x0400, s_romData2nSet02_11H, 0x2CE443B1, "11H"},
+                                                       {NO_BANK_SWITCH, 0x0c00, 0x0400, s_romData2nSet02_13H, 0xE085C293, "13H"},
+                                                       {NO_BANK_SWITCH, 0x1000, 0x0400, s_romData2nSet02__8I, 0x80078A6C, " 8I"},
+                                                       {NO_BANK_SWITCH, 0x2000, 0x0400, s_romData2nSet02_10I, 0x9535D0A9, "10I"},
+                                                       {NO_BANK_SWITCH, 0x2400, 0x0400, s_romData2nSet02_11I, 0xF3BEA168, "11I"},
+                                                       {NO_BANK_SWITCH, 0x2800, 0x0400, s_romData2nSet02_13I, 0xC2A07996, "13I"},
+                                                       {NO_BANK_SWITCH, 0x2c00, 0x0400, s_romData2nSet02_11L, 0xB59423CB, "11L"},
+                                                       {NO_BANK_SWITCH, 0x3000, 0x0400, s_romData2nSet02_13L, 0xBE0356C2, "13L"},
+                                                       {0} }; // end of list
+
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                       "012", "012345"
                                                   {NO_BANK_SWITCH,                         0x1400,      0x14FF,      0x0F, "13F", "Prog. "}, // "Program RAM, 2112, 13F"
                                                   {NO_BANK_SWITCH,                         0x1400,      0x14FF,      0xF0, "13G", "Prog. "}, // "Program RAM, 2112, 13G"
@@ -149,6 +177,13 @@ CAstroWarsGame::createInstanceSet3(
 )
 {
     return (new CAstroWarsGame(s_romRegionSet3));
+}
+
+IGame*
+CAstroWarsGame::createInstanceSet02(
+)
+{
+    return (new CAstroWarsGame(s_romRegionSet02));
 }
 
 CAstroWarsGame::CAstroWarsGame(

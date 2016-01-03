@@ -44,6 +44,9 @@ class CAstroWarsGame : public CAstroWarsBaseGame
         static IGame* createInstanceSet3(
         );
 
+        static IGame* createInstanceSet02(
+        );
+
         //
         // IGame Interface - wholly implemented in the Base game.
         //
