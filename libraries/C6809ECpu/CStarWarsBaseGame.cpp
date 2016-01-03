@@ -39,7 +39,7 @@
 // * BS, BA, AVMA, LIC, BUSY, TSC, HALT, FIRQ & NMI are all unused on this platform.
 //   It's the simplest bus implementation possible.
 //
-// * The CPU bord can be worked on alone - the AVG & interconnect PCB's are not required.
+// * The CPU board can be worked on alone - the AVG & interconnect PCB's are not required.
 //
 
 //

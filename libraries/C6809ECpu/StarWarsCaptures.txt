@@ -1,7 +1,7 @@
 
 /****************************************************
 * Attach Aux pin 1 to the signal to capture then    *
-* run the test, repeat the test and capture one or *
+* run the test, repeat the test and capture one or  *
 * more times to run the system clock and record the *
 * state of pin 1.                                   *
 *                                                   *
@@ -10,9 +10,9 @@
 * from left (bit 7) to right (bit 0).               *
 *                                                   *
 * e.g. 12 34 56 78                                  *
-*      0001 0010 0011 0101 0110 0111 1000           *
-*      ^                                ^           *
-*   clock 1                          clock 32       *
+*      0001 0010 0011 0100 0101 0110 0111 1000      *
+*      ^                                     ^      *
+*   clock 1                              clock 32   *
 *                                                   *
 *****************************************************/
 
