@@ -21,8 +21,8 @@ static int DEFAULT_THRESHOLD = 5;
 */
 #ifdef DF_ROBOT_V1
 	static int RIGHTKEY_ARV = 0;	//that's read "analogue read value"
-	static int DOWNKEY_ARV	= 98;  
-	static int UPKEY_ARV	= 254;
+	static int UPKEY_ARV	= 98;  
+	static int DOWNKEY_ARV	= 254;
 	static int LEFTKEY_ARV	= 407;
 	static int SELKEY_ARV	= 638;
 	static int NOKEY_ARV	= 1023;
