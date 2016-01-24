@@ -20,20 +20,20 @@ static int DEFAULT_THRESHOLD = 5;
 	of the define that you specify accordingly.
 */
 #ifdef DF_ROBOT_V1
-	static int RIGHTKEY_ARV = 0;
-	static int DOWNKEY_ARV	= 98;  //that's read "analogue read value"
+	static int RIGHTKEY_ARV = 0;	//that's read "analogue read value"
+	static int DOWNKEY_ARV	= 98;  
 	static int UPKEY_ARV	= 254;
 	static int LEFTKEY_ARV	= 407;
 	static int SELKEY_ARV	= 638;
 	static int NOKEY_ARV	= 1023;
 #else
-	static int UPKEY_ARV	= 144; //that's read "analogue read value"
+	static int RIGHTKEY_ARV = 0;
+	static int UPKEY_ARV	= 144;
 	static int DOWNKEY_ARV	= 329;
 	static int LEFTKEY_ARV	= 505;
-	static int RIGHTKEY_ARV = 0;
 	static int SELKEY_ARV	= 742;
 	static int NOKEY_ARV	= 1023;
-#endif // ALT_VALUES
+#endif
 
 DFR_Key::DFR_Key()
 {	
