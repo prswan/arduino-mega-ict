@@ -33,9 +33,9 @@
 // Watchdog Disable:
 //   This board does not have a watchdog circuit.
 //
-//
 // 6802 Compatibility Notes
-//   * When RE is enabled by W14 the 6802's internal RAM is enabled.  This cannot be used with a 6808.
+//   * When RE is enabled removing W14 the 6802's internal RAM is enabled.  This cannot be used with a 6808.
+//
 
 //
 // RAM region is the same for all versions.
@@ -48,7 +48,10 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 //
 // No write-only RAM on this platform. Yay!
 //
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} };
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                    "012", "012345"
+                                                          //{NO_BANK_SWITCH, 0x0400, 0x0403, 0xFF, "U10", "6821  "},
+                                                          {0}
+                                                        }; // end of list
 
 //
 // Input region is the same for all versions - IC10 6821 PIA Inputs from ROM board

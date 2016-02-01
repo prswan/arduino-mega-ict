@@ -54,7 +54,7 @@ static const CONNECTION s_VCC1_i    = {  8, "Vcc1 "   };
 static const CONNECTION s_GND2_i    = { 21, "GND2 "   };
 static const CONNECTION s_R_W_o     = { 34, "R/W "    };
 static const CONNECTION s_VCC2_i    = { 35, "Vcc2 "   };
-static const CONNECTION s_RE_i      = { 36, "RE "     };   // High enables internal RAM for 6802
+static const CONNECTION s_RE_i      = { 36, "RE "     };
 static const CONNECTION s_E_o       = { 37, "E "      };
 static const CONNECTION s_XTAL_i    = { 38, "XTAL "   };
 static const CONNECTION s_EXTAL_i   = { 39, "EXTAL "  };
@@ -106,27 +106,27 @@ PERROR
 C6802Cpu::idle(
 )
 {
+    pinMode(g_pinMap40DIL[s_RE_i.pin],            INPUT);   // Don't Care - internal/external RAM select
+    pinMode(g_pinMap40DIL[s_XTAL_i.pin],          INPUT);   // Don't Care - clock input
+    pinMode(g_pinMap40DIL[s_EXTAL_i.pin],         INPUT);   // Don't Care - clock input
+    pinMode(g_pinMap40DIL[s_BA_o.pin],           OUTPUT);   // Don't Care - not connected
+    digitalWrite(g_pinMap40DIL[s_BA_o.pin],         LOW);   // Don't Care - not connected
+
     pinMode(g_pinMap40DIL[s_GND1_i.pin],   INPUT_PULLUP);   // Always low
-    pinMode(g_pinMap40DIL[s__HALT_i.pin],         INPUT);   // Always High
-    pinMode(g_pinMap40DIL[s_MR_i.pin],            INPUT);   // Always High
-    pinMode(g_pinMap40DIL[s__IRQ_i.pin],          INPUT);   // IRQ from 6821 U10
+    pinMode(g_pinMap40DIL[s_GND2_i.pin],   INPUT_PULLUP);   // Always low
+    pinMode(g_pinMap40DIL[s_VCC1_i.pin],          INPUT);   // Always high
+    pinMode(g_pinMap40DIL[s_VCC2_i.pin],          INPUT);   // Always high
+
+
+    pinMode(g_pinMap40DIL[s__RESET_i.pin],        INPUT);   // Always high unless fault in reset circuit
+    pinMode(g_pinMap40DIL[s__HALT_i.pin],         INPUT);   // Pulled high by R27
+    pinMode(g_pinMap40DIL[s_MR_i.pin],            INPUT);   // Pulled high by R31
+    pinMode(g_pinMap40DIL[s__NMI_i.pin],          INPUT);   // Pulled high by R1 grounded if sound test button is pressed
 
     pinMode(g_pinMap40DIL[s_VMA_o.pin],          OUTPUT);   // Always high?
     digitalWrite(g_pinMap40DIL[s_VMA_o.pin],       HIGH);   // Always high?
 
-    pinMode(g_pinMap40DIL[s__NMI_i.pin],          INPUT);   // Grounded by sound test switch
-
-    pinMode(g_pinMap40DIL[s_BA_o.pin],           OUTPUT);   // Don't Care - Not connected
-    digitalWrite(g_pinMap40DIL[s_BA_o.pin],         LOW);   // Don't Care - Not connected
-
-    pinMode(g_pinMap40DIL[s_VCC1_i.pin],          INPUT);   // Always high
-    pinMode(g_pinMap40DIL[s_GND2_i.pin],   INPUT_PULLUP);   // Always low
-
-    pinMode(g_pinMap40DIL[s_VCC2_i.pin],          INPUT);   // Always High
-    pinMode(g_pinMap40DIL[s_RE_i.pin],            INPUT);   // Don't Care - internal/external RAM select
-    pinMode(g_pinMap40DIL[s_XTAL_i.pin],          INPUT);   // Don't Care - clock input
-    pinMode(g_pinMap40DIL[s_EXTAL_i.pin],         INPUT);   // Don't Care - clock input
-    pinMode(g_pinMap40DIL[s__RESET_i.pin],        INPUT);   // Always high
+    pinMode(g_pinMap40DIL[s__IRQ_i.pin],          INPUT);   // IRQ from 6821 U10 Pin 37+38
 
     // Use the pullup input as the float to detect shorts to ground.
     m_busA.pinMode(INPUT_PULLUP);
@@ -141,15 +141,15 @@ C6802Cpu::idle(
     m_pinR_W.digitalWrite(HIGH);
 
     // Initialise outputs on the 6821 U10
-    // memoryWrite(0x0401, 0x04); // Set 0x0400 as DR (Bit 2)
-    // memoryWrite(0x0400, 0xFF); // Set PA0-PA7 as output pins
-    // memoryWrite(0x0401, 0x3B); // Disable CA1 (Bits 0-1), Set 0x0400 as PR (Bit 2), Enable output CA2 (Bits 3-5)
-    // memoryWrite(0x0400, 0x00); // Set outputs PA0-PA7 to all be low
+    memoryWrite(0x0401, 0x00); // Set DDR (xxxxx0xx)
+    memoryWrite(0x0400, 0xFF); // Set PA0-PA7 as output pins
+    memoryWrite(0x0401, 0x34); // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Enable output low CA2 (xx110xxx)
+    memoryWrite(0x0400, 0x00); // Set outputs PA0-PA7 to all be low
 
-    // // Initialise inputs on the 6821 U10
-    // memoryWrite(0x0403, 0x04); // Set 0x0402 as DDR (Bit 2)
-    // memoryWrite(0x0402, 0x00); // Set PB0-PB7 as input pins
-    // memoryWrite(0x0403, 0x3A); // Enable CB1 low > high IRQ (Bits 0-1), Set 0x0400 as PR (Bit 2), Enable output CB2 (Bits 3-5)
+    // Initialise inputs on the 6821 U10
+    memoryWrite(0x0403, 0x00); // Set DDR (xxxxx0xx)
+    memoryWrite(0x0402, 0x00); // Set PB0-PB7 as input pins
+    memoryWrite(0x0403, 0x37); // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Enable output low CB2 (xx110xxx)
 
     return errorSuccess;
 }
@@ -180,22 +180,14 @@ C6802Cpu::check(
     // The /RESET pin should be high, there is no watchdog here
     CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
 
-    // The /HALT pin is tied high by R27
+    // The /HALT pin is pulled high by R27
     CHECK_VALUE_EXIT(error, s__HALT_i, HIGH);
 
-    // The MR pin is tied high by R31
+    // The MR pin is pulled high by R31
     CHECK_VALUE_EXIT(error, s_MR_i, HIGH);
 
-    // The /NMI pin is tied high by R1 and should only go low if the test button is pressed
+    // The /NMI pin is pulled high by R1 and should only go low if the test button is pressed
     CHECK_VALUE_EXIT(error, s__NMI_i, HIGH);
-
-    // The XTAL and EXTAL pins drive the 6802 interal clock circuits so we don't care what state they are in
-    // CHECK_VALUE_EXIT(error, s_XTAL_i, LOW);
-    // CHECK_VALUE_EXIT(error, s_EXTAL_i, LOW);     
-
-    // The RE pin should be low if we are using the external 6810 RAM
-    // If it is high then perhaps we should halt the RAM Test?
-    // CHECK_VALUE_EXIT(error, s_RE_i, LOW);  
 
     // The address bus should be uncontended and pulled high
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_o, 0xFFFF);
@@ -211,27 +203,6 @@ C6802Cpu::check(
 
     // The R/W pin should be high
     CHECK_VALUE_EXIT(error, s_R_W_o, HIGH);
-
-
-
-
-
-
-    // ******************************************************************************************************** //
-
-
-    m_busA.pinMode(OUTPUT);
-    m_busA.digitalWrite((UINT16) 0x002A);
-    m_pinR_W.digitalWrite(LOW);
-    m_pinE.digitalWrite(LOW); 
-    m_pinE.digitalWrite(HIGH);
-    m_busD.pinMode(OUTPUT);
-    m_busD.digitalWrite((UINT16) 0xAA);
-
-
-    // ******************************************************************************************************** //
-
-
 
 Exit:
 
@@ -258,12 +229,6 @@ C6802Cpu::memoryRead(
     CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
     CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
 
-    // The /HALT pin is tied high by R27
-    CHECK_VALUE_EXIT(error, s__HALT_i, HIGH);
-
-    // The MR pin is tied high by R31
-    CHECK_VALUE_EXIT(error, s_MR_i, HIGH);
-
     // The VMA pin should be high
     CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
 
@@ -275,9 +240,9 @@ C6802Cpu::memoryRead(
     m_pinR_W.digitalWrite(HIGH);
     CHECK_VALUE_EXIT(error, s_R_W_o, HIGH);
 
-    // pulse the clock to low
-    m_pinE.digitalWrite(HIGH);
+    // pulse the clock to high
     m_pinE.digitalWrite(LOW);
+    m_pinE.digitalWrite(HIGH);
 
     // Critical timing section
     noInterrupts();
@@ -315,12 +280,6 @@ C6802Cpu::memoryWrite(
     CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
     CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
 
-    // The /HALT pin is tied high by R27
-    CHECK_VALUE_EXIT(error, s__HALT_i, HIGH);
-
-    // The MR pin is tied high by R31
-    CHECK_VALUE_EXIT(error, s_MR_i, HIGH);
-
     // The VMA pin should be high
     CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
 
@@ -332,9 +291,9 @@ C6802Cpu::memoryWrite(
     m_pinR_W.digitalWrite(LOW);
     CHECK_VALUE_EXIT(error, s_R_W_o, LOW);
 
-    // pulse the clock to low
-    m_pinE.digitalWrite(HIGH);
+    // pulse the clock to high
     m_pinE.digitalWrite(LOW);
+    m_pinE.digitalWrite(HIGH);
 
     // Critical timing section
     noInterrupts();
@@ -346,12 +305,12 @@ C6802Cpu::memoryWrite(
 
 Exit:
 
+    // re-enable interrupts
+    if (interruptsDisabled) interrupts();
+
     // Go back to read mode
     m_pinR_W.digitalWrite(HIGH);
     m_busD.pinMode(INPUT);
-
-    // re-enable interrupts
-    if (interruptsDisabled) interrupts();
 
     return error;
 }
