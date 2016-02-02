@@ -141,15 +141,15 @@ C6802Cpu::idle(
     m_pinR_W.digitalWrite(HIGH);
 
     // Initialise outputs on the 6821 U10
-    memoryWrite(0x0401, 0x00); // Set DDR (xxxxx0xx)
-    memoryWrite(0x0400, 0xFF); // Set PA0-PA7 as output pins
-    memoryWrite(0x0401, 0x34); // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Enable output low CA2 (xx110xxx)
-    memoryWrite(0x0400, 0x00); // Set outputs PA0-PA7 to all be low
+    // memoryWrite(0x0401, 0x00); // Set DDR (xxxxx0xx)
+    // memoryWrite(0x0400, 0xFF); // Set PA0-PA7 as output pins
+    // memoryWrite(0x0401, 0x34); // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Enable output low CA2 (xx110xxx)
+    // memoryWrite(0x0400, 0x00); // Set outputs PA0-PA7 to all be low
 
     // Initialise inputs on the 6821 U10
-    memoryWrite(0x0403, 0x00); // Set DDR (xxxxx0xx)
-    memoryWrite(0x0402, 0x00); // Set PB0-PB7 as input pins
-    memoryWrite(0x0403, 0x37); // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Enable output low CB2 (xx110xxx)
+    // memoryWrite(0x0403, 0x00); // Set DDR (xxxxx0xx)
+    // memoryWrite(0x0402, 0x00); // Set PB0-PB7 as input pins
+    // memoryWrite(0x0403, 0x37); // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Enable output low CB2 (xx110xxx)
 
     return errorSuccess;
 }
@@ -240,13 +240,14 @@ C6802Cpu::memoryRead(
     m_pinR_W.digitalWrite(HIGH);
     CHECK_VALUE_EXIT(error, s_R_W_o, HIGH);
 
-    // pulse the clock to high
-    m_pinE.digitalWrite(LOW);
-    m_pinE.digitalWrite(HIGH);
-
     // Critical timing section
     noInterrupts();
     interruptsDisabled = true;
+
+    // pulse the clock to high
+    m_pinE.digitalWrite(LOW);
+    delay(1);
+    m_pinE.digitalWrite(HIGH);
 
     // Set the databus to input and read data
     m_busD.pinMode(INPUT);
@@ -291,13 +292,14 @@ C6802Cpu::memoryWrite(
     m_pinR_W.digitalWrite(LOW);
     CHECK_VALUE_EXIT(error, s_R_W_o, LOW);
 
-    // pulse the clock to high
-    m_pinE.digitalWrite(LOW);
-    m_pinE.digitalWrite(HIGH);
-
     // Critical timing section
     noInterrupts();
     interruptsDisabled = true;
+
+    // pulse the clock to high
+    m_pinE.digitalWrite(LOW);
+    delay(1);
+    m_pinE.digitalWrite(HIGH);
 
     // Set the databus to output and write data
     m_busD.pinMode(OUTPUT);

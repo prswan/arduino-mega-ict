@@ -36,6 +36,14 @@ class CWmsSoundBaseGame : public CGame
         // CWmsSoundBaseGame
         //
 
+        static PERROR onBankSwitchSetupPIA1A(
+            void *cWmsSoundBaseGame
+        );
+
+        static PERROR onBankSwitchSetupPIA1B(
+            void *cWmsSoundBaseGame
+        );
+
     protected:
 
         CWmsSoundBaseGame(
