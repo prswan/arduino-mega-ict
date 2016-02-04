@@ -240,14 +240,13 @@ C6802Cpu::memoryRead(
     m_pinR_W.digitalWrite(HIGH);
     CHECK_VALUE_EXIT(error, s_R_W_o, HIGH);
 
+    // pulse the clock to high
+    m_pinE.digitalWrite(HIGH);
+    CHECK_VALUE_EXIT(error, s_E_o, HIGH);
+
     // Critical timing section
     noInterrupts();
     interruptsDisabled = true;
-
-    // pulse the clock to high
-    m_pinE.digitalWrite(LOW);
-    delay(1);
-    m_pinE.digitalWrite(HIGH);
 
     // Set the databus to input and read data
     m_busD.pinMode(INPUT);
@@ -255,6 +254,9 @@ C6802Cpu::memoryRead(
     *data = (UINT8) data16;
 
 Exit:
+
+    // pulse the clock to low
+    m_pinE.digitalWrite(LOW);
 
     // re-enable interrupts
     if (interruptsDisabled) interrupts();
@@ -292,14 +294,13 @@ C6802Cpu::memoryWrite(
     m_pinR_W.digitalWrite(LOW);
     CHECK_VALUE_EXIT(error, s_R_W_o, LOW);
 
+    // pulse the clock to high
+    m_pinE.digitalWrite(HIGH);
+    CHECK_VALUE_EXIT(error, s_E_o, HIGH);
+
     // Critical timing section
     noInterrupts();
     interruptsDisabled = true;
-
-    // pulse the clock to high
-    m_pinE.digitalWrite(LOW);
-    delay(1);
-    m_pinE.digitalWrite(HIGH);
 
     // Set the databus to output and write data
     m_busD.pinMode(OUTPUT);
@@ -311,6 +312,7 @@ Exit:
     if (interruptsDisabled) interrupts();
 
     // Go back to read mode
+    m_pinE.digitalWrite(LOW);    
     m_pinR_W.digitalWrite(HIGH);
     m_busD.pinMode(INPUT);
 

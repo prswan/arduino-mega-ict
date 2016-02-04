@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) 2015, Paul R. Swan
 // All rights reserved.
 //
@@ -33,16 +33,23 @@
 //
 // The initial selector to select the game to test.
 //
-static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                      false},
-                                    {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),                        false},
-                                    {"Defender: ROM1 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM1), false},
-                                    {"Stargate: ROM2 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM2), false},
-                                    {"Robotron: ROM3 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM3), false},
-                                    {"Joust: ROM4    ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM4), false},
-                                    {"Sinistar: ROM9 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM9), false},
-                                    { 0, 0 }
-                                   };
+static SELECTOR s_gameSelector[] = {
+  // "0123456789abcdef"
+    {"- Set Repeat    ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                        false},
+    {"- Set Error     ",  onSelectConfig, (void*) (&s_repeatIgnoreError),                          false},
+    {"Defender: ROM1  ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM1),   false},
+    {"Stargate: ROM2  ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM2),   false},
+    {"Robotron: ROM3  ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM3),   false},
+    {"Joust: ROM4     ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM4),   false},
+    {"Bubbles: ROM5   ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM5),   false},
+    {"Sinistar: ROM9  ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM9),   false},
+    {"Sinistar: ROM10 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM10),  false},
+    {"Firepower: ROM3 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstancePinballSoundROM3), false},
+    {"Defender Pinball",  onSelectGame,   (void*) (CWmsSoundGame::createInstancePinballSoundROMD), false},
+    {"Hyperball       ",  onSelectGame,   (void*) (CWmsSoundGame::createInstancePinballSoundROMH), false},
+    {"Varkon Pinball  ",  onSelectGame,   (void*) (CWmsSoundGame::createInstancePinballSoundROMV), false},
+    { 0, 0 }
+};
 
 void setup()
 {

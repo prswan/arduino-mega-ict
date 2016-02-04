@@ -36,12 +36,25 @@ class CWmsSoundBaseGame : public CGame
         // CWmsSoundBaseGame
         //
 
+        //
+        // This is used to setup the hardware configuration of the 6821 PIA U10 Bank A for output
+        //
         static PERROR onBankSwitchSetupPIA1A(
             void *cWmsSoundBaseGame
         );
 
+        //
+        // This is used to setup the hardware configuration of the 6821 PIA U10 Bank B for input
+        //
         static PERROR onBankSwitchSetupPIA1B(
             void *cWmsSoundBaseGame
+        );
+
+        //
+        // Custom function for testing the 6821 PIA U10 Bank A outputs to the MC1408 DAC U13 and the analog sound hardware.
+        //
+        static PERROR soundTestDAC(
+            void *context
         );
 
     protected:
@@ -52,9 +65,6 @@ class CWmsSoundBaseGame : public CGame
 
         ~CWmsSoundBaseGame(
         );
-
-    private:
-
 
 };
 

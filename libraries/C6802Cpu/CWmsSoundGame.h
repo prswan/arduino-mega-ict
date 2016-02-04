@@ -47,11 +47,26 @@ class CWmsSoundGame : public CWmsSoundBaseGame
         static IGame* createInstanceVideoSoundROM4(     // Joust
         );
 
+        static IGame* createInstanceVideoSoundROM5(     // Bubbles
+        );
+
         static IGame* createInstanceVideoSoundROM9(     // Sinsiar main and speech
         );
 
-        // static IGame* createInstanceVideoSoundROM910(   // Sinsiar aux (no Speech)
-        // );     
+        static IGame* createInstanceVideoSoundROM10(    // Sinsiar aux (no Speech)
+        );
+
+        static IGame* createInstancePinballSoundROM3(   // Firepower Pinball
+        );
+
+        static IGame* createInstancePinballSoundROMD(   // Defender Pinball
+        );
+
+        static IGame* createInstancePinballSoundROMH(   // Hyperball
+        );
+
+        static IGame* createInstancePinballSoundROMV(   // Varkon Pinball
+        );
 
         //
         // IGame Interface - wholly implemented in the Base game.
