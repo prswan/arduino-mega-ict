@@ -80,7 +80,6 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} };
 // 0x20  DSW-2 - PB5 (W4 Removed & W9 Installed)
 //
 // CWmsSoundBaseGame::onBankSwitchSetupPIA1B initialises Bank B of 6821 U10 to be inputs
-// We don't really need to do this every time
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { 
     //                                                              "012", "012345"
@@ -100,9 +99,8 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = {
 //
 // Output region - IC10 6821 PIA Outputs to DAC (PA0-7) and Speech board (CA2 & CB2)
 //
-//
 // CWmsSoundBaseGame::onBankSwitchSetupPIA1A initialises Bank A of 6821 U10 to be outputs
-// We don't really need to do this every time
+// Better output tests are implememted in the custom functions "Test DAC" and "Test CVSDM"
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { 
     //                                                                       "012", "012345"
@@ -124,8 +122,10 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = {
 //
 // Custom functions implemented for this game.
 //
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { // "0123456789"
-    {CWmsSoundBaseGame::soundTestDAC,                          "Test DAC  "},
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { 
+    //                                  "0123456789"
+    {CWmsSoundBaseGame::soundTestDAC,   "Test DAC  "},
+    {CWmsSoundBaseGame::soundTestCVSDM, "Test CVSDM"},
     {0}
 };
 
@@ -181,7 +181,7 @@ CWmsSoundBaseGame::onBankSwitchSetupPIA1A(
 
     if (SUCCESS(error))
     {
-        // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Set CA2 output low (xx110xxx)
+        // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Set CA2 speech data output low (xx110xxx)
         error = cpu->memoryWrite(addressPIA1A+1, 0x34);    
     }
 
@@ -218,7 +218,7 @@ CWmsSoundBaseGame::onBankSwitchSetupPIA1B(
 
     if (SUCCESS(error))
     {
-        // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Set CB2 output low (xx110xxx)
+        // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Set CB2 speech clock output low (xx110xxx)
         error = cpu->memoryWrite(addressPIA1B+1, 0x37); 
     }
 
@@ -270,7 +270,7 @@ CWmsSoundBaseGame::interruptCheck(
 }
 
 //
-// Custom function for testing the 6821 PIA U10 Bank A outputs to the MC1408 DAC U13 and the analog sound hardware.
+// Custom function for testing the 6821 PIA U10 Bank A outputs to the MC1408 DAC U13 and the analog sound hardware
 //
 PERROR
 CWmsSoundBaseGame::soundTestDAC(
@@ -313,9 +313,9 @@ CWmsSoundBaseGame::soundTestDAC(
         // DAC waveform parameters
         //
         //   step         {   0,   1,   2,   3,   4,   5,}
-        byte loops[]    = {  50, 100,  50, 100,  40,  25, }; // how many times the 'sine' wave is interated
-        byte delay[]    = {  30,   0,  25,   0,   0,  15, }; // how long each data value is left on the DAC
-        byte waveform[] = {   0,   0,   1,   1,   2,   2, }; // waveform shape 0=Sine 1=Sawtooth 2=Square
+        byte loops[]    = {  40,  25,  50, 100,  50, 100, }; // how many times the waveform is repeated      max=255
+        byte delay[]    = {   0,  15,  30,   0,  25,   0, }; // how long each data value is left on the DAC  max=255
+        byte waveform[] = {   2,   2,   0,   0,   1,   1, }; // waveform shape 0=Sine 1=Sawtooth 2=Square
         byte sine[] = { 0x80,0xa0,0xbf,0xda,0xee,0xfb,0xff,0xfb,0xee,0xda,0xbf,0xa0,0x80,0x5f,0x40,0x25,0x11,0x4,0x0,0x4,0x11,0x25,0x40,0x5f,0x80, }; // 24 Points - any more is just too slow
 
         for (int step = 0; step < sizeof(loops); step++)
@@ -347,6 +347,70 @@ CWmsSoundBaseGame::soundTestDAC(
             }
         }
 
+        error = errorCustom;
+    }
+
+    return error;
+}
+
+//
+// Custom function for testing the optional speech board 55516 CVSDM Chip U1
+// The CVSDM chip has two inputs:
+// Speech data is fed from 6821 PAI U10 Pin 39 CA2
+// Speech clock is fed from 6821 PAI U10 Pin 19 CB2
+//
+// On each speech clock pulse the CVSDM chip increases the slope if speech data is high and decrease it if low
+//
+PERROR
+CWmsSoundBaseGame::soundTestCVSDM(
+    void *context
+)
+{
+    PERROR            error     = errorSuccess;
+    CWmsSoundBaseGame *thisGame = (CWmsSoundBaseGame *) context;
+    ICpu              *cpu      = thisGame->m_cpu;
+
+    errorCustom->code = ERROR_SUCCESS;
+    errorCustom->description = "CVSDM Tested!";
+
+    // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Set CA2 speech data output low (xx110xxx) 
+    error = cpu->memoryWrite(addressPIA1A+1, 0x34);
+
+    if (SUCCESS(error))
+    {
+        // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Set CB2 speech clock output low (xx110xxx)
+        error = cpu->memoryWrite(addressPIA1B+1, 0x37);
+    }  
+
+    if (SUCCESS(error))
+    {
+        //
+        // CVSDM waveform parameters
+        //
+        byte change[]  = { 10, 11, 10, 13, 15, }; // number of clocks before change of data state min~10 max~25
+        byte direction = 0;                       // counter for set slope increase/decrease
+        int loops      = 1000;                    // how many times the wave is repeated
+
+        for (int step = 0; step < sizeof(change); step++)
+        {
+            for (int loop = 0; loop < loops; loop++)
+            {
+                // CB2 speech clock low
+                cpu->memoryWrite(addressPIA1B+1, 0x3F); 
+
+                // CA2 speech data high
+                if (direction == 0) cpu->memoryWrite(addressPIA1A+1, 0x3C);   
+
+                // CA2 speech data low       
+                if (direction == change[step]) cpu->memoryWrite(addressPIA1A+1, 0x34);                   
+                
+                // CB2 speech clock high
+                cpu->memoryWrite(addressPIA1B+1, 0x37);
+
+                direction++;
+                if (direction == change[step] * 2) direction = 0;
+            }
+        }
         error = errorCustom;
     }
 

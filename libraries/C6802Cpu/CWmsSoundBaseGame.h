@@ -57,9 +57,16 @@ class CWmsSoundBaseGame : public CGame
         );
 
         //
-        // Custom function for testing the 6821 PIA U10 Bank A outputs to the MC1408 DAC U13 and the analog sound hardware.
+        // Custom function for testing the 6821 PIA U10 Bank A outputs to the MC1408 DAC U13 and the analog sound hardware
         //
         static PERROR soundTestDAC(
+            void *context
+        );
+
+        //
+        // Custom function for testing the optional speech board 55516 CVSDM Chip U1
+        //
+        static PERROR soundTestCVSDM(
             void *context
         );
 

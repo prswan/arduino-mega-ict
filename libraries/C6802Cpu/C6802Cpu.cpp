@@ -208,15 +208,15 @@ C6802Cpu::memoryRead(
     *data = 0;
 
     // The ground pins (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
-    CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
+    // CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
+    // CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
 
     // The Vcc pins should be high
-    CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
+    // CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
+    // CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
 
     // The VMA pin should be high
-    CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
+    // CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
 
     // Enable the address bus and set the value
     m_busA.pinMode(OUTPUT);
@@ -224,11 +224,11 @@ C6802Cpu::memoryRead(
 
     // Set up a read cycle
     m_pinR_W.digitalWrite(HIGH);
-    CHECK_VALUE_EXIT(error, s_R_W_o, HIGH);
+    // CHECK_VALUE_EXIT(error, s_R_W_o, HIGH);
 
     // pulse the clock to high
     m_pinE.digitalWrite(HIGH);
-    CHECK_VALUE_EXIT(error, s_E_o, HIGH);
+    // CHECK_VALUE_EXIT(error, s_E_o, HIGH);
 
     // Critical timing section
     noInterrupts();
@@ -262,15 +262,15 @@ C6802Cpu::memoryWrite(
     UINT16 data16 = data;
 
     // The ground pins (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
-    CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
+    // CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
+    // CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
 
     // The Vcc pins should be high
-    CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
+    // CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
+    // CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
 
     // The VMA pin should be high
-    CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
+    // CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
 
     // Enable the address bus and set the value
     m_busA.pinMode(OUTPUT);
@@ -278,11 +278,11 @@ C6802Cpu::memoryWrite(
 
     // Set up a write cycle
     m_pinR_W.digitalWrite(LOW);
-    CHECK_VALUE_EXIT(error, s_R_W_o, LOW);
+    // CHECK_VALUE_EXIT(error, s_R_W_o, LOW);
 
     // pulse the clock to high
     m_pinE.digitalWrite(HIGH);
-    CHECK_VALUE_EXIT(error, s_E_o, HIGH);
+    // CHECK_VALUE_EXIT(error, s_E_o, HIGH);
 
     // Critical timing section
     noInterrupts();
