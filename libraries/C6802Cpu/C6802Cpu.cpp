@@ -117,16 +117,13 @@ C6802Cpu::idle(
     pinMode(g_pinMap40DIL[s_VCC1_i.pin],          INPUT);   // Always high
     pinMode(g_pinMap40DIL[s_VCC2_i.pin],          INPUT);   // Always high
 
-
     pinMode(g_pinMap40DIL[s__RESET_i.pin],        INPUT);   // Always high unless fault in reset circuit
     pinMode(g_pinMap40DIL[s__HALT_i.pin],         INPUT);   // Pulled high by R27
     pinMode(g_pinMap40DIL[s_MR_i.pin],            INPUT);   // Pulled high by R31
-    pinMode(g_pinMap40DIL[s__NMI_i.pin],          INPUT);   // Pulled high by R1 grounded if sound test button is pressed
-
-    pinMode(g_pinMap40DIL[s_VMA_o.pin],          OUTPUT);   // Always high?
-    digitalWrite(g_pinMap40DIL[s_VMA_o.pin],       HIGH);   // Always high?
-
+    pinMode(g_pinMap40DIL[s__NMI_i.pin],          INPUT);   // Pulled high by R1 grounded by sound test button
     pinMode(g_pinMap40DIL[s__IRQ_i.pin],          INPUT);   // IRQ from 6821 U10 Pin 37+38
+    pinMode(g_pinMap40DIL[s_VMA_o.pin],          OUTPUT);   // Always high
+    digitalWrite(g_pinMap40DIL[s_VMA_o.pin],       HIGH);   // Always high
 
     // Use the pullup input as the float to detect shorts to ground.
     m_busA.pinMode(INPUT_PULLUP);
@@ -139,17 +136,6 @@ C6802Cpu::idle(
     // Initialise the R/W pin to be high
     m_pinR_W.pinMode(OUTPUT);
     m_pinR_W.digitalWrite(HIGH);
-
-    // Initialise outputs on the 6821 U10
-    // memoryWrite(0x0401, 0x00); // Set DDR (xxxxx0xx)
-    // memoryWrite(0x0400, 0xFF); // Set PA0-PA7 as output pins
-    // memoryWrite(0x0401, 0x34); // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Enable output low CA2 (xx110xxx)
-    // memoryWrite(0x0400, 0x00); // Set outputs PA0-PA7 to all be low
-
-    // Initialise inputs on the 6821 U10
-    // memoryWrite(0x0403, 0x00); // Set DDR (xxxxx0xx)
-    // memoryWrite(0x0402, 0x00); // Set PB0-PB7 as input pins
-    // memoryWrite(0x0403, 0x37); // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Enable output low CB2 (xx110xxx)
 
     return errorSuccess;
 }
@@ -333,7 +319,6 @@ C6802Cpu::waitForInterrupt(
 
     UINT8 intPin = ((interrupt == NMI) ? (g_pinMap40DIL[s__NMI_i.pin]) :
                                          (g_pinMap40DIL[s__IRQ_i.pin]));
-
     do
     {
         value = ::digitalRead(intPin);

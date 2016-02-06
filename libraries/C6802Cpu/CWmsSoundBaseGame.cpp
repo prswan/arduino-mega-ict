@@ -124,8 +124,8 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = {
 //
 // Custom functions implemented for this game.
 //
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //    0123456789"
-    {CWmsSoundBaseGame::soundTestDAC,                             "Test DAC "},
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { // "0123456789"
+    {CWmsSoundBaseGame::soundTestDAC,                          "Test DAC  "},
     {0}
 };
 
@@ -142,13 +142,11 @@ CWmsSoundBaseGame::CWmsSoundBaseGame(
     m_cpu = new C6802Cpu();
     m_cpu->idle();
 
-    // The sound test interrupt is on the NMI pin.
-    // The sound request interrupt is on the /IRQ pin.
-    m_interrupt = ICpu::NMI;
+    // The sound request interrupt is on /IRQ pin 6
+    m_interrupt = ICpu::INT;
 
     // There is no direct hardware response of a vector on this platform.
     m_interruptAutoVector = true;
-
 }
 
 
@@ -161,7 +159,7 @@ CWmsSoundBaseGame::~CWmsSoundBaseGame(
 
 
 //
-// This is used to setup the hardware configuration of the A side of the 6821 PIA U10 for output
+// This is used to setup the hardware configuration Port A of the 6821 PIA U10 for output
 //
 PERROR
 CWmsSoundBaseGame::onBankSwitchSetupPIA1A(
@@ -198,7 +196,7 @@ CWmsSoundBaseGame::onBankSwitchSetupPIA1A(
 
 
 //
-// This is used to setup the hardware configuration of the B side of the 6821 PIA U10 for input
+// This is used to setup the hardware configuration Port B of the 6821 PIA U10 for input
 //
 PERROR
 CWmsSoundBaseGame::onBankSwitchSetupPIA1B(
@@ -229,6 +227,49 @@ CWmsSoundBaseGame::onBankSwitchSetupPIA1B(
 
 
 //
+// This is used to test /IRQ: 6802 CPU U9 Pin 4 is pulled low by 6821 PIA U10 /IRQA Pin 37 or /IRQB Pin 38  
+// This is triggered by 6821 PIA U10 CB1 Pin 18 being pulled high when a sound input is triggered through 4068 U6
+//
+PERROR
+CWmsSoundBaseGame::interruptCheck(
+)
+{
+    PERROR error = errorSuccess;
+
+    errorCustom->code = ERROR_SUCCESS;
+    errorCustom->description = "/IRQ Tested!";
+
+    // Set the CR to ensure we are set up for IRQ
+    m_cpu->memoryWrite(addressPIA1B+1, 0x37);
+
+    // Deselect PIA and read DR to ensure /IRQ is not set
+    m_cpu->memoryRead(0xF800, 0x00);
+    m_cpu->memoryRead(addressPIA1B+1, 0x00);
+
+    error = m_cpu->waitForInterrupt(m_interrupt, 2500);
+
+    if (SUCCESS(error)) 
+    {
+        // Deselect PIA and read PR to ensure /IRQ is not set
+        m_cpu->memoryRead(0xF800, 0x00);
+        m_cpu->memoryRead(addressPIA1B, 0x00);
+
+        error = m_cpu->waitForInterrupt(m_interrupt, 0);
+
+        if (SUCCESS(error))
+        {
+            error = errorUnexpected;
+        }
+        else
+        {
+            error = errorCustom;
+        }
+    }
+
+    return error;
+}
+
+//
 // Custom function for testing the 6821 PIA U10 Bank A outputs to the MC1408 DAC U13 and the analog sound hardware.
 //
 PERROR
@@ -239,6 +280,9 @@ CWmsSoundBaseGame::soundTestDAC(
     PERROR            error     = errorSuccess;
     CWmsSoundBaseGame *thisGame = (CWmsSoundBaseGame *) context;
     ICpu              *cpu      = thisGame->m_cpu;
+
+    errorCustom->code = ERROR_SUCCESS;
+    errorCustom->description = "DAC Tested!";
 
     // Firstly initialse PIA1A in case the output test hasn't been run
 
@@ -263,42 +307,47 @@ CWmsSoundBaseGame::soundTestDAC(
         error = cpu->memoryWrite(addressPIA1A, 0x00); 
     }
 
-    //
-    // DAC waveform parameters
-    //
-    //   step         {   0,   1,   2,   3,   4,   5,}
-    byte loops[]    = {  50, 100,  50, 100,  50,  25, }; // how many times the 'sine' wave is interated
-    byte delay[]    = {  30,   0,  25,   0,   0,  15, }; // how long each data value is left on the DAC
-    byte waveform[] = {   0,   0,   1,   1,   2,   2, }; // waveform shape 0=Sine 1=Sawtooth 2=Square
-    byte sine[] = { 0x80,0xa0,0xbf,0xda,0xee,0xfb,0xff,0xfb,0xee,0xda,0xbf,0xa0,0x80,0x5f,0x40,0x25,0x11,0x4,0x0,0x4,0x11,0x25,0x40,0x5f,0x80, }; // 24 Points - any more is just too slow
-
-    for (int step = 0; step < sizeof(loops); step++)
+    if (SUCCESS(error))
     {
-        for (int loop = 0; loop < loops[step]; loop++)
+        //
+        // DAC waveform parameters
+        //
+        //   step         {   0,   1,   2,   3,   4,   5,}
+        byte loops[]    = {  50, 100,  50, 100,  40,  25, }; // how many times the 'sine' wave is interated
+        byte delay[]    = {  30,   0,  25,   0,   0,  15, }; // how long each data value is left on the DAC
+        byte waveform[] = {   0,   0,   1,   1,   2,   2, }; // waveform shape 0=Sine 1=Sawtooth 2=Square
+        byte sine[] = { 0x80,0xa0,0xbf,0xda,0xee,0xfb,0xff,0xfb,0xee,0xda,0xbf,0xa0,0x80,0x5f,0x40,0x25,0x11,0x4,0x0,0x4,0x11,0x25,0x40,0x5f,0x80, }; // 24 Points - any more is just too slow
+
+        for (int step = 0; step < sizeof(loops); step++)
         {
-            for (int point = 0; point < sizeof(sine); point++)
+            for (int loop = 0; loop < loops[step]; loop++)
             {
-                switch (waveform[step]) {
-                    case 0:
-                        // Sine Wave
-                        cpu->memoryWrite(addressPIA1A, sine[point]);
-                        delayMicroseconds(delay[step]);
-                        break;
-                    case 1:
-                        // Sawtooth Wave
-                        cpu->memoryWrite(addressPIA1A, int (256/sizeof(sine)) * point);
-                        delayMicroseconds(delay[step]);
-                        break;
-                    case 2:
-                        // Square Wave
-                        cpu->memoryWrite(addressPIA1A, 0);
-                        delayMicroseconds(delay[step]);
-                        cpu->memoryWrite(addressPIA1A, 255);
-                        delayMicroseconds(delay[step]);
-                        break;
+                for (int point = 0; point < sizeof(sine); point++)
+                {
+                    switch (waveform[step]) {
+                        case 0:
+                            // Sine Wave
+                            cpu->memoryWrite(addressPIA1A, sine[point]);
+                            delayMicroseconds(delay[step]);
+                            break;
+                        case 1:
+                            // Sawtooth Wave
+                            cpu->memoryWrite(addressPIA1A, int (256/sizeof(sine)) * point);
+                            delayMicroseconds(delay[step]);
+                            break;
+                        case 2:
+                            // Square Wave
+                            cpu->memoryWrite(addressPIA1A, 0);
+                            delayMicroseconds(delay[step]);
+                            cpu->memoryWrite(addressPIA1A, 255);
+                            delayMicroseconds(delay[step]);
+                            break;
+                    }
                 }
             }
         }
+
+        error = errorCustom;
     }
 
     return error;

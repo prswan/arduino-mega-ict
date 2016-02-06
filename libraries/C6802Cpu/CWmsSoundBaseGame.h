@@ -33,7 +33,7 @@ class CWmsSoundBaseGame : public CGame
     public:
 
         //
-        // CWmsSoundBaseGame
+        // Constructors for CWmsSoundBaseGame
         //
 
         //
@@ -48,6 +48,12 @@ class CWmsSoundBaseGame : public CGame
         //
         static PERROR onBankSwitchSetupPIA1B(
             void *cWmsSoundBaseGame
+        );
+
+        //
+        // This is used for testing the the /IRQ on 6802 CPU U9 Pin 4
+        //
+        virtual PERROR interruptCheck(
         );
 
         //
