@@ -91,14 +91,34 @@ class C6502ClockMasterCpu : public ICpu
         // C6502ClockMasterCpu Interface
         //
 
+        void
+        clockPulse(
+        );
+
+    private:
+
+        PERROR
+        memoryReadWrite(
+            UINT32 address,
+            UINT8  *data,
+            int    readWrite
+        );
+
+
     private:
 
         CBus          m_busA;
         CFast8BitBus  m_busD;
 
+        CFastPin      m_pinCLK0i;
         CFastPin      m_pinCLK1o;
         CFastPin      m_pinCLK2o;
         CFastPin      m_pinRDY;
+
+        CFastPin      m_pinClock;
+
+        int           m_valueCLK1o;
+        int           m_valueCLK2o;
 
 };
 
