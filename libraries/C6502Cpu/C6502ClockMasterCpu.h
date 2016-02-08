@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,29 +22,84 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <LiquidCrystal.h>
-#include <main.h>
-#include <DFR_Key.h>
-#include <zutil.h>
+#ifndef C6502ClockMasterCpu_h
+#define C6502ClockMasterCpu_h
 
-#include <CTomahawk777Game.h>
+#include "Arduino.h"
+#include "ICpu.h"
+#include "CBus.h"
+#include "CFast8BitBus.h"
+#include "CFastPin.h"
 
-//
-// The initial selector to select the game to test.
-//
-static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),               false},
-                                    {"Tomahawk777 (5)",  onSelectGame,   (void*) (CTomahawk777Game::createInstanceSet5), false},
-                                    { 0, 0 }
-                                   };
 
-void setup()
+class C6502ClockMasterCpu : public ICpu
 {
-  mainSetup(s_gameSelector);
-}
+    public:
 
-void loop()
-{
-  mainLoop();
-}
+        //
+        // Constructor
+        //
 
+        C6502ClockMasterCpu(
+        );
+
+        // ICpu Interface
+        //
+
+        virtual
+        PERROR
+        idle(
+        );
+
+        virtual
+        PERROR
+        check(
+        );
+
+        // Address Space:
+        // 0x00000 -> 0x0FFFF - Memory Mapped Data
+        //
+
+        virtual
+        PERROR
+        memoryRead(
+            UINT32 address,
+            UINT8  *data
+        );
+
+        virtual
+        PERROR
+        memoryWrite(
+            UINT32 address,
+            UINT8  data
+        );
+
+        virtual
+        PERROR
+        waitForInterrupt(
+            Interrupt interrupt,
+            UINT16    timeoutInMs
+        );
+
+        virtual
+        PERROR
+        acknowledgeInterrupt(
+            UINT8 *response
+        );
+
+        //
+        // C6502ClockMasterCpu Interface
+        //
+
+    private:
+
+        CBus          m_busA;
+        CFast8BitBus  m_busD;
+
+        CFastPin      m_pinCLK1o;
+        CFastPin      m_pinCLK2o;
+        CFastPin      m_pinRDY;
+
+};
+
+#endif

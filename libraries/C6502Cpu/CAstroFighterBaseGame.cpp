@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CAstroFighterBaseGame.h"
-#include "C6502Cpu.h"
+#include "C6502ClockMasterCpu.h"
 #include <DFR_Key.h>
 
 //
@@ -49,7 +49,7 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
            outputRegion,
            s_customFunction )
 {
-    m_cpu = new C6502Cpu();
+    m_cpu = new C6502ClockMasterCpu();
     m_cpu->idle();
 
     // VBLANK is on the INT pin.

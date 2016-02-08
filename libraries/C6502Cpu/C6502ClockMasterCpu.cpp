@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -24,12 +24,12 @@
 //
 #include "Arduino.h"
 #include "Error.h"
-#include "C6502Cpu.h"
+#include "C6502ClockMasterCpu.h"
 #include "PinMap.h"
 #include "6502PinDescription.h"
 
 
-C6502Cpu::C6502Cpu(
+C6502ClockMasterCpu::C6502ClockMasterCpu(
 ) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinCLK1o(g_pinMap40DIL, &s_CLK1o_o),
@@ -43,7 +43,7 @@ C6502Cpu::C6502Cpu(
 // and idle state ready for the next bus cycle.
 //
 PERROR
-C6502Cpu::idle(
+C6502ClockMasterCpu::idle(
 )
 {
     pinMode(g_pinMap40DIL[s_GND1_i.pin],           INPUT_PULLUP);
@@ -92,7 +92,7 @@ C6502Cpu::idle(
 // to idle state.
 //
 PERROR
-C6502Cpu::check(
+C6502ClockMasterCpu::check(
 )
 {
     PERROR error = errorSuccess;
@@ -151,7 +151,7 @@ Exit:
 
 
 PERROR
-C6502Cpu::memoryRead(
+C6502ClockMasterCpu::memoryRead(
     UINT32 address,
     UINT8  *data
 )
@@ -213,7 +213,7 @@ Exit:
 
 
 PERROR
-C6502Cpu::memoryWrite(
+C6502ClockMasterCpu::memoryWrite(
     UINT32 address,
     UINT8  data
 )
@@ -275,7 +275,7 @@ Exit:
 
 
 PERROR
-C6502Cpu::waitForInterrupt(
+C6502ClockMasterCpu::waitForInterrupt(
     Interrupt interrupt,
     UINT16    timeoutInMs
 )
@@ -315,7 +315,7 @@ Exit:
 //
 //
 PERROR
-C6502Cpu::acknowledgeInterrupt(
+C6502ClockMasterCpu::acknowledgeInterrupt(
     UINT8 *response
 )
 {
