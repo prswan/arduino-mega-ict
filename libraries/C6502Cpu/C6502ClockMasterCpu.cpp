@@ -174,6 +174,110 @@ Exit:
     return error;
 }
 
+//
+// Though there are two clock outputs the datasheet only shows timing
+// related to CLK2. It's an output from the CPU but we use it here as
+// an "input" for implementing the cycle correlated with it. It's
+// fairly simple, drive the outputs in the low phase and terminate
+// the cycle on the falling edge. CLK2 thus appears to be similar to
+// the 68xx series "E" clock (but the datasheet doesn't suggest that
+// CLK1 is "Q" ...)
+//
+PERROR
+C6502ClockMasterCpu::memoryReadWrite(
+    UINT32 address,
+    UINT8  *data,
+    int    readWrite
+)
+{
+    PERROR error = errorSuccess;
+
+    //
+    // Step 1 - Wait for CLK2 Lo
+    //
+    for (int x = 0 ; x < 100 ; x++)
+    {
+        if (m_valueCLK2o == LOW)
+        {
+            break;
+        }
+        clockPulse();
+    }
+    CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, LOW);
+
+    //
+    // Step 2 - Drive RW, A, onto the bus.
+    // For read, set D input.
+    //
+    m_busA.pinMode(OUTPUT);
+    m_busA.digitalWrite(address);
+
+    if (readWrite == LOW)
+    {
+        digitalWrite(g_pinMap40DIL[s_R_W_o.pin], LOW);
+        m_busD.pinMode(OUTPUT);
+        m_busD.digitalWrite(*data);
+    }
+    else
+    {
+        digitalWrite(g_pinMap40DIL[s_R_W_o.pin], HIGH);
+        m_busD.pinMode(INPUT);
+    }
+
+    //
+    // Currently no support for RDY delayed cycles.
+    // It only works for reads making it of little use in practice.
+    //
+    CHECK_VALUE_EXIT(error, s_RDY_i, HIGH);
+
+    //
+    // Step 3 - Wait for CLK2 Hi
+    //
+    for (int x = 0 ; x < 100 ; x++)
+    {
+        if (m_valueCLK2o == HIGH)
+        {
+            break;
+        }
+        clockPulse();
+    }
+    CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
+
+    //
+    // Step 4 - D-Read.
+    //
+    if (readWrite == HIGH)
+    {
+        UINT16 data16;
+
+        m_busD.digitalRead(&data16);
+        *data = (UINT8) data16;
+    }
+
+    //
+    // Step 5 - Wait for CLK2 Lo to complete the cycle.
+    // Back to initial state.
+    //
+    for (int x = 0 ; x < 100 ; x++)
+    {
+        if (m_valueCLK2o == LOW)
+        {
+            break;
+        }
+        clockPulse();
+    }
+    CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, LOW);
+
+    if (readWrite == LOW)
+    {
+        m_busD.pinMode(INPUT);
+        digitalWrite(g_pinMap40DIL[s_R_W_o.pin], HIGH);
+    }
+
+Exit:
+    return error;
+}
+
 
 PERROR
 C6502ClockMasterCpu::memoryRead(
@@ -181,59 +285,7 @@ C6502ClockMasterCpu::memoryRead(
     UINT8  *data
 )
 {
-    PERROR error = errorSuccess;
-    bool interruptsDisabled = false;
-    UINT16 data16 = 0;
-
-    // Set a read cycle.
-    digitalWrite(g_pinMap40DIL[s_R_W_o.pin], HIGH);
-
-    // Enable the address bus and set the value (the lower 16 bits only)
-    m_busA.pinMode(OUTPUT);
-    m_busA.digitalWrite((UINT16) (address & 0xFFFF));
-
-    // Set the databus to input.
-    m_busD.pinMode(INPUT);
-
-    // Critical timing section
-    noInterrupts();
-    interruptsDisabled = true;
-
-    // Assert the clocks
-    m_pinCLK1o.digitalWriteLOW();
-    m_pinCLK2o.digitalWriteHIGH();
-
-    // Poll RDY for cycle completion
-    {
-        int rdyValue;
-
-        for (int i = 0 ; i < 64 ; i++)
-        {
-            rdyValue = m_pinRDY.digitalRead();
-
-            if (rdyValue == HIGH)
-            {
-                // Read the data presented on the bus as soon as we see no RDY set then clear _RD
-                m_busD.digitalReadThenDigitalWriteLOW(&data16, m_pinCLK2o);
-                m_pinCLK1o.digitalWriteHIGH();
-
-                break;
-            }
-        }
-
-        CHECK_LITERAL_VALUE_EXIT(error, s_RDY_i, rdyValue, HIGH);
-    }
-
-Exit:
-
-    if (interruptsDisabled)
-    {
-        interrupts();
-    }
-
-    *data = (UINT8) data16;
-
-    return error;
+    return memoryReadWrite(address, data, HIGH);
 }
 
 
@@ -243,60 +295,8 @@ C6502ClockMasterCpu::memoryWrite(
     UINT8  data
 )
 {
-    PERROR error = errorSuccess;
-    bool interruptsDisabled = false;
-
-    // Set a write cycle.
-    digitalWrite(g_pinMap40DIL[s_R_W_o.pin], LOW);
-
-    // Enable the address bus and set the value.
-    m_busA.pinMode(OUTPUT);
-    m_busA.digitalWrite((UINT16) (address & 0xFFFF));
-
-    // Set the databus to output and set a value.
-    m_busD.pinMode(OUTPUT);
-    m_busD.digitalWrite((UINT16) data);
-
-    // Critical timing section
-    noInterrupts();
-    interruptsDisabled = true;
-
-    // Assert the clocks
-    m_pinCLK1o.digitalWriteLOW();
-    m_pinCLK2o.digitalWriteHIGH();
-
-    // Poll WAIT for cycle completion
-    {
-        int rdyValue;
-
-        for (int i = 0 ; i < 64 ; i++)
-        {
-            rdyValue = m_pinRDY.digitalRead();
-
-            if (rdyValue == HIGH)
-            {
-                m_pinCLK2o.digitalWriteLOW();
-                m_pinCLK1o.digitalWriteHIGH();
-
-                break;
-            }
-        }
-        CHECK_LITERAL_VALUE_EXIT(error, s_RDY_i, rdyValue, HIGH);
-    }
-
-    // Set a read cycle.
-    digitalWrite(g_pinMap40DIL[s_R_W_o.pin], HIGH);
-
-Exit:
-
-    if (interruptsDisabled)
-    {
-        interrupts();
-    }
-
-    return error;
+    return memoryReadWrite(address, &data, LOW);
 }
-
 
 
 PERROR
@@ -305,35 +305,8 @@ C6502ClockMasterCpu::waitForInterrupt(
     UINT16    timeoutInMs
 )
 {
-    PERROR error = errorSuccess;
-    unsigned long startTime = millis();
-    unsigned long endTime = startTime + timeoutInMs;
-    int value = 0;
-
-    UINT8 intPin = ((interrupt == NMI) ? (g_pinMap40DIL[s__NMI_i.pin]) :
-                                         (g_pinMap40DIL[s__IRQ_i.pin]));
-
-    do
-    {
-        value = ::digitalRead(intPin);
-
-        if (value == LOW)
-        {
-            break;
-        }
-    }
-    while (millis() < endTime);
-
-    if (value != LOW)
-    {
-        error = errorTimeout;
-    }
-
-Exit:
-
-    return error;
+    return errorNotImplemented;
 }
-
 
 
 //
@@ -344,13 +317,7 @@ C6502ClockMasterCpu::acknowledgeInterrupt(
     UINT8 *response
 )
 {
-/*
-    digitalWrite(g_pinMap40DIL[s_M_IO_o.pin], LOW);
-
-    digitalWrite(g_pinMap40DIL[s_INTACK_o.pin], HIGH);
-
-    return read(0, response);
-*/
+    return errorNotImplemented;
 }
 
 
