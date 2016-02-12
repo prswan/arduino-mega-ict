@@ -35,7 +35,9 @@ static const CONNECTION s_Clock_o    = {  8, "Clock"    };
 
 
 C6502ClockMasterCpu::C6502ClockMasterCpu(
-) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
+    UINT8 CLK2oHiToDInClockPulses
+) : m_CLK2oHiToDInClockPulses(CLK2oHiToDInClockPulses),
+    m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinCLK0i(g_pinMap40DIL, &s_CLK0i_i),
     m_pinCLK1o(g_pinMap40DIL, &s_CLK1o_o),
@@ -244,7 +246,23 @@ C6502ClockMasterCpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
 
     //
-    // Step 4 - D-Read.
+    // Step 4 - Wait data based on master clock
+    //
+    // If this is incorrect (too long) such that CLK2o returns
+    // low then we flag this as a bus error.
+    //
+    for (int x = 0 ; x < m_CLK2oHiToDInClockPulses ; x++)
+    {
+        if (m_valueCLK2o == LOW)
+        {
+            break;
+        }
+        clockPulse();
+    }
+    CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
+
+    //
+    // Step 5 - D-Read.
     //
     if (readWrite == HIGH)
     {
@@ -255,7 +273,7 @@ C6502ClockMasterCpu::memoryReadWrite(
     }
 
     //
-    // Step 5 - Wait for CLK2 Lo to complete the cycle.
+    // Step 6 - Wait for CLK2 Lo to complete the cycle.
     // Back to initial state.
     //
     for (int x = 0 ; x < 100 ; x++)

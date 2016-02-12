@@ -39,8 +39,28 @@ class C6502ClockMasterCpu : public ICpu
         //
         // Constructor
         //
+        // Some games (e.g. Astro Fighter) have strictly synchronous bus
+        // cycles clocked from the external master clock.
+        // The "CLK2oHiToD" setting allows the cycle time to be specified
+        // such that the data read point is performed after
+        // "CLK2oHiToD" pulses. Typically this is to the n-1 pulse for
+        // an n clock pulse cycle.
+        // If "CLK2oHiToD" value is zero then the cycle is treated as being
+        // asynchronous.
+        //
+        //                                             End of cycle
+        //                                             ^
+        // CLK2o  ----\                /---------------\
+        //            |                |               |
+        //            \----------------/               \----
+        //                             .
+        //                             .
+        // CLK2oHiToD                  .------------>
+        //                                          ^
+        //                                          D read
 
         C6502ClockMasterCpu(
+            UINT8 CLK2oHiToDInClockPulses
         );
 
         // ICpu Interface
@@ -106,6 +126,8 @@ class C6502ClockMasterCpu : public ICpu
 
 
     private:
+
+        UINT8         m_CLK2oHiToDInClockPulses;
 
         CBus          m_busA;
         CFast8BitBus  m_busD;

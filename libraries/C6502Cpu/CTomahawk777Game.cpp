@@ -24,28 +24,6 @@
 //
 #include "CTomahawk777Game.h"
 
-// The status so far:
-//
-// * The bus check fails with pattern 0xDC. The databus is behind a couple of 8216
-//   From the datasheet for that, HiZ draws 100uA but the Arduino pullups can only
-//   source 50uA @ 1.8Vcc so it would seem the 8216's draws too much even in HiZ.
-//
-// * The ROM check passes OK.
-//
-// * The program RAM won't write/read reliably in test.
-//   Suspect this is because the 2114 CS is gated by TCLD, a quarter CLK2o pulse,
-//   that effectively allows the CLK2o high time to be halved to allow the A/D to
-//   setup on the RAM for the 2nd half of CS.
-//
-// * The video RAM is even less reliable and won't write/read 4 bytes.
-//   Looking more deeply at the schematics, it looks like the VRAM access for display
-//   occurs in the CLK2o low time with the CPU access in the CLK2o high time.
-//
-//   Since we can't get anywhere near closely matching that timing with the Arduino,
-//   we're done with this platform for now. One solution is a slightly smarter shield
-//   for the 6502 specifically that will allow the 6502 bus cycles to be executed in
-//   hardware with correct timing w.r.t. CLKi.
-//
 
 //                                       01   02   04   08   10   20   40   80  100  200
 static const UINT8 s_romData2n_C5[] = {0xA2,0xFF,0xD8,0x20,0xDC,0x16,0x06,0xA9,0x08,0x20}; // 8

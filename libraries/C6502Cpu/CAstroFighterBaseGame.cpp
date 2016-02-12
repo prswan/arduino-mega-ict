@@ -36,6 +36,26 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}; // end of list
 
+//
+// Notes
+// -----
+//
+// * The bus check fails with pattern 0xDC. The databus is behind a couple of 8216
+//   From the datasheet for that, HiZ draws 100uA but the Arduino pullups can only
+//   source 50uA @ 1.8Vcc so it would seem the 8216's draws too much even in HiZ.
+//
+// * The program RAM is read synchrounously using a split CLK2oHi cycle.
+//   The 2114 CS is gated by TCLD, a quarter CLK2o pulse, that effectively allows the
+//   CLK2o high time to be halved to allow the A/D to setup on the RAM for the 2nd half
+//   of CS.
+//
+// * Looking more deeply at the schematics, it looks like the VRAM access for display
+//   occurs in the CLK2o low time with the CPU access in the CLK2o high time.
+//
+// * The clock output from the ICT should be connected to IC 6H (04) pin 11 that's
+//   been disconnected from the 10.595MHz clock source (e.g. socket and insert the IC
+//   with the pin bent out and connect the ICT clock to the bent out pin).
+//
 
 CAstroFighterBaseGame::CAstroFighterBaseGame(
     const ROM_REGION    *romRegion,
@@ -49,7 +69,33 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
            outputRegion,
            s_customFunction )
 {
-    m_cpu = new C6502ClockMasterCpu();
+    //        _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _
+    // XTAL    \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/
+    //
+    //            ___     ___     ___     ___     ___     ___     ___     ___     ___     ___
+    // 4H QA  ___/   \___/   \___/   \___/   \___/   \___/   \___/   \___/   \___/   \___/   \_
+    //
+    //                _______         _______         _______         _______         _______
+    // 4H QB  _______/       \_______/       \_______/       \_______/       \_______/       \_
+    //
+    //                        _______________                 _______________                 _
+    // 4H QC  _______________/               \_______________/               \_______________/
+    //
+    //                                        ________________________________
+    // 4H QD  _______________________________/                                \________________
+    //                                       ^                           ^
+    //                                       CLK2oHi                     D
+    //
+    // In this diagam:
+    //  * IC 4H QD is inverted and feeds CLK0i (the CPU clock input) that in turn
+    //    generates CLK1o & CLK2o.
+    //  * IC 4H QC is the TCLD signal that is used to provide the half cycle for address setup
+    //    to chip select time.
+    //
+    // Counting the clocks, the D should be read 7 XTAL clocks from CLK2oHi.
+    //
+
+    m_cpu = new C6502ClockMasterCpu(7);
     m_cpu->idle();
 
     // VBLANK is on the INT pin.
