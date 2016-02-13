@@ -98,7 +98,6 @@ class C6502Cpu : public ICpu
 
         CFastPin      m_pinCLK1o;
         CFastPin      m_pinCLK2o;
-        CFastPin      m_pinRDY;
 
 };
 
