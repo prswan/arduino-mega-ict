@@ -23,13 +23,31 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CAstroFighterBaseGame.h"
+#include "C6502Cpu.h"
 #include "C6502ClockMasterCpu.h"
 #include <DFR_Key.h>
 
 //
-// No write-only RAM on this platform. Yay!
+// RAM region is the same for all versions.
 //
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0x0F, "r2M", "Prog. "}, // "Program RAM, 2114, ???"
+                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0xF0, "r2F", "Prog. "}, // "Program RAM, 2114, ???"
+                                                  {0}
+                                                }; // end of list
+
+//
+// According to MAME it seems that the video RAM is write only.
+// Even with schematics, the common CPU/Video bus makes it hard to determine if
+// it really is write only.
+//
+// According to MAME a write to the VRAM also loads the colour RAM with the contents
+// of the colour output register.
+//
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                               "012", "012345"
+                                                           {NO_BANK_SWITCH, 0x4000,      0x5FFF,      0xFF, "2AT", "Video "}, // "Video RAM"
+                                                           {0}
+                                                         }; // end of list
 
 //
 // Custom functions implemented for this game.
@@ -58,12 +76,12 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 //
 
 CAstroFighterBaseGame::CAstroFighterBaseGame(
+    const bool          clockMaster,
     const ROM_REGION    *romRegion,
-    const RAM_REGION    *ramRegion,
     const INPUT_REGION  *inputRegion,
     const OUTPUT_REGION *outputRegion
 ) : CGame( romRegion,
-           ramRegion,
+           s_ramRegion,
            s_ramRegionWriteOnly,
            inputRegion,
            outputRegion,
@@ -95,7 +113,15 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
     // Counting the clocks, the D should be read 7 XTAL clocks from CLK2oHi.
     //
 
-    m_cpu = new C6502ClockMasterCpu(7);
+    if (clockMaster)
+    {
+        m_cpu = new C6502ClockMasterCpu(7);
+    }
+    else
+    {
+        m_cpu = new C6502Cpu();
+    }
+
     m_cpu->idle();
 
     // VBLANK is on the INT pin.

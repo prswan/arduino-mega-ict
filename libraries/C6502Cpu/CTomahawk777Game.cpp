@@ -52,19 +52,7 @@ static const ROM_REGION s_romRegionSet5[] PROGMEM = { //
                                                       {0} }; // end of list
 
 //
-// RAM region is the same for all versions.
-//
-// NOTE: Neither program or video RAM access is working properly.
-//
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0x0F, "???", "Prog. "}, // "Program RAM, 2114, ???"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0xF0, "???", "Prog. "}, // "Program RAM, 2114, ???"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x5FFF,      0xFF, "???", "Video "}, // "Video RAM"
-                                                  {0}
-                                                }; // end of list
-
-//
-// Input region is the same for all versions.
+// Input region is the same for all ROM versions.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
                                                       {NO_BANK_SWITCH, 0xA000L, 0xFF,  "???", "IN    "}, // Inputs
@@ -75,7 +63,7 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
                                                     }; // end of list
 
 //
-// Output region is the same for all versions.
+// Output region is the same for all ROM versions.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
                                                         {NO_BANK_SWITCH, 0x8003L, 0xFF, 0x00,  "???", "Colour"}, // Colour control
@@ -94,14 +82,23 @@ IGame*
 CTomahawk777Game::createInstanceSet5(
 )
 {
-    return (new CTomahawk777Game(s_romRegionSet5));
+    return (new CTomahawk777Game(false,
+                                 s_romRegionSet5));
 }
 
+IGame*
+CTomahawk777Game::createInstanceClockMasterSet5(
+)
+{
+    return (new CTomahawk777Game(true,
+                                 s_romRegionSet5));
+}
 
 CTomahawk777Game::CTomahawk777Game(
+    const bool       clockMaster,
     const ROM_REGION *romRegion
-) : CAstroFighterBaseGame( romRegion,
-                           s_ramRegion,
+) : CAstroFighterBaseGame( clockMaster,
+                           romRegion,
                            s_inputRegion,
                            s_outputRegion )
 {
