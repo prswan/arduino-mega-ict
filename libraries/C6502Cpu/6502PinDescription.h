@@ -22,6 +22,9 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+#ifndef PinDescription_h
+#define PinDescription_h
+
 #include "Arduino.h"
 #include "Error.h"
 #include "PinMap.h"
@@ -38,52 +41,21 @@
 // o - output
 // t - tri-state
 //
-
-//
-// Control Pins
-//
-static const CONNECTION s_GND1_i     = {  1, "GND1"     };
-static const CONNECTION s_RDY_i      = {  2, "RDY"      };
-static const CONNECTION s_CLK1o_o    = {  3, "CLK1o"    };
-static const CONNECTION s__IRQ_i     = {  4, "_IRQ"     };
-static const CONNECTION s__NMI_i     = {  6, "_NMI"     };
-static const CONNECTION s_SYNC_o     = {  7, "SYNC"     };
-static const CONNECTION s_Vcc_i      = {  8, "Vcc"      };
-static const CONNECTION s_GND2_i     = { 21, "GND2"     };
-static const CONNECTION s_R_W_o      = { 34, "R_W"      };
-static const CONNECTION s_CLK0i_i    = { 37, "CLK0i"    };
-static const CONNECTION s_SO_i       = { 38, "SO"       };
-static const CONNECTION s_CLK2o_o    = { 39, "CLK2o"    };
-static const CONNECTION s_RES_i      = { 40, "RES"      };
+extern const CONNECTION s_GND1_i   ;
+extern const CONNECTION s_RDY_i    ;
+extern const CONNECTION s_CLK1o_o  ;
+extern const CONNECTION s__IRQ_i   ;
+extern const CONNECTION s__NMI_i   ;
+extern const CONNECTION s_SYNC_o   ;
+extern const CONNECTION s_Vcc_i    ;
+extern const CONNECTION s_GND2_i   ;
+extern const CONNECTION s_R_W_o    ;
+extern const CONNECTION s_CLK0i_i  ;
+extern const CONNECTION s_SO_i     ;
+extern const CONNECTION s_CLK2o_o  ;
+extern const CONNECTION s_RES_i    ;
+extern const CONNECTION s_A_ot[16] ;
+extern const CONNECTION s_D_iot[8] ;
 
 
-//
-// Bus pins
-//
-static const CONNECTION s_A_ot[]   = { { 9, "A0"  },
-                                       {10, "A1"  },
-                                       {11, "A2"  },
-                                       {12, "A3"  },
-                                       {13, "A4"  },
-                                       {14, "A5"  },
-                                       {15, "A6"  },
-                                       {16, "A7"  },
-                                       {17, "A8"  },
-                                       {18, "A9"  },
-                                       {19, "A10" },
-                                       {20, "A11" },
-                                       {22, "A12" },
-                                       {23, "A13" },
-                                       {24, "A14" },
-                                       {25, "A15" } }; // 16 bits
-
-static const CONNECTION s_D_iot[] = { {33, "D0" },
-                                      {32, "D1" },
-                                      {31, "D2" },
-                                      {30, "D3" },
-                                      {29, "D4" },
-                                      {28, "D5" },
-                                      {27, "D6" },
-                                      {26, "D7" } }; // 8 bits.
-
-
+#endif
