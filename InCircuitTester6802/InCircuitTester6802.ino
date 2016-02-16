@@ -35,19 +35,20 @@
 //
 static SELECTOR s_gameSelector[] = {
   // "0123456789abcdef"
-    {"- Set Repeat    ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                        false},
-    {"- Set Error     ",  onSelectConfig, (void*) (&s_repeatIgnoreError),                          false},
-    {"Defender: VROM1 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM1),   false},
-    {"Stargate: VROM2 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM2),   false},
-    {"Robotron: VROM3 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM3),   false},
-    {"Joust: VROM4    ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM4),   false},
-    {"Bubbles: VROM5  ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM5),   false},
-    {"Sinistar: VROM9 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM9),   false},
-    {"Sinistar: VROM10",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVideoSoundROM10),  false},
-    {"Firepower: ROM3 ",  onSelectGame,   (void*) (CWmsSoundGame::createInstancePinballSoundROM3), false},
-    {"Defender Pinball",  onSelectGame,   (void*) (CWmsSoundGame::createInstancePinballSoundROMD), false},
-    {"Hyperball       ",  onSelectGame,   (void*) (CWmsSoundGame::createInstancePinballSoundROMH), false},
-    {"Varkon Pinball  ",  onSelectGame,   (void*) (CWmsSoundGame::createInstancePinballSoundROMV), false},
+    {"- Set Repeat    ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                             false},
+    {"- Set Error     ",  onSelectConfig, (void*) (&s_repeatIgnoreError),                               false},
+    {"Defender        ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceDefenderSound),         false},
+    {"Stargate        ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceStargateSound),         false},
+    {"Robotron        ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceRobotronSound),         false},
+    {"Joust           ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceJoustSound),            false},
+    {"Bubbles         ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceBubblesSound),          false},
+    {"Sinistar Main   ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceSinistarMainSound),     false},
+    {"Sinistar Aux    ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceSinistarAuxSound),      false},
+    {"Splat           ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceSplatSound),            false},
+    {"Firepower       ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceFirepowerSound),        false},
+    {"Defender Pinball",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceDefenderPinballSound),  false},
+    {"Hyperball       ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceHyperballSound),        false},
+    {"Varkon          ",  onSelectGame,   (void*) (CWmsSoundGame::createInstanceVarkonSound),           false},
     { 0, 0 }
 };
 

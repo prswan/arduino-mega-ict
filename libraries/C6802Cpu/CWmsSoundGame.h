@@ -35,37 +35,40 @@ class CWmsSoundGame : public CWmsSoundBaseGame
         // Constructors for this game.
         //
 
-        static IGame* createInstanceVideoSoundROM1(     // Defender
+        static IGame* createInstanceDefenderSound(
         );
 
-        static IGame* createInstanceVideoSoundROM2(     //Stargate
+        static IGame* createInstanceStargateSound(
         );
 
-        static IGame* createInstanceVideoSoundROM3(     // Robotron
+        static IGame* createInstanceRobotronSound(
         );
 
-        static IGame* createInstanceVideoSoundROM4(     // Joust
+        static IGame* createInstanceJoustSound(
         );
 
-        static IGame* createInstanceVideoSoundROM5(     // Bubbles
+        static IGame* createInstanceBubblesSound(
         );
 
-        static IGame* createInstanceVideoSoundROM9(     // Sinsiar main and speech
+        static IGame* createInstanceSinistarMainSound(
         );
 
-        static IGame* createInstanceVideoSoundROM10(    // Sinsiar aux (no Speech)
+        static IGame* createInstanceSinistarAuxSound(
         );
 
-        static IGame* createInstancePinballSoundROM3(   // Firepower Pinball
+        static IGame* createInstanceSplatSound(
         );
 
-        static IGame* createInstancePinballSoundROMD(   // Defender Pinball
+        static IGame* createInstanceFirepowerSound(
         );
 
-        static IGame* createInstancePinballSoundROMH(   // Hyperball
+        static IGame* createInstanceDefenderPinballSound(
         );
 
-        static IGame* createInstancePinballSoundROMV(   // Varkon Pinball
+        static IGame* createInstanceHyperballSound(
+        );
+
+        static IGame* createInstanceVarkonSound(
         );
 
         //
