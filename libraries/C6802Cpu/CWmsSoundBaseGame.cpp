@@ -71,7 +71,7 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} };
 // 0x01  4J3-3 - PB0                                         0x04  PB2 - 4J3-5
 // 0x08  4J3-4 - PB3                                         0x08  PB3 - 4J3-4
 // 0x04  4J3-5 - PB2                                         0x10  PB4 - 4J3-7
-// 0x20  4J3-6 - PB5 (W4 Installed & W9 Removed)             0x20  PB5 - 4J3-6 (W4) / DSW-1 (W9)
+// 0x20  4J3-6 - PB5 (W4 Installed & W9 Removed)             0x20  PB5 - 4J3-6 (W4) / DSW-2 (W9)
 // 0x10  4J3-7 - PB4                                         0x40  PB6 - DSW-1
 // 0x80  4J3-8 - PB7 (W12 Installed)                         0x80  PB7 - 4J3-8 (W12)
 //       4J3-9 - No Connection
@@ -250,7 +250,7 @@ CWmsSoundBaseGame::interruptCheck(
 
     if (SUCCESS(error)) 
     {
-        // Deselect PIA and read PR to ensure /IRQ is not set
+        // Deselect PIA and read PR to release /IRQ
         m_cpu->memoryRead(0xF800, 0x00);
         m_cpu->memoryRead(addressPIA1B, 0x00);
 
