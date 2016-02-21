@@ -29,25 +29,39 @@
 
 #include <C6809ECpu.h>
 #include <CStarWarsGame.h>
+#include <CDefenderGame.h>
+// #include <CWilliamsGame.h>
 
 //
 // The initial selector to select the game to test.
 //
-static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),               false},
-                                    {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),                 false},
-                                    {"Star Wars      ",  onSelectGame,   (void*) (CStarWarsGame::createInstance),        false},
-                                    {"Star Wars (O)  ",  onSelectGame,   (void*) (CStarWarsGame::createInstanceSetO),    false},
-                                    { 0, 0 }
-                                   };
+static SELECTOR s_gameSelector[] = {
+//   "0123456789abcde"
+    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                            false},
+    {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),                              false},
+    {"Star Wars      ",  onSelectGame,   (void*) (CStarWarsGame::createInstance),                     false},
+    {"Star Wars (O)  ",  onSelectGame,   (void*) (CStarWarsGame::createInstanceSetO),                 false},
+    {"Defender Red   ",  onSelectGame,   (void*) (CDefenderGame::createInstanceDefenderRed),          false},
+    {"Defender Green ",  onSelectGame,   (void*) (CDefenderGame::createInstanceDefenderGreen),        false},
+    {"Defender Blue  ",  onSelectGame,   (void*) (CDefenderGame::createInstanceDefenderBlue),         false},
+    {"Defender White ",  onSelectGame,   (void*) (CDefenderGame::createInstanceDefenderWhite),        false},
+    // {"Stargate       ",  onSelectGame,   (void*) (CWilliamsGame::createInstanceStargate),             false},
+    // {"Robotron TieDie",  onSelectGame,   (void*) (CWilliamsGame::createInstanceRobotronTieDie),       false},
+    // {"Robotron Blue  ",  onSelectGame,   (void*) (CWilliamsGame::createInstanceRobotronBlue),         false},
+    // {"Robotron Patch ",  onSelectGame,   (void*) (CWilliamsGame::createInstanceRobotronBluePatched),  false},
+    // {"Robotron Pause ",  onSelectGame,   (void*) (CWilliamsGame::createInstanceRobotronBluePause),    false},
+    // {"Robotron       ",  onSelectGame,   (void*) (CWilliamsGame::createInstanceRobotronYellowOrange), false},
+    { 0, 0 }
+};
+
 
 void setup()
 {
-  mainSetup(s_gameSelector);
+    mainSetup(s_gameSelector);
 }
 
 void loop()
 {
-  mainLoop();
+    mainLoop();
 }
 

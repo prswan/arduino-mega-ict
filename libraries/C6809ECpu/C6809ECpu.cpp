@@ -426,7 +426,35 @@ C6809ECpu::waitForInterrupt(
     UINT16 timeoutInMs
 )
 {
-    return errorNotImplemented;
+    PERROR error = errorSuccess;
+    unsigned long startTime = millis();
+    unsigned long endTime = startTime + timeoutInMs;
+    int value = 0;
+
+    UINT8 intPin = ((interrupt == NMI) ? (g_pinMap40DIL[s__NMI_i.pin]) :
+                                         (g_pinMap40DIL[s__IRQ_i.pin]));
+    do
+    {
+        // keep reading memory to generate VA11 and Count 240 Interrupts
+        memoryRead(0xf800, 0x00);
+
+        value = ::digitalRead(intPin);
+
+        if (value == LOW)
+        {
+            break;
+        }
+    }
+    while (millis() < endTime);
+
+    if (value != LOW)
+    {
+        error = errorTimeout;
+    }
+
+Exit:
+
+    return error;
 }
 
 
@@ -435,7 +463,11 @@ C6809ECpu::acknowledgeInterrupt(
     UINT8     *response
 )
 {
-    return errorNotImplemented;
+    PERROR error = errorSuccess;
+
+    *response = 0;
+
+    return error;
 }
 
 //
