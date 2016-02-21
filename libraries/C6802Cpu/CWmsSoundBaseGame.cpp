@@ -230,6 +230,9 @@ CWmsSoundBaseGame::onBankSwitchSetupPIA1B(
 // This is used to test /IRQ: 6802 CPU U9 Pin 4 is pulled low by 6821 PIA U10 /IRQA Pin 37 or /IRQB Pin 38  
 // This is triggered by 6821 PIA U10 CB1 Pin 18 being pulled high when a sound input is triggered through 4068 U6
 //
+// To run the test initiate it and then ground one of the sound input lines on 4J3 pins 2-5 or 7 before the 5 second timer expires
+// (4J3 Pin 6 may not be connected depending on jumpers, e.g. Defender/Stargate)
+//
 PERROR
 CWmsSoundBaseGame::interruptCheck(
 )
@@ -246,7 +249,7 @@ CWmsSoundBaseGame::interruptCheck(
     m_cpu->memoryRead(0xF800, 0x00);
     m_cpu->memoryRead(addressPIA1B+1, 0x00);
 
-    error = m_cpu->waitForInterrupt(m_interrupt, 2500);
+    error = m_cpu->waitForInterrupt(m_interrupt, 5000);
 
     if (SUCCESS(error)) 
     {
