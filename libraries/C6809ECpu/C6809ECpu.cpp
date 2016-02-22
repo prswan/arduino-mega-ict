@@ -260,6 +260,7 @@ C6809ECpu::memoryReadWrite(
 )
 {
     PERROR error = errorSuccess;
+    bool interruptsDisabled = false;
     int valueE;
     int valueQ;
 
@@ -287,13 +288,22 @@ C6809ECpu::memoryReadWrite(
     // Step 2 - Drive RW, A, BA, BS onto the bus.
     // Set the databus input.
     //
+    m_busA.pinMode(OUTPUT);
+    m_busA.digitalWrite(address);
+
+    //
+    // If a write, also set a write cycle and drive D.
+    //
     if (readWrite == LOW)
     {
         m_pinRW.digitalWriteLOW();
+        m_busD.pinMode(OUTPUT);
+        m_busD.digitalWrite(*data);
     }
 
-    m_busA.pinMode(OUTPUT);
-    m_busA.digitalWrite(address);
+    // Critical timing section
+    noInterrupts();
+    interruptsDisabled = true;
 
     //
     // Step 3 - Wait for E-Lo, Q-Hi (Q rising edge).
@@ -315,17 +325,7 @@ C6809ECpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, HIGH);
 
     //
-    // Step 4 - Drive BUSY, LIC, AVMA, D-write
-    // Only handle D-write for now.
-    //
-    if (readWrite == LOW)
-    {
-        m_busD.pinMode(OUTPUT);
-        m_busD.digitalWrite(*data);
-    }
-
-    //
-    // Step 5 - Wait for E-Hi, Q-Hi (E-rising)
+    // Step 4 - Wait for E-Hi, Q-Hi (E-rising)
     // Nothing to do.
     //
     for (int x = 0 ; x < 100 ; x++)
@@ -398,6 +398,11 @@ C6809ECpu::memoryReadWrite(
     }
 
 Exit:
+    if (interruptsDisabled)
+    {
+        interrupts();
+    }
+
     return error;
 }
 
