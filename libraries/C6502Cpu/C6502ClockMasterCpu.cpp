@@ -193,6 +193,7 @@ C6502ClockMasterCpu::memoryReadWrite(
 )
 {
     PERROR error = errorSuccess;
+    bool interruptsDisabled = false;
 
     //
     // Step 1 - Wait for CLK2 Lo
@@ -231,6 +232,10 @@ C6502ClockMasterCpu::memoryReadWrite(
     // It only works for reads making it of little use in practice.
     //
     CHECK_VALUE_EXIT(error, s_RDY_i, HIGH);
+
+    // Critical timing section
+    noInterrupts();
+    interruptsDisabled = true;
 
     //
     // Step 3 - Wait for CLK2 Hi
@@ -293,6 +298,12 @@ C6502ClockMasterCpu::memoryReadWrite(
     }
 
 Exit:
+
+    if (interruptsDisabled)
+    {
+        interrupts();
+    }
+
     return error;
 }
 

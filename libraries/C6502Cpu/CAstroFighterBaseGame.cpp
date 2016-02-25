@@ -33,21 +33,25 @@
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
                                                   {NO_BANK_SWITCH, 0x0000,      0x03FF,      0x0F, "r2M", "Prog. "}, // "Program RAM, 2114, ???"
                                                   {NO_BANK_SWITCH, 0x0000,      0x03FF,      0xF0, "r2F", "Prog. "}, // "Program RAM, 2114, ???"
+                                                  //
+                                                  // *** NOTE 0x4000-0x5FFF is DRAM ***
+                                                  //
+                                                  // In clock master mode testing the DRAM is out of specification and may yield
+                                                  // incorrect test results (failures).
+                                                  //
+                                                  // Split into two halves seems to work OK with ITT 4027 (single block testing yielded a
+                                                  // consistent single bit error in the test).
+                                                  //
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0xFF, "2AT", "Video "}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0xFF, "2AT", "Video "}, // "Video RAM, upper"
+                                    /* TEST */    {NO_BANK_SWITCH, 0x4000,      0x5FFF,      0xFF, "2AT", "Video "}, // "Video RAM, whole"
                                                   {0}
                                                 }; // end of list
 
 //
-// According to MAME it seems that the video RAM is write only.
-// Even with schematics, the common CPU/Video bus makes it hard to determine if
-// it really is write only.
+// No write-only RAM on this platform. Yay!
 //
-// According to MAME a write to the VRAM also loads the colour RAM with the contents
-// of the colour output register.
-//
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                               "012", "012345"
-                                                           {NO_BANK_SWITCH, 0x4000,      0x5FFF,      0xFF, "2AT", "Video "}, // "Video RAM"
-                                                           {0}
-                                                         }; // end of list
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 
 //
 // Custom functions implemented for this game.
