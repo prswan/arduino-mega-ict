@@ -95,7 +95,9 @@ static const CONNECTION s_D_iot[] = { {31, "D0" },
                                       {24, "D7" } }; // 8 bits.
 
 C6809ECpu::C6809ECpu(
-) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
+    UINT8 QLoToDInClockPulses
+) : m_QLoToDInClockPulses(QLoToDInClockPulses),
+    m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinRW(g_pinMap40DIL, &s_RW_o),
     m_pinE(g_pinMap40DIL, &s_E_i),
@@ -379,6 +381,26 @@ C6809ECpu::memoryReadWrite(
     }
     CHECK_PIN_VALUE_EXIT(error, m_pinE, s_E_i, HIGH);
     CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, LOW);
+
+    //
+    // Wait for data based on master clock
+    //
+    // If this is incorrect (too long) such that E returns
+    // low then we flag this as a bus error.
+    //
+    for (int x = 0 ; x < m_QLoToDInClockPulses ; x++)
+    {
+        valueE = m_pinE.digitalRead();
+
+        if (valueE == LOW)
+        {
+            break;
+        }
+
+        m_pinClock.digitalWriteHIGH();
+        m_pinClock.digitalWriteLOW();
+    }
+    CHECK_LITERAL_VALUE_EXIT(error, s_E_i, valueE, HIGH);
 
     //
     // Phase 3 Actions
