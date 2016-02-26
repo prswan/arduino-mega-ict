@@ -196,7 +196,8 @@ C6502ClockMasterCpu::memoryReadWrite(
     bool interruptsDisabled = false;
 
     //
-    // Step 1 - Wait for CLK2 Lo
+    // Phase 0 - Initial State
+    // - Wait for CLK2 Lo
     //
     for (int x = 0 ; x < 100 ; x++)
     {
@@ -209,7 +210,7 @@ C6502ClockMasterCpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, LOW);
 
     //
-    // Step 2 - Drive RW, A, onto the bus.
+    // Drive RW, A, onto the bus.
     // For read, set D input.
     //
     m_busA.pinMode(OUTPUT);
@@ -238,7 +239,8 @@ C6502ClockMasterCpu::memoryReadWrite(
     interruptsDisabled = true;
 
     //
-    // Step 3 - Wait for CLK2 Hi
+    // Phase 1
+    // - Wait for CLK2 Hi
     //
     for (int x = 0 ; x < 100 ; x++)
     {
@@ -251,7 +253,7 @@ C6502ClockMasterCpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
 
     //
-    // Step 4 - Wait data based on master clock
+    // Wait data based on master clock
     //
     // If this is incorrect (too long) such that CLK2o returns
     // low then we flag this as a bus error.
@@ -267,7 +269,7 @@ C6502ClockMasterCpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
 
     //
-    // Step 5 - D-Read.
+    // D-Read.
     //
     if (readWrite == HIGH)
     {
@@ -278,8 +280,8 @@ C6502ClockMasterCpu::memoryReadWrite(
     }
 
     //
-    // Step 6 - Wait for CLK2 Lo to complete the cycle.
-    // Back to initial state.
+    // Phase 0 - Back to Initial State
+    // - Wait for CLK2 Lo to complete the cycle.
     //
     for (int x = 0 ; x < 100 ; x++)
     {

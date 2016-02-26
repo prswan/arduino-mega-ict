@@ -67,12 +67,12 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
                                                         {NO_BANK_SWITCH, 0x8003L, 0xFF, 0x00,  "???", "Colour"}, // Colour control
-                                                        {NO_BANK_SWITCH, 0x8004L, 0x01, 0x00,  "6J ", "Flip  "}, // Video control #1 - D0 - Flip
-                                                        {NO_BANK_SWITCH, 0x8004L, 0x02, 0x00,  "6J ", "VidOff"}, // Video control #1 - D1 - Screen off
-                                                        {NO_BANK_SWITCH, 0x8005L, 0x01, 0x00,  "2C ", "Out0  "}, // Video control #2 - D0 - Out 0.
-                                                        {NO_BANK_SWITCH, 0x8005L, 0x02, 0x00,  "2C ", "Out1  "}, // Video control #2 - D1 - Out 1.
-                                                        {NO_BANK_SWITCH, 0x8005L, 0x04, 0x00,  "2C ", "ClrSel"}, // Video control #2 - D2 - Colour select.
-                                                        {NO_BANK_SWITCH, 0x8005L, 0x08, 0x00,  "2C ", "Red on"}, // Video control #2 - D3 - Red screen
+                                                        {NO_BANK_SWITCH, 0x8004L, 0x01, 0x00,  "c6J", "Flip  "}, // Video control #1 - D0 - Flip
+                                                        {NO_BANK_SWITCH, 0x8004L, 0x02, 0x00,  "c6J", "VidOff"}, // Video control #1 - D1 - Screen off
+                                                        {NO_BANK_SWITCH, 0x8005L, 0x01, 0x00,  "c2C", "Out0  "}, // Video control #2 - D0 - Out 0.
+                                                        {NO_BANK_SWITCH, 0x8005L, 0x02, 0x00,  "c2C", "Out1  "}, // Video control #2 - D1 - Out 1.
+                                                        {NO_BANK_SWITCH, 0x8005L, 0x04, 0x00,  "c2C", "ClrSel"}, // Video control #2 - D2 - Colour select.
+                                                        {NO_BANK_SWITCH, 0x8005L, 0x08, 0x00,  "c2C", "Red on"}, // Video control #2 - D3 - Red screen
                                                         {NO_BANK_SWITCH, 0x8006L, 0xFF, 0x00,  "???", "Sound "}, // Sound control
                                                         {NO_BANK_SWITCH, 0x8007L, 0xFF, 0x00,  "???", "Prot. "}, // Protection write
                                                         {0}
