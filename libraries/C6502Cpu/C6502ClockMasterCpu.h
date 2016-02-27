@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,8 +22,8 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef C6502Cpu_h
-#define C6502Cpu_h
+#ifndef C6502ClockMasterCpu_h
+#define C6502ClockMasterCpu_h
 
 #include "Arduino.h"
 #include "ICpu.h"
@@ -32,15 +32,35 @@
 #include "CFastPin.h"
 
 
-class C6502Cpu : public ICpu
+class C6502ClockMasterCpu : public ICpu
 {
     public:
 
         //
         // Constructor
         //
+        // Some games (e.g. Astro Fighter) have strictly synchronous bus
+        // cycles clocked from the external master clock.
+        // The "CLK2oHiToD" setting allows the cycle time to be specified
+        // such that the data read point is performed after
+        // "CLK2oHiToD" pulses. Typically this is to the n-1 pulse for
+        // an n clock pulse cycle.
+        // If "CLK2oHiToD" value is zero then the cycle is treated as being
+        // asynchronous.
+        //
+        //                                             End of cycle
+        //                                             ^
+        // CLK2o  ----\                /---------------\
+        //            |                |               |
+        //            \----------------/               \----
+        //                             .
+        //                             .
+        // CLK2oHiToD                  .------------>
+        //                                          ^
+        //                                          D read
 
-        C6502Cpu(
+        C6502ClockMasterCpu(
+            UINT8 CLK2oHiToDInClockPulses
         );
 
         // ICpu Interface
@@ -88,16 +108,39 @@ class C6502Cpu : public ICpu
         );
 
         //
-        // C6502Cpu Interface
+        // C6502ClockMasterCpu Interface
         //
 
+        void
+        clockPulse(
+        );
+
     private:
+
+        PERROR
+        memoryReadWrite(
+            UINT32 address,
+            UINT8  *data,
+            int    readWrite
+        );
+
+
+    private:
+
+        UINT8         m_CLK2oHiToDInClockPulses;
 
         CBus          m_busA;
         CFast8BitBus  m_busD;
 
+        CFastPin      m_pinCLK0i;
         CFastPin      m_pinCLK1o;
         CFastPin      m_pinCLK2o;
+        CFastPin      m_pinRDY;
+
+        CFastPin      m_pinClock;
+
+        int           m_valueCLK1o;
+        int           m_valueCLK2o;
 
 };
 

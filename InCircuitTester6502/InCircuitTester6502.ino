@@ -1,4 +1,4 @@
-//
+  //
 // Copyright (c) 2015, Paul R. Swan
 // All rights reserved.
 //
@@ -27,15 +27,15 @@
 #include <DFR_Key.h>
 #include <zutil.h>
 
-#include <C6502Cpu.h>
 #include <CTomahawk777Game.h>
 
 //
 // The initial selector to select the game to test.
 //
 static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),               false},
-                                    {"Tomahawk777 (5)",  onSelectGame,   (void*) (CTomahawk777Game::createInstanceSet5), false},
+                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                          false},
+                                    {"T-777   (5)    ",  onSelectGame,   (void*) (CTomahawk777Game::createInstanceSet5),            false},
+                                    {"T-777   (5) clk",  onSelectGame,   (void*) (CTomahawk777Game::createInstanceClockMasterSet5), false},
                                     { 0, 0 }
                                    };
 

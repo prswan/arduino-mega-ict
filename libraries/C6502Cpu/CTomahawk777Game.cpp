@@ -24,28 +24,6 @@
 //
 #include "CTomahawk777Game.h"
 
-// The status so far:
-//
-// * The bus check fails with pattern 0xDC. The databus is behind a couple of 8216
-//   From the datasheet for that, HiZ draws 100uA but the Arduino pullups can only
-//   source 50uA @ 1.8Vcc so it would seem the 8216's draws too much even in HiZ.
-//
-// * The ROM check passes OK.
-//
-// * The program RAM won't write/read reliably in test.
-//   Suspect this is because the 2114 CS is gated by TCLD, a quarter CLK2o pulse,
-//   that effectively allows the CLK2o high time to be halved to allow the A/D to
-//   setup on the RAM for the 2nd half of CS.
-//
-// * The video RAM is even less reliable and won't write/read 4 bytes.
-//   Looking more deeply at the schematics, it looks like the VRAM access for display
-//   occurs in the CLK2o low time with the CPU access in the CLK2o high time.
-//
-//   Since we can't get anywhere near closely matching that timing with the Arduino,
-//   we're done with this platform for now. One solution is a slightly smarter shield
-//   for the 6502 specifically that will allow the 6502 bus cycles to be executed in
-//   hardware with correct timing w.r.t. CLKi.
-//
 
 //                                       01   02   04   08   10   20   40   80  100  200
 static const UINT8 s_romData2n_C5[] = {0xA2,0xFF,0xD8,0x20,0xDC,0x16,0x06,0xA9,0x08,0x20}; // 8
@@ -74,19 +52,7 @@ static const ROM_REGION s_romRegionSet5[] PROGMEM = { //
                                                       {0} }; // end of list
 
 //
-// RAM region is the same for all versions.
-//
-// NOTE: Neither program or video RAM access is working properly.
-//
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0x0F, "???", "Prog. "}, // "Program RAM, 2114, ???"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0xF0, "???", "Prog. "}, // "Program RAM, 2114, ???"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x5FFF,      0xFF, "???", "Video "}, // "Video RAM"
-                                                  {0}
-                                                }; // end of list
-
-//
-// Input region is the same for all versions.
+// Input region is the same for all ROM versions.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
                                                       {NO_BANK_SWITCH, 0xA000L, 0xFF,  "???", "IN    "}, // Inputs
@@ -97,16 +63,16 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
                                                     }; // end of list
 
 //
-// Output region is the same for all versions.
+// Output region is the same for all ROM versions.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
                                                         {NO_BANK_SWITCH, 0x8003L, 0xFF, 0x00,  "???", "Colour"}, // Colour control
-                                                        {NO_BANK_SWITCH, 0x8004L, 0x01, 0x00,  "6J ", "Flip  "}, // Video control #1 - D0 - Flip
-                                                        {NO_BANK_SWITCH, 0x8004L, 0x02, 0x00,  "6J ", "VidOff"}, // Video control #1 - D1 - Screen off
-                                                        {NO_BANK_SWITCH, 0x8005L, 0x01, 0x00,  "2C ", "Out0  "}, // Video control #2 - D0 - Out 0.
-                                                        {NO_BANK_SWITCH, 0x8005L, 0x02, 0x00,  "2C ", "Out1  "}, // Video control #2 - D1 - Out 1.
-                                                        {NO_BANK_SWITCH, 0x8005L, 0x04, 0x00,  "2C ", "ClrSel"}, // Video control #2 - D2 - Colour select.
-                                                        {NO_BANK_SWITCH, 0x8005L, 0x08, 0x00,  "2C ", "Red on"}, // Video control #2 - D3 - Red screen
+                                                        {NO_BANK_SWITCH, 0x8004L, 0x01, 0x00,  "c6J", "Flip  "}, // Video control #1 - D0 - Flip
+                                                        {NO_BANK_SWITCH, 0x8004L, 0x02, 0x00,  "c6J", "VidOff"}, // Video control #1 - D1 - Screen off
+                                                        {NO_BANK_SWITCH, 0x8005L, 0x01, 0x00,  "c2C", "Out0  "}, // Video control #2 - D0 - Out 0.
+                                                        {NO_BANK_SWITCH, 0x8005L, 0x02, 0x00,  "c2C", "Out1  "}, // Video control #2 - D1 - Out 1.
+                                                        {NO_BANK_SWITCH, 0x8005L, 0x04, 0x00,  "c2C", "ClrSel"}, // Video control #2 - D2 - Colour select.
+                                                        {NO_BANK_SWITCH, 0x8005L, 0x08, 0x00,  "c2C", "Red on"}, // Video control #2 - D3 - Red screen
                                                         {NO_BANK_SWITCH, 0x8006L, 0xFF, 0x00,  "???", "Sound "}, // Sound control
                                                         {NO_BANK_SWITCH, 0x8007L, 0xFF, 0x00,  "???", "Prot. "}, // Protection write
                                                         {0}
@@ -116,14 +82,23 @@ IGame*
 CTomahawk777Game::createInstanceSet5(
 )
 {
-    return (new CTomahawk777Game(s_romRegionSet5));
+    return (new CTomahawk777Game(false,
+                                 s_romRegionSet5));
 }
 
+IGame*
+CTomahawk777Game::createInstanceClockMasterSet5(
+)
+{
+    return (new CTomahawk777Game(true,
+                                 s_romRegionSet5));
+}
 
 CTomahawk777Game::CTomahawk777Game(
+    const bool       clockMaster,
     const ROM_REGION *romRegion
-) : CAstroFighterBaseGame( romRegion,
-                           s_ramRegion,
+) : CAstroFighterBaseGame( clockMaster,
+                           romRegion,
                            s_inputRegion,
                            s_outputRegion )
 {
