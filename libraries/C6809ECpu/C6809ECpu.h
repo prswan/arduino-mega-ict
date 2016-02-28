@@ -41,6 +41,7 @@ class C6809ECpu : public ICpu
         //
 
         C6809ECpu(
+            UINT8 QLoToDInClockPulses
         );
 
         // ICpu Interface
@@ -101,6 +102,8 @@ class C6809ECpu : public ICpu
         );
 
     private:
+
+        UINT8         m_QLoToDInClockPulses;
 
         CBus          m_busA;
         CFast8BitBus  m_busD;
