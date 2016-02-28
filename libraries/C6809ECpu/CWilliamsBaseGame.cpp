@@ -22,7 +22,7 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include "CDefenderBaseGame.h"
+#include "CWilliamsBaseGame.h"
 #include "C6809ECpu.h"
 #include <DFR_Key.h>
 #include <LiquidCrystal.h>
@@ -35,39 +35,27 @@ static LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 // 6809E GND Pin 1
 //
 // Watchdog:
-// Watchdog is cleared by the program writing 0x38 or 0x39 to address c3fc
-// On early series boards watchdog is disabled by cutting the jumper pad between 1D and 1F on the solder side
-// On later series boards watchdog is disabled by cutting the jumper pad between 5M and 5O on the component side 
+// Watchdog is cleared by the program writing 0x39 to address cbff
+// Watchdog is disabled by cutting the jumper pad between 5H and 5I on the component side
 //
 
 
 //
 // PIA Addresses
 //
-static const UINT32 addressPIA1A  = 0xcc00;             // ROM Board PIA Port A 
+static const UINT32 addressPIA1A  = 0xc804;             // ROM Board PIA Port A 
 static const UINT32 addressPIA1B  = addressPIA1A+2;     // ROM Board PIA Port B
 
-static const UINT32 addressPIA2A  = 0xcc04;             // Interface Board PIA Port A
+static const UINT32 addressPIA2A  = 0xc80c;             // Interface Board PIA Port A
 static const UINT32 addressPIA2B  = addressPIA2A+2;     // Interface Board PIA Port B
-
-
-//
-// RAM region is the same for all versions.
-//
-static const RAM_REGION s_ramRegion[] PROGMEM = { 
-    //                                                          "012", "012345"
-    {NO_BANK_SWITCH,                      0x0000, 0xbfff, 0xff, "RAM", "DRAM  "}, // 4116 DRAM x24
-    {CDefenderBaseGame::onROMBankSelect0, 0xc400, 0x0100, 0x0f, "1E ", "CMOS  "}, // 5101 CMOS RAM bits 0-3 only
-    {0}
-}; // end of list
 
 
 //
 // Write only RAM region is the same for all versions.
 //
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = {
-    //                                                          "012", "012345"
-    {CDefenderBaseGame::onROMBankSelect0, 0xc000, 0x0010, 0xff, "12C", "Colour"}, // 2x 7489 Colour RAM
+    //                                     "012", "012345"
+    {NO_BANK_SWITCH, 0xc000, 0x0010, 0xff, "12B", "Colour"}, // 2x 7489 Colour RAM at 1B and 2B
     {0} 
 }; // end of list
 
@@ -92,54 +80,24 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = {
 //          2J3-10 - Ground
 //
 //
-// Early series interface board inputs
-// Inputs PA0-7 and PB0-7 are connected however PB1-7 are not used by the game
-// IRQA, IRQB, CA1, CA2, CB1 and CB2 are not used
-//
-// 0x01 PA0 3J3-10 - Fire                           0x01 PB0 3J3-10 - Up                 
-// 0x02 PA1 3J3-9  - Thrust                         0x02 PB1 3J3-9  - Not Used 
-// 0x04 PA2 3J3-8  - Smart Bomb                     0x04 PB2 3J3-8  - Not Used 
-// 0x08 PA3 3J3-7  - Hyperspace                     0x08 PB3 3J3-7  - Not Used 
-// 0x10 PA4 3J3-6  - 2 Player Start                 0x10 PB4 3J3-6  - Not Used 
-// 0x20 PA5 3J3-5  - 1 Player Start                          3J3-5  - Key
-// 0x40 PA6 3J3-4  - Reverse                        0x20 PB5 3J3-4  - Not Used 
-// 0x80 PA7 3J3-3  - Down                           0x40 PB6 3J3-3  - Not Used 
-//          3J3-2  - Key                            0x80 PB7 3J3-2  - Not Used 
-//          3J3-1  - Ground                                  3J3-1  - Ground
-//
-//
-// Later series interface board inputs
+// Interface board inputs
 // Only inputs PA0-7, PB0 and PB7 are connected
-// IRQA, IRQB, PB1-6, CA1, CA2, and CB1 are not used
-//
+// Additionally PB1-6 are used by ther Sinistar/Blaster Interface board
+// IRQA, IRQB, CA1, CA2, and CB1 are not used
+// 
 // Output CB2 is used to determine which set of player controls is used in cocktail mode high=Player 1 low=Player 2
-// When using ROM colours other than red W2 should be removed as the state of PB2 cannot be assured
+// Input PB7 is pulled up via R2 and grounded via W1 to determine if the game is upright (fitted) or cocktail (removed)
 //
-// 0x01 PA0 3J3-1  - Fire Player 1                  0x01 PB0 3J3-1  - Up                 
-// 0x02 PA1 3J3-2  - Thrust Player 1                0x01 PA0 3J3-2  - Fire Player 2 
-// 0x04 PA2 3J3-3  - Smart Bomb Player 1            0x02 PA1 3J3-3  - Thrust Player 2  
-// 0x08 PA3 3J3-4  - Hyperspace Player 1            0x04 PA2 3J3-4  - Smart Bomb Player 2  
-// 0x10 PA4 3J3-5  - 2 Player Start                 0x08 PA3 3J3-5  - Hyperspace Player 2  
-// 0x20 PA5 3J3-6  - 1 Player Start                          3J3-6  - Key
-// 0x40 PA6 3J3-7  - Reverse Player 1               0x40 PA6 3J3-7  - Reverse Player 2 
-// 0x80 PA7 3J3-8  - Down Player 1                  0x80 PA7 3J3-8  - Down Player 2 
-//          3J3-9  - Key                            0x01 PB0 3J3-9  - Up Player 2 
-//          3J3-10 - Ground                                  3J3-10 - Ground
-//
-// 0x80 PB7 is pulled up via R2 and grounded via W1 to determine if the game is upright (fitted) or cocktail (removed)
-// Cocktail operation is only possible with red label ROMs
-//
-//
-// CDefenderBaseGame::setupPIA1A initialises Port A of ROM board 6821 U1 to be inputs on bits 0-5
-// CDefenderBaseGame::setupPIA2A initialises Port A of interface board 6821 U1 to be inputs
-// CDefenderBaseGame::setupPIA2B initialises Port B of interface board 6821 U1 to be inputs
+// CWilliamsBaseGame::setupPIA1A initialises Port A of ROM board 6821 U1 to be inputs on bits 0-5
+// CWilliamsBaseGame::setupPIA2A initialises Port A of interface board 6821 U1 to be inputs
+// CWilliamsBaseGame::setupPIA2B initialises Port B of interface board 6821 U1 to be inputs
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { 
-    //                                                        "012", "012345"
-    {CDefenderBaseGame::setupPIA1A,       addressPIA1A, 0x3f, "ROM", "PB0-5 "}, // Coin Door Inputs
-    {CDefenderBaseGame::setupPIA2A,       addressPIA2A, 0xff, "Int", "PA0-7 "}, // Control Panel
-    {CDefenderBaseGame::setupPIA2B,       addressPIA2B, 0xff, "Int", "PB0-7 "}, // Control Panel/Upright or Cocktail
-    {CDefenderBaseGame::onROMBankSelect0, 0xc800,       0xfc, "CPU", "VA8-13"}, // 6 bits of video counter chain VA8-13
+    //                                                  "012", "012345"
+    {CWilliamsBaseGame::setupPIA1A, addressPIA1A, 0x3f, "ROM", "PB0-5 "},
+    {CWilliamsBaseGame::setupPIA2A, addressPIA2A, 0xff, "Int", "PA0-7 "},
+    {CWilliamsBaseGame::setupPIA2B, addressPIA2B, 0xff, "Int", "PB0-7 "},
+    {NO_BANK_SWITCH,                0xcb00,       0xfc, "CPU", "VA8-13"}, // 6 bits of video counter chain VA8-13
     {0}
 }; // end of list
 
@@ -153,18 +111,18 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = {
 // CWmsSoundBaseGame::setupPIA1B initialises Bank B of ROM board PIA 6821 U1 to be outputs
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { 
-    //                                                                "012", "012345"
-    {CDefenderBaseGame::setupPIA1A,       addressPIA1A,   0x80, 0x00, "ROM", "LED1  "}, // PA7
-    {CDefenderBaseGame::setupPIA1A,       addressPIA1A,   0x40, 0x00, "ROM", "LED2  "}, // PA6
-    {CDefenderBaseGame::setupPIA1B,       addressPIA1B,   0x80, 0x00, "ROM", "LED3  "}, // PB7
-    {CDefenderBaseGame::setupPIA1B,       addressPIA1B,   0x40, 0x00, "ROM", "LED4  "}, // PB6
-    {CDefenderBaseGame::setupPIA1B,       addressPIA1B,   0x02, 0x00, "ROM", "Sound0"}, // PB1
-    {CDefenderBaseGame::setupPIA1B,       addressPIA1B,   0x01, 0x00, "ROM", "Sound1"}, // PB0
-    {CDefenderBaseGame::setupPIA1B,       addressPIA1B,   0x08, 0x00, "ROM", "Sound2"}, // PB3
-    {CDefenderBaseGame::setupPIA1B,       addressPIA1B,   0x04, 0x00, "ROM", "Sound3"}, // PB2
-    {CDefenderBaseGame::setupPIA1B,       addressPIA1B,   0x20, 0x00, "ROM", "Sound4"}, // PB5
-    {CDefenderBaseGame::setupPIA1B,       addressPIA1B,   0x10, 0x00, "ROM", "Sound5"}, // PB4
-    {CDefenderBaseGame::onROMBankSelect0, addressPIA2B+1, 0x38, 0x30, "Int", "P1/P2 "}, // CB2
+    //                                                          "012", "012345"
+    {CWilliamsBaseGame::setupPIA1A, addressPIA1A,   0x80, 0x00, "ROM", "LED1  "}, // PA7
+    {CWilliamsBaseGame::setupPIA1A, addressPIA1A,   0x40, 0x00, "ROM", "LED2  "}, // PA6
+    {CWilliamsBaseGame::setupPIA1B, addressPIA1B,   0x80, 0x00, "ROM", "LED3  "}, // PB7
+    {CWilliamsBaseGame::setupPIA1B, addressPIA1B,   0x40, 0x00, "ROM", "LED4  "}, // PB6
+    {CWilliamsBaseGame::setupPIA1B, addressPIA1B,   0x02, 0x00, "ROM", "Sound0"}, // PB1
+    {CWilliamsBaseGame::setupPIA1B, addressPIA1B,   0x01, 0x00, "ROM", "Sound1"}, // PB0
+    {CWilliamsBaseGame::setupPIA1B, addressPIA1B,   0x08, 0x00, "ROM", "Sound2"}, // PB3
+    {CWilliamsBaseGame::setupPIA1B, addressPIA1B,   0x04, 0x00, "ROM", "Sound3"}, // PB2
+    {CWilliamsBaseGame::setupPIA1B, addressPIA1B,   0x20, 0x00, "ROM", "Sound4"}, // PB5
+    {CWilliamsBaseGame::setupPIA1B, addressPIA1B,   0x10, 0x00, "ROM", "Sound5"}, // PB4
+    {NO_BANK_SWITCH,                addressPIA2B+1, 0x38, 0x30, "Int", "P1/P2 "}, // CB2
     {0}
 }; // end of list
 
@@ -173,19 +131,19 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = {
 // Custom functions implemented for this game.
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { 
-    //                                        "0123456789"
-    {CDefenderBaseGame::soundTestA,           "Sound 1-31"},
-    {CDefenderBaseGame::soundTestB,           "Sound 0-4 "},
-    {CDefenderBaseGame::watchdogAndVABusTest, "WD & VABus"},
-    {CDefenderBaseGame::resetPIAs,            "Reset PIAs"},
+    //                              "0123456789"
+    {CWilliamsBaseGame::soundTestA, "Sound 1-63"},
+    {CWilliamsBaseGame::soundTestB, "Sound 0-5 "},
+    {CWilliamsBaseGame::resetPIAs,  "Reset PIAs"},
     {0}
 };
 
 
-CDefenderBaseGame::CDefenderBaseGame(
-    const ROM_REGION    *romRegion
+CWilliamsBaseGame::CWilliamsBaseGame(
+    const ROM_REGION *romRegion,
+    const RAM_REGION *ramRegion
 ) : CGame( romRegion,
-           s_ramRegion,
+           ramRegion,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,
@@ -206,7 +164,7 @@ CDefenderBaseGame::CDefenderBaseGame(
 }
 
 
-CDefenderBaseGame::~CDefenderBaseGame(
+CWilliamsBaseGame::~CWilliamsBaseGame(
 )
 {
     delete m_cpu;
@@ -215,95 +173,36 @@ CDefenderBaseGame::~CDefenderBaseGame(
 
 
 //
-// This is used to select Bank 0 (I/O) of the banked ROMs 0xc000 to 0xcfff
+// This is used to select ROM insead of RAM from 0x0000 to 0x98ff
 //
 PERROR
-CDefenderBaseGame::onROMBankSelect0(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::onROMBankSelect(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
-    // Address d000 sets the I/O to be available for 0xc000 to 0xcfff
-    error = cpu->memoryWrite(0xd000, 0x00);
+    error = cpu->memoryWrite(0xc900, 0x01);
 
     return error;
 }
 
 
 //
-// This is used to select Bank 1 of the banked ROMs 0xc000 to 0xcfff
+// This is used to select RAM insead of ROM from 0x0000 to 0x98ff
 //
 PERROR
-CDefenderBaseGame::onROMBankSelect1(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::onRAMBankSelect(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
-    // Address d000 sets the ROM bank available for 0xc000 to 0xcfff
-    error = cpu->memoryWrite(0xd000, 0x01);
-
-    return error;
-}
-
-
-//
-// This is used to select Bank 2 of the banked ROMs 0xc000 to 0xcfff
-//
-PERROR
-CDefenderBaseGame::onROMBankSelect2(
-    void *cDefenderBaseGame
-)
-{
-    PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
-    ICpu *cpu = thisGame->m_cpu;
-
-    // Address d000 sets the ROM bank available for 0xc000 to 0xcfff
-    error = cpu->memoryWrite(0xd000, 0x02);
-
-    return error;
-}
-
-
-//
-// This is used to select Bank 3 of the banked ROMs 0xc000 to 0xcfff
-//
-PERROR
-CDefenderBaseGame::onROMBankSelect3(
-    void *cDefenderBaseGame
-)
-{
-    PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
-    ICpu *cpu = thisGame->m_cpu;
-
-    // Address d000 sets the ROM bank available for 0xc000 to 0xcfff
-    error = cpu->memoryWrite(0xd000, 0x03);
-
-    return error;
-}
-
-
-//
-// This is used to select Bank 7 of the banked ROMs 0xc000 to 0xcfff
-//
-PERROR
-CDefenderBaseGame::onROMBankSelect7(
-    void *cDefenderBaseGame
-)
-{
-    PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
-    ICpu *cpu = thisGame->m_cpu;
-
-    // Address d000 sets the ROM bank available for 0xc000 to 0xcfff
-    error = cpu->memoryWrite(0xd000, 0x07);
+    error = cpu->memoryWrite(0xc900, 0x00);
 
     return error;
 }
@@ -313,25 +212,20 @@ CDefenderBaseGame::onROMBankSelect7(
 // This is used to setup the hardware configuration of the ROM board 6821 PIA U1 Bank A
 //
 PERROR
-CDefenderBaseGame::setupPIA1A(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::setupPIA1A(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
     // If we have previously set this PIA up there is no need to do it again as it interfers with the tests
     // If power has been cycled or PIAs need reinitialising for any other reason use the custom test 'Reset PIAs'
     if (thisGame->PIA1Ainitialised == false) 
     {
-        // Address d000 sets the I/O to be available for 0xc000 to 0xcfff
-        error = cpu->memoryWrite(0xd000, 0x00);
-
-        if (SUCCESS(error)) {
-            // Enable Data Direction Register (xxxxx0xx)
-            error = cpu->memoryWrite(addressPIA1A+1, 0x00);
-        }     
+        // Enable Data Direction Register (xxxxx0xx)
+        error = cpu->memoryWrite(addressPIA1A+1, 0x00);   
 
         if (SUCCESS(error)) {
             // Set PB0-PB5 as input pins and CA6-7 as output pins
@@ -344,7 +238,7 @@ CDefenderBaseGame::setupPIA1A(
         }
 
         if (SUCCESS(error)) {
-            // Set CA6-7 initial state as low
+            // Set CA6-7 initial state as high
             error = cpu->memoryWrite(addressPIA1A, 0xc0); 
         }
 
@@ -361,37 +255,35 @@ CDefenderBaseGame::setupPIA1A(
 // This is used to setup the hardware configuration of the ROM board 6821 PIA U1 Bank B
 //
 PERROR
-CDefenderBaseGame::setupPIA1B(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::setupPIA1B(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
     // If we have previously set this PIA up there is no need to do it again as it interfers with the tests
     // If power has been cycled or PIAs need reinitialising for any other reason use the custom test 'Reset PIAs'
     if (thisGame->PIA1Binitialised == false) 
     {
-        // Address d000 sets the I/O to be available for 0xc000 to 0xcfff
-        error = cpu->memoryWrite(0xd000, 0x00);
+        // Enable Data Direction Register (xxxxx0xx)
+        error = cpu->memoryWrite(addressPIA1B+1, 0x00);  
 
-        if (SUCCESS(error)) {
-            // Enable Data Direction Register (xxxxx0xx)
-            error = cpu->memoryWrite(addressPIA1B+1, 0x00);
-        }
-
-        if (SUCCESS(error)) {
+        if (SUCCESS(error))
+        {
             // Set PB0-PB7 as output pins
             error = cpu->memoryWrite(addressPIA1B, 0xff); 
         }
 
-        if (SUCCESS(error)) {
+        if (SUCCESS(error))
+        {
             // Enable CB2 low > high IRQ (xx011xxx), Enable Output Register (xxxxx1xx), Enable CB1 low > high IRQ (xxxxxx11)
             error = cpu->memoryWrite(addressPIA1B+1, 0x1f); 
         }
 
-        if (SUCCESS(error)) {
+        if (SUCCESS(error))
+        {
             // Set PB0-PB7 initial state as high
             error = cpu->memoryWrite(addressPIA1B, 0xff); 
         }
@@ -409,32 +301,29 @@ CDefenderBaseGame::setupPIA1B(
 // This is used to setup the hardware configuration of the interface board 6821 PIA U1 Bank A
 //
 PERROR
-CDefenderBaseGame::setupPIA2A(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::setupPIA2A(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
     // If we have previously set this PIA up there is no need to do it again as it interfers with the tests
     // If power has been cycled or PIAs need reinitialising for any other reason use the custom test 'Reset PIAs'
     if (thisGame->PIA2Ainitialised == false) 
     {
-        // Address d000 sets the I/O to be available for 0xc000 to 0xcfff
-        error = cpu->memoryWrite(0xd000, 0x00);
+        // Enable Data Direction Register (xxxxx0xx)
+        error = cpu->memoryWrite(addressPIA2A+1, 0x00);  
 
-        if (SUCCESS(error)) {
-            // Enable Data Direction Register (xxxxx0xx)
-            error = cpu->memoryWrite(addressPIA2A+1, 0x00);
-        }  
-
-        if (SUCCESS(error)) {
+        if (SUCCESS(error))
+        {
             // Set PA0-PA7 as input pins
             error = cpu->memoryWrite(addressPIA2A, 0x00); 
         }
 
-        if (SUCCESS(error)) {
+        if (SUCCESS(error))
+        {
             // Set CA2 output low (xx110xxx), Enable Output Register (xxxxx1xx), Disable CA1 (xxxxxx00)
             error = cpu->memoryWrite(addressPIA2A+1, 0x34); 
         }
@@ -452,32 +341,29 @@ CDefenderBaseGame::setupPIA2A(
 // This is used to setup the hardware configuration of the interface board 6821 PIA U1 Bank B
 //
 PERROR
-CDefenderBaseGame::setupPIA2B(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::setupPIA2B(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
     // If we have previously set this PIA up there is no need to do it again as it interfers with the tests
     // If power has been cycled or PIAs need reinitialising for any other reason use the custom test 'Reset PIAs'
     if (thisGame->PIA2Binitialised == false) 
     {
-        // Address d000 sets the I/O to be available for 0xc000 to 0xcfff
-        error = cpu->memoryWrite(0xd000, 0x00);
+        // Enable Data Direction Register (xxxxx0xx)
+        error = cpu->memoryWrite(addressPIA2B+1, 0x00);  
 
-        if (SUCCESS(error)) {
-            // Enable Data Direction Register (xxxxx0xx)
-            error = cpu->memoryWrite(addressPIA2B+1, 0x00);
-        } 
-
-        if (SUCCESS(error)) {
+        if (SUCCESS(error))
+        {
             // Set PB0-PB7 as input pins
             error = cpu->memoryWrite(addressPIA2B, 0x00); 
         }
 
-        if (SUCCESS(error)) {
+        if (SUCCESS(error))
+        {
             // Set CB2 output high for P1 controls (xx111xxx), Enable Output Register (xxxxx1xx), Disable CB1 (xxxxxx00)
             error = cpu->memoryWrite(addressPIA2B+1, 0x34); 
         }
@@ -511,7 +397,7 @@ CDefenderBaseGame::setupPIA2B(
 // E:U - Unexpected: Interrupt did not clear
 //
 PERROR
-CDefenderBaseGame::interruptCheck(
+CWilliamsBaseGame::interruptCheck(
 )
 {
     PERROR error = errorCustom;
@@ -596,19 +482,18 @@ CDefenderBaseGame::interruptCheck(
 
 
 //
-// Custom function to cycle through all 32 output combinations using Sound0 to Sound4 (PB0-PB4) on PIA1B one at a time
-// Sound5 (PB5) is not used on Defender
+// Custom function to cycle through all 64 output combinations using Sound0 to Sound4 (PB0-PB5) on PIA1B one at a time
 //
 // Currently tests 19, 27 and 28 do not make any sound. 
 // Also need to test the game end and high score of the day tunes
 //
 PERROR
-CDefenderBaseGame::soundTestA(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::soundTestA(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
     // Re-initialse PIA1 so it's state is known
@@ -619,10 +504,10 @@ CDefenderBaseGame::soundTestA(
 
     lcd.begin(16, 2);
     lcd.setCursor(0, 0);
-    lcd.print("Sound Test 1-31 ");
+    lcd.print("Sound Test 1-63 ");
 
     // Loop through each sound test
-    for (UINT8 test = 1; test < 32; test++) {
+    for (UINT8 test = 1; test < 64; test++) {
         lcd.setCursor(0, 1);
         lcd.print("* Test: " + String(test));
 
@@ -676,16 +561,15 @@ CDefenderBaseGame::soundTestA(
 
 
 //
-// Custom function to cycle through sound control lines Sound0 to Sound4 (PB0-PB4) on PIA1B one at a time
-// Sound5 (PB5) is not used on Defender
+// Custom function to cycle through sound control lines Sound0 to Sound4 (PB0-PB5) on PIA1B one at a time
 //
 PERROR
-CDefenderBaseGame::soundTestB(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::soundTestB(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
     // Re-initialse PIA1 so it's state is known
@@ -696,12 +580,12 @@ CDefenderBaseGame::soundTestB(
 
     lcd.begin(16, 2);
     lcd.setCursor(0, 0);
-    lcd.print("Sound Test 0-4");
+    lcd.print("Sound Test 0-5");
     lcd.setCursor(0, 1);
     lcd.print("* Test: ");
 
     // Loop through each sound line
-    for (UINT8 test = 0; test < 5; test++) {
+    for (UINT8 test = 0; test < 6; test++) {
         lcd.setCursor(8+test, 1);
         lcd.print(String(test));
 
@@ -749,44 +633,18 @@ CDefenderBaseGame::soundTestB(
     return error;
 }
 
-//
-// Custom function to test the Video Address Bus counter chain and the Watchdog timer clear
-//
-PERROR
-CDefenderBaseGame::watchdogAndVABusTest(
-    void *cDefenderBaseGame
-)
-{
-    PERROR error = errorSuccess;
-    // CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
-    // ICpu *cpu = thisGame->m_cpu;
-
-    // for (UINT32 loop  = 1; loop < 65535; loop++) {
-    //     cpu->clockPulse();
-    //     //cpu->memoryWrite(addressWatchdog, 0x38);
-
-    // }
-
-    // errorCustom->code = ERROR_SUCCESS;
-    // errorCustom->description = "WD Test Done!   ";
-    // error = errorCustom;
-
-    // return error;
-    return errorNotImplemented;
-}
-
 
 //
 // Custom function to reset PIAs as we only initialse them once
 // If there was a power interruption or some other issue we can re-initialse them without resetting the Arduino
 //
 PERROR
-CDefenderBaseGame::resetPIAs(
-    void *cDefenderBaseGame
+CWilliamsBaseGame::resetPIAs(
+    void *cWilliamsBaseGame
 )
 {
     PERROR error = errorSuccess;
-    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    CWilliamsBaseGame *thisGame = (CWilliamsBaseGame *) cWilliamsBaseGame;
     ICpu *cpu = thisGame->m_cpu;
 
     thisGame->PIA1Ainitialised = false;
@@ -805,3 +663,4 @@ CDefenderBaseGame::resetPIAs(
 
     return error;
 }
+
