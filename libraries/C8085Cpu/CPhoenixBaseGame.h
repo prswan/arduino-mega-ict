@@ -39,6 +39,14 @@ class CPhoenixBaseGame : public CGame
         virtual PERROR interruptCheck(
         );
 
+        static PERROR onBankSwitchVRamBank1(
+            void *cPhoenixBaseGame
+        );
+
+        static PERROR onBankSwitchVRamBank2(
+            void *cPhoenixBaseGame
+        );
+
     protected:
 
         CPhoenixBaseGame(

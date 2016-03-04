@@ -52,11 +52,15 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //
                                                   // These regions are access with special support in the C8085Cpu triggered
                                                   // via address 0x10xxxx.
                                                   //
-                                                  //                                         "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x104000, 0x1043FF, 0x0F, "???", "VRAM  "}, // Video RAM, 2114
-                                                  {NO_BANK_SWITCH, 0x104000, 0x1043FF, 0xF0, "???", "VRAM  "}, // Video RAM, 2114
-                                                  {NO_BANK_SWITCH, 0x104400, 0x1047FF, 0x0F, "???", "VRAM  "}, // Video RAM, 2114
-                                                  {NO_BANK_SWITCH, 0x104400, 0x1047FF, 0xF0, "???", "VRAM  "}, // Video RAM, 2114
+                                                  //                                                                  "012", "012345"
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104000, 0x1043FF, 0x0F, "r41", "FgRam1"}, // Foreground Video RAM Bank 1, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104000, 0x1043FF, 0xF0, "r43", "FgRam1"}, // Foreground Video RAM Bank 1, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104800, 0x104BFF, 0x0F, "r25", "BgRam1"}, // Background Video RAM Bank 1, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104800, 0x104BFF, 0xF0, "r27", "BgRam1"}, // Background Video RAM Bank 1, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104000, 0x1043FF, 0x0F, "r42", "FgRam2"}, // Foreground Video RAM Bank 2, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104000, 0x1043FF, 0xF0, "r44", "FgRam2"}, // Foreground Video RAM Bank 2, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104800, 0x104BFF, 0x0F, "r26", "BgRam2"}, // Background Video RAM Bank 2, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104800, 0x104BFF, 0xF0, "r28", "BgRam2"}, // Background Video RAM Bank 2, 2114
                                                   {0}
                                                 }; // end of list
 
@@ -69,8 +73,9 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Input region is the same for all games on this board set.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
-                                                      {NO_BANK_SWITCH, 0x7000L, 0xFF,  "???", "IN SW0"}, // Switch Inputs (IN0)
-                                                      {NO_BANK_SWITCH, 0x7800L, 0xFF,  "???", "DIP SW"}, // DIP Switch
+                                                      {NO_BANK_SWITCH, 0x7000L, 0x0F,  "c 4", "InStrt"}, // Switch Inputs (IN0)
+                                                      {NO_BANK_SWITCH, 0x7000L, 0xF0,  "c12", "InPlay"}, // Switch Inputs (IN0)
+                                                      {NO_BANK_SWITCH, 0x7800L, 0xFF,  "c 3", "DIP SW"}, // DIP Switch
                                                       {0}
                                                     }; // end of list
 
@@ -78,11 +83,16 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 // Output region is the same for all versions on this board set.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x5000L, 0x01, 0x00,  "???", "V.Bank"}, // Video bank select
-                                                        {NO_BANK_SWITCH, 0x5000L, 0x02, 0x00,  "???", "C.Bank"}, // Colour bank select
-                                                        {NO_BANK_SWITCH, 0x5800L, 0xFF, 0x00,  "???", "Scroll"}, // Scroll register
-                                                        {NO_BANK_SWITCH, 0x6000L, 0xFF, 0x00,  "???", "Snd A "}, // Sound A
-                                                        {NO_BANK_SWITCH, 0x6800L, 0xFF, 0x00,  "???", "Snd B "}, // Sound B
+                                                        {NO_BANK_SWITCH, 0x5000L, 0x01, 0x00,  "c37", "V Bank"}, // Video bank select
+                                                        {NO_BANK_SWITCH, 0x5000L, 0x02, 0x00,  "c37", "C Bank"}, // Colour bank select
+                                                        {NO_BANK_SWITCH, 0x5800L, 0xFF, 0x00,  "r 8", "BgScrl"}, // Background scroll register
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x0F, 0x00,  "c 6", "S CntA"}, // Sound A counter
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x30, 0x00,  "c 6", "S FrqA"}, // Sound A frequency
+                                                        {NO_BANK_SWITCH, 0x6000L, 0xC0, 0x00,  "c 6", "S NoiA"}, // Sound A noise
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x0F, 0x00,  "c 5", "S CntB"}, // Sound B counter
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x10, 0x00,  "c 5", "S FrqB"}, // Sound B frequency
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x20, 0x00,  "c 5", "S FltB"}, // Sound B filter
+                                                        {NO_BANK_SWITCH, 0x6800L, 0xC0, 0x00,  "c 5", "S MusB"}, // Sound B music (MN6221AA)
                                                         {0}
                                                       }; // end of list
 
@@ -126,5 +136,44 @@ CPhoenixBaseGame::interruptCheck(
 )
 {
     return errorNotImplemented;
+}
+
+
+//
+// Select video bank 1
+// ONE-00 is Lo, CS on 2114 is Lo (active)
+// ONE-01 is Hi
+//
+PERROR
+CPhoenixBaseGame::onBankSwitchVRamBank1(
+    void *cPhoenixBaseGame
+)
+{
+    PERROR           error     = errorSuccess;
+    CPhoenixBaseGame *thisGame  = (CPhoenixBaseGame *) cPhoenixBaseGame;
+    ICpu             *cpu       = thisGame->m_cpu;
+
+    error = cpu->memoryWrite(0x5000, 0x00);
+
+    return error;
+}
+
+//
+// Select video bank 2
+// ONE-00 is Hi
+// ONE-01 is Lo, CS on 2114 is Lo (active)
+//
+PERROR
+CPhoenixBaseGame::onBankSwitchVRamBank2(
+    void *cPhoenixBaseGame
+)
+{
+    PERROR           error     = errorSuccess;
+    CPhoenixBaseGame *thisGame  = (CPhoenixBaseGame *) cPhoenixBaseGame;
+    ICpu             *cpu       = thisGame->m_cpu;
+
+    error = cpu->memoryWrite(0x5000, 0x01);
+
+    return error;
 }
 
