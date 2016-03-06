@@ -36,6 +36,7 @@
 static SELECTOR s_gameSelector[] = {//0123456789abcde
                                     {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                   false},
                                     {"Phoenix (Cen 1)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceCenturiSet1),  false},
+                                    {"Phoenix (GGI 1)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceGGISet1),      false},
                                     { 0, 0 }
                                    };
 

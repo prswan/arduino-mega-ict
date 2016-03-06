@@ -200,7 +200,7 @@ C8085Cpu::check(
     CHECK_VALUE_EXIT(error, s__RESIN_i, HIGH);
 
     // The tester doesn't support bus sharing.
-    CHECK_VALUE_EXIT(error, s_HOLD_i, HIGH);
+    CHECK_VALUE_EXIT(error, s_HOLD_i, LOW);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT8_EXIT(error, m_busA, s_A_ot, 0xFF);
@@ -283,13 +283,27 @@ C8085Cpu::memoryReadWrite(
     m_pinALE.digitalWriteHIGH();
     m_pinALE.digitalWriteLOW();
 
+    // Setup the data bus ready for access
+    if (read)
+    {
+        m_busAD.pinMode(INPUT);
+    }
+    else
+    {
+        m_busAD.digitalWrite(*data);
+    }
+
+    // Critical timing section
+    noInterrupts();
+    interruptsDisabled = true;
+
     // Perform a ready sync if needed
     if (readySync)
     {
         int value;
 
         // Wait for active
-        for (int i = 0 ; i < 4096 ; i++)
+        for (int i = 0 ; i < 8192 ; i++)
         {
             value = m_pinREADY.digitalRead();
 
@@ -301,7 +315,7 @@ C8085Cpu::memoryReadWrite(
         CHECK_LITERAL_VALUE_EXIT(error, s_READY_i, value, LOW);
 
         // Wait for inactive
-        for (int i = 0 ; i < 4096 ; i++)
+        for (int i = 0 ; i < 8192 ; i++)
         {
             value = m_pinREADY.digitalRead();
 
@@ -313,10 +327,9 @@ C8085Cpu::memoryReadWrite(
         CHECK_LITERAL_VALUE_EXIT(error, s_READY_i, value, HIGH);
     }
 
+    // Perform the data access
     if (read)
     {
-        m_busAD.pinMode(INPUT);
-
         m_pin_RD.digitalWriteLOW();
         m_busAD.digitalReadThenDigitalWriteHIGH(&data16, m_pin_RD);
 
@@ -324,8 +337,6 @@ C8085Cpu::memoryReadWrite(
     }
     else
     {
-        m_busAD.digitalWrite((UINT16) data);
-
         m_pin_WR.digitalWriteLOW();
         m_pin_WR.digitalWriteHIGH();
 

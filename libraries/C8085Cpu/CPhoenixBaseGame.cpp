@@ -73,9 +73,9 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Input region is the same for all games on this board set.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
-                                                      {NO_BANK_SWITCH, 0x7000L, 0x0F,  "c 4", "InStrt"}, // Switch Inputs (IN0)
+                                                      {NO_BANK_SWITCH, 0x7000L, 0x0F,  "c04", "InStrt"}, // Switch Inputs (IN0)
                                                       {NO_BANK_SWITCH, 0x7000L, 0xF0,  "c12", "InPlay"}, // Switch Inputs (IN0)
-                                                      {NO_BANK_SWITCH, 0x7800L, 0xFF,  "c 3", "DIP SW"}, // DIP Switch
+                                                      {NO_BANK_SWITCH, 0x7800L, 0xFF,  "c03", "DIP SW"}, // DIP Switch
                                                       {0}
                                                     }; // end of list
 
@@ -85,14 +85,18 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
                                                         {NO_BANK_SWITCH, 0x5000L, 0x01, 0x00,  "c37", "V Bank"}, // Video bank select
                                                         {NO_BANK_SWITCH, 0x5000L, 0x02, 0x00,  "c37", "C Bank"}, // Colour bank select
-                                                        {NO_BANK_SWITCH, 0x5800L, 0xFF, 0x00,  "r 8", "BgScrl"}, // Background scroll register
-                                                        {NO_BANK_SWITCH, 0x6000L, 0x0F, 0x00,  "c 6", "S CntA"}, // Sound A counter
-                                                        {NO_BANK_SWITCH, 0x6000L, 0x30, 0x00,  "c 6", "S FrqA"}, // Sound A frequency
-                                                        {NO_BANK_SWITCH, 0x6000L, 0xC0, 0x00,  "c 6", "S NoiA"}, // Sound A noise
-                                                        {NO_BANK_SWITCH, 0x6800L, 0x0F, 0x00,  "c 5", "S CntB"}, // Sound B counter
-                                                        {NO_BANK_SWITCH, 0x6800L, 0x10, 0x00,  "c 5", "S FrqB"}, // Sound B frequency
-                                                        {NO_BANK_SWITCH, 0x6800L, 0x20, 0x00,  "c 5", "S FltB"}, // Sound B filter
-                                                        {NO_BANK_SWITCH, 0x6800L, 0xC0, 0x00,  "c 5", "S MusB"}, // Sound B music (MN6221AA)
+                                                        {NO_BANK_SWITCH, 0x5800L, 0x55, 0x00,  "r08", "Scrl55"}, // Background scroll register
+                                                        {NO_BANK_SWITCH, 0x5800L, 0xAA, 0x00,  "r08", "ScrlAA"}, // Background scroll register
+                                                        {NO_BANK_SWITCH, 0x5800L, 0xFF, 0x00,  "r08", "ScrlFF"}, // Background scroll register
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x0F, 0x0F,  "c06", "SCntA "}, // Sound A counter
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x38, 0x0F,  "c06", "SFrqA "}, // Sound A frequency
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x40, 0x0F,  "c06", "SNoiA1"}, // Sound A noise
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x80, 0x0F,  "c06", "SNoiA2"}, // Sound A noise
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x0F, 0x0F,  "c05", "SCntB "}, // Sound B counter
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x18, 0x0F,  "c05", "SFrqB "}, // Sound B frequency
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x28, 0x0F,  "c05", "SFltB "}, // Sound B filter
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x80, 0x0F,  "c05", "Mus 2 "}, // Sound B music, ending (MN6221AA)
+                                                        {NO_BANK_SWITCH, 0x6800L, 0xC0, 0x0F,  "c05", "Mus 1 "}, // Sound B music, starting (MN6221AA)
                                                         {0}
                                                       }; // end of list
 
@@ -117,6 +121,13 @@ CPhoenixBaseGame::CPhoenixBaseGame(
     // Phoenix has no interrupts connected
     m_interrupt = ICpu::NMI;
     m_interruptAutoVector = true;
+
+    // Pheonix has no hardware reset clear of the sound latches
+    // so we'll do a clear here fo convenience to save our ears.
+    m_cpu->memoryWrite(0x6000, 0x0F);
+    m_cpu->memoryWrite(0x6800, 0x0F);
+    m_cpu->idle();
+
 }
 
 

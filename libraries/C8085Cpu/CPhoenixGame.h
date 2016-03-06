@@ -38,6 +38,9 @@ class CPhoenixGame : public CPhoenixBaseGame
         static IGame* createInstanceCenturiSet1(
         );
 
+        static IGame* createInstanceGGISet1(
+        );
+
         //
         // IGame Interface - wholly implemented in the Base game.
         //
