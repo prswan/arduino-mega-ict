@@ -136,11 +136,12 @@ CRomCheck::checkData2n(
 
 
 //
-// Perform the full CRC ROM check for the supplied region.
+// Calculate the CRC for the supplied ROM region.
 //
 PERROR
-CRomCheck::checkCrc(
-    const ROM_REGION *romRegion
+CRomCheck::calculateCrc(
+    const ROM_REGION *romRegion,
+    UINT32 *crc
 )
 {
     PERROR error = errorSuccess;
@@ -158,7 +159,7 @@ CRomCheck::checkCrc(
     if (SUCCESS(error))
     {
         UINT8 data = 0;
-        UINT32 crc = 0;
+        UINT32 tempCrc = 0;
 
         for (UINT32 address = romRegion->start ; address < (romRegion->start + romRegion->length) ; address++)
         {
@@ -169,22 +170,44 @@ CRomCheck::checkCrc(
                 break;
             }
 
-            crc = crc32(crc, &data, sizeof(data));
+            tempCrc = crc32(tempCrc, &data, sizeof(data));
         }
 
         if (SUCCESS(error))
         {
-            if (crc != romRegion->crc)
-            {
-                error = errorCustom;
-
-                error->code = ERROR_FAILED;
-                error->description = "E:";
-                error->description += romRegion->location;
-                STRING_UINT32_HEX(error->description, crc);
-            }
+            *crc = tempCrc;
         }
     }
+    return error;
+}
+
+
+//
+// Perform the full CRC ROM check for the supplied region.
+//
+PERROR
+CRomCheck::checkCrc(
+    const ROM_REGION *romRegion
+)
+{
+    PERROR error = errorSuccess;
+    UINT32 crc = 0;
+
+    error = calculateCrc(romRegion, &crc);
+
+    if (SUCCESS(error))
+    {
+        if (crc != romRegion->crc)
+        {
+            error = errorCustom;
+
+            error->code = ERROR_FAILED;
+            error->description = "E:";
+            error->description += romRegion->location;
+            STRING_UINT32_HEX(error->description, crc);
+        }
+    }
+
     return error;
 }
 

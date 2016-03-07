@@ -35,6 +35,7 @@ static const SELECTOR s_selector[] = { //"0123456789abcdef"
                                         {"Input Read",      CGameCallback::onSelectInputRead,      (void*) &CGameCallback::game, true},
                                         {"Output Write",    CGameCallback::onSelectOutputWrite,    (void*) &CGameCallback::game, true},
                                         {"ROM Check",       CGameCallback::onSelectRomCheck,       (void*) &CGameCallback::game, true},
+                                        {"ROM CRC",         CGameCallback::onSelectRomCrc,         (void*) &CGameCallback::game, true},
                                         {"ROM Read",        CGameCallback::onSelectRomRead,        (void*) &CGameCallback::game, true},
                                         {"RAM Check",       CGameCallback::onSelectRamCheck,       (void*) &CGameCallback::game, true},
                                         {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
@@ -150,6 +151,17 @@ CGameCallback::onSelectRomCheck(
     IGame *game = *((IGame **) iGame);
 
     return game->romCheck( key );
+}
+
+PERROR
+CGameCallback::onSelectRomCrc(
+    void *iGame,
+    int  key
+)
+{
+    IGame *game = *((IGame **) iGame);
+
+    return game->romCrc( key );
 }
 
 PERROR

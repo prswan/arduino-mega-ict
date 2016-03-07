@@ -88,6 +88,11 @@ class CGameCallback
             int  key
         );
 
+        static PERROR onSelectRomCrc(
+            void *iGame,
+            int  key
+        );
+
         static PERROR onSelectRomRead(
             void *iGame,
             int  key
