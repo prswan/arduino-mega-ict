@@ -74,6 +74,20 @@ static const ROM_REGION s_romRegionGGISet1[] PROGMEM     = { //
                                                             {NO_BANK_SWITCH, 0x3800, 0x0800, s_romData2nCenturiSet1_r52, 0x8424d7c4, "r52"}, //
                                                             {0} }; // end of list
 
+//
+// GGI Set 2 from MAME (phoenixc2)
+//
+static const ROM_REGION s_romRegionGGISet2[] PROGMEM     = { //
+                                                            {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nGGISet1_r45,     0x5b8c55a8, "r45"}, //
+                                                            {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nCenturiSet1_r46, 0xdbc942fa, "r46"}, //
+                                                            {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nCenturiSet1_r47, 0xcbbb8839, "r47"}, //
+                                                            {NO_BANK_SWITCH, 0x1800, 0x0800, s_romData2nGGISet1_r48,     0xf28e16d8, "r48"}, //
+                                                            {NO_BANK_SWITCH, 0x2000, 0x0800, s_romData2nCenturiSet1_r49, 0x1a1ce0d0, "r49"}, //
+                                                            {NO_BANK_SWITCH, 0x2800, 0x0800, s_romData2nCenturiSet1_r50, 0xac5e9ec1, "r50"}, //
+                                                            {NO_BANK_SWITCH, 0x3000, 0x0800, s_romData2nCenturiSet1_r51, 0x2eab35b4, "r51"}, //
+                                                            {NO_BANK_SWITCH, 0x3800, 0x0800, s_romData2nCenturiSet1_r52, 0x8424d7c4, "r52"}, //
+                                                            {0} }; // end of list
+
 IGame*
 CPhoenixGame::createInstanceCenturiSet1(
 )
@@ -87,6 +101,14 @@ CPhoenixGame::createInstanceGGISet1(
 )
 {
     return (new CPhoenixGame(s_romRegionGGISet1));
+}
+
+
+IGame*
+CPhoenixGame::createInstanceGGISet2(
+)
+{
+    return (new CPhoenixGame(s_romRegionGGISet2));
 }
 
 
