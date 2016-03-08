@@ -22,34 +22,44 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <LiquidCrystal.h>
-#include <main.h>
-#include <DFR_Key.h>
-#include <zutil.h>
+#ifndef CGenericBaseGame_h
+#define CGenericBaseGame_h
 
-#include <C8085GenericGame.h>
-#include <CPhoenixGame.h>
+#include "CGame.h"
+#include "ICpu.h"
 
-//
-// The initial selector to select the game to test.
-//
-static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                   false},
-                                    {"Generic 2716   ",  onSelectGame,   (void*) (C8085GenericGame::createInstance2716),     false},
-                                    {"Generic 2732   ",  onSelectGame,   (void*) (C8085GenericGame::createInstance2732),     false},
-                                    {"Phoenix (Cen 1)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceCenturiSet1),  false},
-                                    {"Phoenix (GGI 1)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceGGISet1),      false},
-                                    {"Phoenix (GGI 2)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceGGISet2),      false},
-                                    { 0, 0 }
-                                   };
 
-void setup()
+class CGenericBaseGame : public CGame
 {
-  mainSetup(s_gameSelector);
-}
+    public:
 
-void loop()
-{
-  mainLoop();
-}
+        //
+        // CGenericBaseGame
+        //
+
+    protected:
+
+        //
+        // ROM size definition for the generic platform.
+        //
+        typedef enum {
+            I2716,
+            I2732
+        } RomSize;
+
+        //
+        // Parameterized for the tye of CPU and size of the ROMS.
+        // RAM is divided into 1Kb blocks.
+        //
+        CGenericBaseGame(
+            ICpu    *cpu,
+            RomSize  romSize
+        );
+
+        ~CGenericBaseGame(
+        );
+
+};
+
+#endif
 
