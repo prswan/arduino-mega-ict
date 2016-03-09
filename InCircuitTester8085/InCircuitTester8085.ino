@@ -34,12 +34,12 @@
 // The initial selector to select the game to test.
 //
 static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                   false},
-                                    {"Generic 2716   ",  onSelectGame,   (void*) (C8085GenericGame::createInstance2716),     false},
-                                    {"Generic 2732   ",  onSelectGame,   (void*) (C8085GenericGame::createInstance2732),     false},
-                                    {"Phoenix (Cen 1)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceCenturiSet1),  false},
-                                    {"Phoenix (GGI 1)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceGGISet1),      false},
-                                    {"Phoenix (GGI 2)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceGGISet2),      false},
+                                    {"- Set Repeat   ",  onSelectConfig,  (void*) (&s_repeatSelectTimeInS),                   false},
+                                    {"Generic 2716   ",  onSelectGeneric, (void*) (C8085GenericGame::createInstance2716),     false},
+                                    {"Generic 2732   ",  onSelectGeneric, (void*) (C8085GenericGame::createInstance2732),     false},
+                                    {"Phoenix (Cen 1)",  onSelectGame,    (void*) (CPhoenixGame::createInstanceCenturiSet1),  false},
+                                    {"Phoenix (GGI 1)",  onSelectGame,    (void*) (CPhoenixGame::createInstanceGGISet1),      false},
+                                    {"Phoenix (GGI 2)",  onSelectGame,    (void*) (CPhoenixGame::createInstanceGGISet2),      false},
                                     { 0, 0 }
                                    };
 

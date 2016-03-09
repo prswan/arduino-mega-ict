@@ -264,13 +264,15 @@ typedef struct _INTERRUPT_DEFINITION {
 
 #define STRING_UINT8_HEX(string, value)                     \
     {                                                       \
-        if (value <= 0xF)                                   \
+        UINT8 value8 = (UINT8) value;                       \
+                                                            \
+        if (value8 <= 0xF)                                  \
         {                                                   \
-            string += " 0" + String(value, HEX);            \
+            string += " 0" + String(value8, HEX);           \
         }                                                   \
         else                                                \
         {                                                   \
-            string += " "  + String((value & 0xFF), HEX);   \
+            string += " "  + String(value8, HEX);           \
         }                                                   \
     }                                                       \
 
@@ -281,21 +283,23 @@ typedef struct _INTERRUPT_DEFINITION {
 
 #define STRING_UINT16_HEX(string, value)                      \
     {                                                         \
-        if (value <= 0xF)                                     \
+        UINT16 value16 = (UINT16) value;                      \
+                                                              \
+        if (value16 <= 0xF)                                   \
         {                                                     \
-            string += " 000" + String(value, HEX);            \
+            string += " 000" + String(value16, HEX);          \
         }                                                     \
-        else if (value <= 0xFF)                               \
+        else if (value16 <= 0xFF)                             \
         {                                                     \
-            string += " 00" + String(value, HEX);             \
+            string += " 00" + String(value16, HEX);           \
         }                                                     \
-        else if (value <= 0xFFF)                              \
+        else if (value16 <= 0xFFF)                            \
         {                                                     \
-            string += " 0" + String(value, HEX);              \
+            string += " 0" + String(value16, HEX);            \
         }                                                     \
         else                                                  \
         {                                                     \
-            string += " " + String((value & 0xFFFF), HEX);    \
+            string += " " + String(value16, HEX);             \
         }                                                     \
     }                                                         \
 

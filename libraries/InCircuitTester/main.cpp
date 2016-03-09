@@ -126,9 +126,10 @@ onSelectConfig(
 // game to the one supplied.
 //
 PERROR
-onSelectGame(
+onSelectGameCallback(
     void *context,
-    int  key
+    int  key,
+    const SELECTOR *selector
 )
 {
     PERROR error = errorSuccess;
@@ -146,12 +147,41 @@ onSelectGame(
 
     CGameCallback::game = (IGame *) gameConstructor();
 
-    s_currentSelector  = CGameCallback::selector;
+    s_currentSelector  = selector;
     s_currentSelection = 0;
 
     return error;
 }
 
+//
+// Handler for the game select callback that will switch the current
+// selector to the one supplied.
+//
+PERROR
+onSelectGame(
+    void *context,
+    int  key
+)
+{
+    return onSelectGameCallback(context,
+                                key,
+                                CGameCallback::selectorGame);
+}
+
+//
+// Handler for the generic select callback that will switch the current
+// selector to the one supplied.
+//
+PERROR
+onSelectGeneric(
+    void *context,
+    int  key
+)
+{
+    return onSelectGameCallback(context,
+                                key,
+                                CGameCallback::selectorGeneric);
+}
 
 void mainSetup(
     const SELECTOR *gameSelector
