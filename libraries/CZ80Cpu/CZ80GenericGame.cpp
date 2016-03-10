@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,21 +22,30 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <LiquidCrystal.h>
-#include <DFR_Key.h>
-#include <zutil.h>
+#include "CZ80GenericGame.h"
+#include "CZ80Cpu.h"
 
-#include <main.h>
+//
+// See the base game cpp comments for details about this platform.
+//
 
-#include <Z80GameSelector.h>
-
-void setup()
+IGame*
+CZ80GenericGame::createInstance2716(
+)
 {
-  mainSetup(s_gameSelector);
+    return (new CZ80GenericGame(I2716));
 }
 
-void loop()
+IGame*
+CZ80GenericGame::createInstance2732(
+)
 {
-  mainLoop();
+    return (new CZ80GenericGame(I2732));
+}
+
+CZ80GenericGame::CZ80GenericGame(
+    RomSize romSize
+) : CGenericBaseGame( new CZ80Cpu(), romSize )
+{
 }
 
