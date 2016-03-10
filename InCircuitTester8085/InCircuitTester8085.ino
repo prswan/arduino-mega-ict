@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,33 +22,32 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CAstroFighterBaseGame_h
-#define CAstroFighterBaseGame_h
+#include <LiquidCrystal.h>
+#include <main.h>
+#include <DFR_Key.h>
+#include <zutil.h>
 
-#include "CGame.h"
+//#include <C6809ECpu.h>
+#include <CPhoenixGame.h>
 
+//
+// The initial selector to select the game to test.
+//
+static SELECTOR s_gameSelector[] = {//0123456789abcde
+                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),                   false},
+                                    {"Phoenix (Cen 1)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceCenturiSet1),  false},
+                                    {"Phoenix (GGI 1)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceGGISet1),      false},
+                                    {"Phoenix (GGI 2)",  onSelectGame,   (void*) (CPhoenixGame::createInstanceGGISet2),      false},
+                                    { 0, 0 }
+                                   };
 
-class CAstroFighterBaseGame : public CGame
+void setup()
 {
-    public:
+  mainSetup(s_gameSelector);
+}
 
-        //
-        // CAstroFighterBaseGame
-        //
-
-    protected:
-
-        CAstroFighterBaseGame(
-            const ROM_REGION    *romRegion,
-            const RAM_REGION    *ramRegion,
-            const INPUT_REGION  *inputRegion,
-            const OUTPUT_REGION *outputRegion
-        );
-
-        ~CAstroFighterBaseGame(
-        );
-
-};
-
-#endif
+void loop()
+{
+  mainLoop();
+}
 

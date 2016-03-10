@@ -38,6 +38,9 @@ class CTomahawk777Game : public CAstroFighterBaseGame
         static IGame* createInstanceSet5(
         );
 
+        static IGame* createInstanceClockMasterSet5(
+        );
+
         //
         // IGame Interface - wholly implemented in the Base game.
         //
@@ -48,6 +51,7 @@ class CTomahawk777Game : public CAstroFighterBaseGame
         // Different ROM sets supplied.
         //
         CTomahawk777Game(
+            const bool       clockMaster,
             const ROM_REGION *romRegion
         );
 

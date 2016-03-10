@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,83 +22,43 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef C6502Cpu_h
-#define C6502Cpu_h
+#ifndef CPhoenixGame_h
+#define CPhoenixGame_h
 
-#include "Arduino.h"
-#include "ICpu.h"
-#include "CBus.h"
-#include "CFast8BitBus.h"
-#include "CFastPin.h"
+#include "CPhoenixBaseGame.h"
 
-
-class C6502Cpu : public ICpu
+class CPhoenixGame : public CPhoenixBaseGame
 {
     public:
 
         //
-        // Constructor
+        // Constructors for this game.
         //
 
-        C6502Cpu(
+        static IGame* createInstanceCenturiSet1(
         );
 
-        // ICpu Interface
-        //
-
-        virtual
-        PERROR
-        idle(
+        static IGame* createInstanceGGISet1(
         );
 
-        virtual
-        PERROR
-        check(
-        );
-
-        // Address Space:
-        // 0x00000 -> 0x0FFFF - Memory Mapped Data
-        //
-
-        virtual
-        PERROR
-        memoryRead(
-            UINT32 address,
-            UINT8  *data
-        );
-
-        virtual
-        PERROR
-        memoryWrite(
-            UINT32 address,
-            UINT8  data
-        );
-
-        virtual
-        PERROR
-        waitForInterrupt(
-            Interrupt interrupt,
-            UINT16    timeoutInMs
-        );
-
-        virtual
-        PERROR
-        acknowledgeInterrupt(
-            UINT8 *response
+        static IGame* createInstanceGGISet2(
         );
 
         //
-        // C6502Cpu Interface
+        // IGame Interface - wholly implemented in the Base game.
         //
 
     private:
 
-        CBus          m_busA;
-        CFast8BitBus  m_busD;
-
-        CFastPin      m_pinCLK1o;
-        CFastPin      m_pinCLK2o;
+        //
+        // Different ROM sets supplied.
+        //
+        CPhoenixGame(
+            const ROM_REGION *romRegion
+        );
 
 };
 
 #endif
+
+

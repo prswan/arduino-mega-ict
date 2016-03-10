@@ -26,74 +26,14 @@
 #include "Error.h"
 #include "C6502Cpu.h"
 #include "PinMap.h"
-
-
-//
-// Pin prefixes
-//
-// _ - active low
-//
-// Pin suffixes
-//
-// i - input
-// o - output
-// t - tri-state
-//
-
-//
-// Control Pins
-//
-static const CONNECTION s_GND1_i     = {  1, "GND1"     };
-static const CONNECTION s_RDY_i      = {  2, "RDY"      };
-static const CONNECTION s_CLK1o_o    = {  3, "CLK1o"    };
-static const CONNECTION s__IRQ_i     = {  4, "_IRQ"     };
-static const CONNECTION s__NMI_i     = {  6, "_NMI"     };
-static const CONNECTION s_SYNC_o     = {  7, "SYNC"     };
-static const CONNECTION s_Vcc_i      = {  8, "Vcc"      };
-static const CONNECTION s_GND2_i     = { 21, "GND2"     };
-static const CONNECTION s_R_W_o      = { 34, "R_W"      };
-static const CONNECTION s_CLK0i_i    = { 37, "CLK0i"    };
-static const CONNECTION s_SO_i       = { 38, "SO"       };
-static const CONNECTION s_CLK2o_o    = { 39, "CLK2o"    };
-static const CONNECTION s_RES_i      = { 40, "RES"      };
-
-
-//
-// Bus pins
-//
-static const CONNECTION s_A_ot[]   = { { 9, "A0"  },
-                                       {10, "A1"  },
-                                       {11, "A2"  },
-                                       {12, "A3"  },
-                                       {13, "A4"  },
-                                       {14, "A5"  },
-                                       {15, "A6"  },
-                                       {16, "A7"  },
-                                       {17, "A8"  },
-                                       {18, "A9"  },
-                                       {19, "A10" },
-                                       {20, "A11" },
-                                       {22, "A12" },
-                                       {23, "A13" },
-                                       {24, "A14" },
-                                       {25, "A15" } }; // 16 bits
-
-static const CONNECTION s_D_iot[] = { {33, "D0" },
-                                      {32, "D1" },
-                                      {31, "D2" },
-                                      {30, "D3" },
-                                      {29, "D4" },
-                                      {28, "D5" },
-                                      {27, "D6" },
-                                      {26, "D7" } }; // 8 bits.
+#include "6502PinDescription.h"
 
 
 C6502Cpu::C6502Cpu(
 ) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinCLK1o(g_pinMap40DIL, &s_CLK1o_o),
-    m_pinCLK2o(g_pinMap40DIL, &s_CLK2o_o),
-    m_pinRDY(g_pinMap40DIL, &s_RDY_i)
+    m_pinCLK2o(g_pinMap40DIL, &s_CLK2o_o)
 {
 };
 
@@ -106,6 +46,7 @@ C6502Cpu::idle(
 )
 {
     pinMode(g_pinMap40DIL[s_GND1_i.pin],           INPUT_PULLUP);
+    pinMode(g_pinMap40DIL[s_RDY_i.pin],            INPUT);
 
     pinMode(g_pinMap40DIL[s__IRQ_i.pin],           INPUT);
     pinMode(g_pinMap40DIL[s__NMI_i.pin],           INPUT);
@@ -129,15 +70,12 @@ C6502Cpu::idle(
     m_busA.pinMode(INPUT_PULLUP);
     m_busD.pinMode(INPUT_PULLUP);
 
-    // Set the fast output pins to output an inactive.
+    // Set the fast output pins to output in setup phase.
     m_pinCLK1o.digitalWrite(HIGH);
     m_pinCLK1o.pinMode(OUTPUT);
 
-    m_pinCLK2o.digitalWrite(HIGH);
+    m_pinCLK2o.digitalWrite(LOW);
     m_pinCLK2o.pinMode(OUTPUT);
-
-    // Set the fast input pins to input
-    m_pinRDY.pinMode(INPUT);
 
     return errorSuccess;
 }
@@ -237,26 +175,11 @@ C6502Cpu::memoryRead(
     m_pinCLK1o.digitalWriteLOW();
     m_pinCLK2o.digitalWriteHIGH();
 
-    // Poll RDY for cycle completion
-    {
-        int rdyValue;
+    // Read the data presented on the bus
+    m_busD.digitalRead(&data16);
 
-        for (int i = 0 ; i < 64 ; i++)
-        {
-            rdyValue = m_pinRDY.digitalRead();
-
-            if (rdyValue == HIGH)
-            {
-                // Read the data presented on the bus as soon as we see no RDY set then clear _RD
-                m_busD.digitalReadThenDigitalWriteLOW(&data16, m_pinCLK2o);
-                m_pinCLK1o.digitalWriteHIGH();
-
-                break;
-            }
-        }
-
-        CHECK_LITERAL_VALUE_EXIT(error, s_RDY_i, rdyValue, HIGH);
-    }
+    m_pinCLK2o.digitalWriteLOW();
+    m_pinCLK1o.digitalWriteHIGH();
 
 Exit:
 
@@ -299,24 +222,8 @@ C6502Cpu::memoryWrite(
     m_pinCLK1o.digitalWriteLOW();
     m_pinCLK2o.digitalWriteHIGH();
 
-    // Poll WAIT for cycle completion
-    {
-        int rdyValue;
-
-        for (int i = 0 ; i < 64 ; i++)
-        {
-            rdyValue = m_pinRDY.digitalRead();
-
-            if (rdyValue == HIGH)
-            {
-                m_pinCLK2o.digitalWriteLOW();
-                m_pinCLK1o.digitalWriteHIGH();
-
-                break;
-            }
-        }
-        CHECK_LITERAL_VALUE_EXIT(error, s_RDY_i, rdyValue, HIGH);
-    }
+    m_pinCLK2o.digitalWriteLOW();
+    m_pinCLK1o.digitalWriteHIGH();
 
     // Set a read cycle.
     digitalWrite(g_pinMap40DIL[s_R_W_o.pin], HIGH);
@@ -369,21 +276,16 @@ Exit:
 }
 
 
-
 //
-//
+// The 6502 has a fixed vector address
 //
 PERROR
 C6502Cpu::acknowledgeInterrupt(
     UINT8 *response
 )
 {
-/*
-    digitalWrite(g_pinMap40DIL[s_M_IO_o.pin], LOW);
-
-    digitalWrite(g_pinMap40DIL[s_INTACK_o.pin], HIGH);
-
-    return read(0, response);
-*/
+    PERROR error = errorSuccess;
+    *response = 0;
+    return error;
 }
 

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,83 +22,40 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef C6502Cpu_h
-#define C6502Cpu_h
+#ifndef PinDescription_h
+#define PinDescription_h
 
 #include "Arduino.h"
-#include "ICpu.h"
-#include "CBus.h"
-#include "CFast8BitBus.h"
-#include "CFastPin.h"
+#include "Error.h"
+#include "PinMap.h"
 
 
-class C6502Cpu : public ICpu
-{
-    public:
+//
+// Pin prefixes
+//
+// _ - active low
+//
+// Pin suffixes
+//
+// i - input
+// o - output
+// t - tri-state
+//
+extern const CONNECTION s_GND1_i   ;
+extern const CONNECTION s_RDY_i    ;
+extern const CONNECTION s_CLK1o_o  ;
+extern const CONNECTION s__IRQ_i   ;
+extern const CONNECTION s__NMI_i   ;
+extern const CONNECTION s_SYNC_o   ;
+extern const CONNECTION s_Vcc_i    ;
+extern const CONNECTION s_GND2_i   ;
+extern const CONNECTION s_R_W_o    ;
+extern const CONNECTION s_CLK0i_i  ;
+extern const CONNECTION s_SO_i     ;
+extern const CONNECTION s_CLK2o_o  ;
+extern const CONNECTION s_RES_i    ;
+extern const CONNECTION s_A_ot[16] ;
+extern const CONNECTION s_D_iot[8] ;
 
-        //
-        // Constructor
-        //
-
-        C6502Cpu(
-        );
-
-        // ICpu Interface
-        //
-
-        virtual
-        PERROR
-        idle(
-        );
-
-        virtual
-        PERROR
-        check(
-        );
-
-        // Address Space:
-        // 0x00000 -> 0x0FFFF - Memory Mapped Data
-        //
-
-        virtual
-        PERROR
-        memoryRead(
-            UINT32 address,
-            UINT8  *data
-        );
-
-        virtual
-        PERROR
-        memoryWrite(
-            UINT32 address,
-            UINT8  data
-        );
-
-        virtual
-        PERROR
-        waitForInterrupt(
-            Interrupt interrupt,
-            UINT16    timeoutInMs
-        );
-
-        virtual
-        PERROR
-        acknowledgeInterrupt(
-            UINT8 *response
-        );
-
-        //
-        // C6502Cpu Interface
-        //
-
-    private:
-
-        CBus          m_busA;
-        CFast8BitBus  m_busD;
-
-        CFastPin      m_pinCLK1o;
-        CFastPin      m_pinCLK2o;
-
-};
 
 #endif

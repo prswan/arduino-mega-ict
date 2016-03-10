@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,8 +22,8 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef C6502Cpu_h
-#define C6502Cpu_h
+#ifndef C8085Cpu_h
+#define C8085Cpu_h
 
 #include "Arduino.h"
 #include "ICpu.h"
@@ -32,7 +32,7 @@
 #include "CFastPin.h"
 
 
-class C6502Cpu : public ICpu
+class C8085Cpu : public ICpu
 {
     public:
 
@@ -40,36 +40,32 @@ class C6502Cpu : public ICpu
         // Constructor
         //
 
-        C6502Cpu(
+        C8085Cpu(
         );
 
         // ICpu Interface
         //
 
-        virtual
-        PERROR
-        idle(
+        virtual PERROR idle(
         );
 
-        virtual
-        PERROR
-        check(
+        virtual PERROR check(
         );
 
-        // Address Space:
+        // 8085 Address Space:
         // 0x00000 -> 0x0FFFF - Memory Mapped Data
+        // 0x10000 -> 0x1FFFF - Input/Output Ports
         //
+        // Game Specific Address Space
+        // 0x100000 -> 0x10FFFF - RDY pre-synchronized memory cycle.
+        // 0x110000 -> 0x11FFFF - RDY pre-synchronized I/O cycle.
 
-        virtual
-        PERROR
-        memoryRead(
+        virtual PERROR memoryRead(
             UINT32 address,
             UINT8  *data
         );
 
-        virtual
-        PERROR
-        memoryWrite(
+        virtual PERROR memoryWrite(
             UINT32 address,
             UINT8  data
         );
@@ -88,16 +84,31 @@ class C6502Cpu : public ICpu
         );
 
         //
-        // C6502Cpu Interface
+        // C8085Cpu Interface
         //
 
     private:
 
-        CBus          m_busA;
-        CFast8BitBus  m_busD;
+        PERROR
+        memoryReadWrite(
+            UINT32 address,
+            UINT8  *data,
+            bool   read
+        );
 
-        CFastPin      m_pinCLK1o;
-        CFastPin      m_pinCLK2o;
+    private:
+
+        CFast8BitBus  m_busA;
+        CFast8BitBus  m_busAD;
+
+        CFastPin      m_pinIO_M;
+        CFastPin      m_pinS0;
+        CFastPin      m_pinS1;
+
+        CFastPin      m_pinALE;
+        CFastPin      m_pin_RD;
+        CFastPin      m_pin_WR;
+        CFastPin      m_pinREADY;
 
 };
 

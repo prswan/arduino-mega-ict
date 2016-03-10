@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,83 +22,41 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef C6502Cpu_h
-#define C6502Cpu_h
+#ifndef CPhoenixBaseGame_h
+#define CPhoenixBaseGame_h
 
-#include "Arduino.h"
-#include "ICpu.h"
-#include "CBus.h"
-#include "CFast8BitBus.h"
-#include "CFastPin.h"
+#include "CGame.h"
 
 
-class C6502Cpu : public ICpu
+class CPhoenixBaseGame : public CGame
 {
     public:
 
         //
-        // Constructor
+        // CPhoenixBaseGame
         //
 
-        C6502Cpu(
+        virtual PERROR interruptCheck(
         );
 
-        // ICpu Interface
-        //
-
-        virtual
-        PERROR
-        idle(
+        static PERROR onBankSwitchVRamBank1(
+            void *cPhoenixBaseGame
         );
 
-        virtual
-        PERROR
-        check(
+        static PERROR onBankSwitchVRamBank2(
+            void *cPhoenixBaseGame
         );
 
-        // Address Space:
-        // 0x00000 -> 0x0FFFF - Memory Mapped Data
-        //
+    protected:
 
-        virtual
-        PERROR
-        memoryRead(
-            UINT32 address,
-            UINT8  *data
+        CPhoenixBaseGame(
+            const ROM_REGION *romRegion
         );
 
-        virtual
-        PERROR
-        memoryWrite(
-            UINT32 address,
-            UINT8  data
+        ~CPhoenixBaseGame(
         );
-
-        virtual
-        PERROR
-        waitForInterrupt(
-            Interrupt interrupt,
-            UINT16    timeoutInMs
-        );
-
-        virtual
-        PERROR
-        acknowledgeInterrupt(
-            UINT8 *response
-        );
-
-        //
-        // C6502Cpu Interface
-        //
-
-    private:
-
-        CBus          m_busA;
-        CFast8BitBus  m_busD;
-
-        CFastPin      m_pinCLK1o;
-        CFastPin      m_pinCLK2o;
 
 };
 
 #endif
+

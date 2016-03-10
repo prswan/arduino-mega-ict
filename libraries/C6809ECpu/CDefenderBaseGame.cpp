@@ -757,6 +757,125 @@ CDefenderBaseGame::watchdogAndVABusTest(
     void *cDefenderBaseGame
 )
 {
+    // CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
+    // C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    // PERROR error = errorCustom;
+
+    // // For Williams games reset clears when:
+    // // 1. All voltages are present then /RESET goes high
+    // // 2. The Watchdog timer /WDR driven by the Video Address generator has been cleared by writing 0x38 to 0xc3ff before timing out
+
+    // UINT32 clock;
+    // lcd.begin(16, 2);
+    // lcd.setCursor(0, 0);
+    // lcd.print("Clock+WD Checks");
+
+    // // Make sure page 0 is selected or we cannot clear /WDR timer
+    // cpu->memoryWrite(0xd000, 0x00);
+
+    // // Phase 1: Clock till /RESET goes high
+    // // This happens after 0x30035 (196,597) clocks on Defender from a cold start
+
+    // for (clock = 0 ; clock < 0x31000 ; clock++) {
+    //     int value = ::digitalRead(cpu->pinReset);
+
+    //     //if (value == HIGH) break;
+
+    //     cpu->clockPulse();
+    // }
+
+    // lcd.setCursor(0, 1);
+    // lcd.print("/RESET+"+ String(clock)+"         ");
+    // delay(1000);
+
+    //CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+
+
+    // // Phase 2: Now continue to clock till /WDR pulls /RESET low 
+    // // This happens after 0x186000 (1,597,440) clocks on Defender from a cold start
+    // for (clock = 0 ; clock < 0x200000 ; clock++) {
+    //     int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
+
+    //     if (value == LOW) break;
+
+    //     cpu->clockPulse();
+    // }
+
+    // lcd.setCursor(0, 1);
+    // lcd.print("/WDR+"+ String(clock)+"         ");
+    // delay(1000);
+
+    // CHECK_VALUE_EXIT(error, s__RESET_i, LOW);
+
+
+    // // Phase 3: Clock till /RESET goes high again
+    // // This happens straight away if all is well
+
+    // cpu->memoryWrite(0xc3ff, 0x38);
+    // for (clock = 0 ; clock < 0x31000 ; clock++) {
+    //     int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
+
+    //     if (value == HIGH) break;
+        
+    //     cpu->clockPulse();
+    // }
+
+    // lcd.setCursor(0, 1);
+    // lcd.print("/RESET+"+ String(clock)+"         ");
+
+
+    // CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+
+
+    // // Phase 4: Now write 0x38 to address 0xc3ff at least every 0x100000 clock cycles to clear /WDR
+    // // This will run to completion of 0x200000 (2,097,152) clocks to ensure /WDR does not trigger a reset
+    // cpu->memoryWrite(0xc3ff, 0x38);
+    // for (clock = 0 ; clock < 0x200000 ; clock++) {
+    //     if (clock == 0x100000) cpu->memoryWrite(0xc3ff, 0x38);
+
+    //     int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
+
+    //     if (value == LOW) break;
+
+    //     cpu->clockPulse();
+    // }
+
+    // // Finish by cleaing /WDR timer again
+    // cpu->memoryWrite(0xc3ff, 0x38);
+
+    // lcd.setCursor(0, 1);
+    // lcd.print("/WDR-"+ String(clock)+"         ");
+    // delay(3000);
+
+    // CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+
+    // for (UINT32 loop  = 1; loop < 65535; loop++) {
+    //     cpu->clockPulse();
+    //     //cpu->memoryWrite(addressWatchdog, 0x38);
+
+    // }
+
+    // errorCustom->code = ERROR_SUCCESS;
+    // errorCustom->description = "WD Test Done!   ";
+    // error = errorCustom;
+
+    // return error;
+
+    
+    /*
+
+    CDefenderBaseGame *thisGame = (CDefenderBaseGame *) context;
+    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    PERROR error = errorCustom;
+
+    cpu->clockPulse();
+    thisGame->m_clockPulseCount++;
+
+    errorCustom->code = ERROR_SUCCESS;
+    errorCustom->description = "OK: Count ";
+    errorCustom->description += String(thisGame->m_clockPulseCount, DEC);
+
+    */
 
     return errorNotImplemented;
 }
