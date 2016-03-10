@@ -162,7 +162,7 @@ CStarWarsBaseGame::CStarWarsBaseGame(
     m_clockPulseCount(0),
     m_lastMatrixProgramAddress(0)
 {
-    m_cpu = new C6809ECpu(0);
+    m_cpu = new C6809ECpu(0, false);
     m_cpu->idle();
 
     // A timer is on the INT pin (vector game thus no VBALNK).

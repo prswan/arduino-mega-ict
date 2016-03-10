@@ -26,7 +26,9 @@
 #include "Error.h"
 #include "C6809ECpu.h"
 #include "PinMap.h"
+#include <LiquidCrystal.h>
 
+static LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 //
 // Pin prefixes
@@ -95,8 +97,10 @@ static const CONNECTION s_D_iot[] = { {31, "D0" },
                                       {24, "D7" } }; // 8 bits.
 
 C6809ECpu::C6809ECpu(
-    UINT8 QLoToDInClockPulses
+    UINT8 QLoToDInClockPulses,
+    boolean busTestCheckWatchdog
 ) : m_QLoToDInClockPulses(QLoToDInClockPulses),
+    m_busTestCheckWatchdog(busTestCheckWatchdog),
     m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinRW(g_pinMap40DIL, &s_RW_o),
@@ -192,11 +196,13 @@ C6809ECpu::check(
     //
     //CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
 
-    // Loop to detect that reset clears
-    // On Star Wars this ~0x40000 (262,144) clocks.
-    // On exit the reset pin should be high (no reset).
-    //
+    // Only do enhanced /RESET tests with watchdog if flag set
+    if (m_busTestCheckWatchdog = false)
     {
+        // Loop to detect that reset clears
+        // On Star Wars this ~0x40000 (262,144) clocks.
+        // On exit the reset pin should be high (no reset).
+
         for (UINT32 i = 0 ; i < 0x41000 ; i++)
         {
             int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
@@ -209,8 +215,88 @@ C6809ECpu::check(
             m_pinClock.digitalWriteHIGH();
             m_pinClock.digitalWriteLOW();
         }
+        CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+    } else {
+        // For Williams games reset clears when:
+        // All voltages are present then /RESET goes high
+        // The Watchdog timer /WDR driven by the Video Address generator has been cleared by writing 0x38/0x39 to 0xc3ff before timing out
+
+        // This test should prove much (but possibly not all) of the following circuits:
+        // 1. Analog Reset circuit
+        // 2. Clock Generator 4Mhz signal
+        // 3. Watchdog timer and timer clear circuit
+        // 4. Video Address generator circuit 
+        // 5. Page 0 Decoder circuit
+        // 6. Colour RAM Control WDFF circuit
+
+        lcd.begin(16, 2);
+        lcd.setCursor(0, 0);
+        lcd.print("VA Bus+WD Checks");
+
+        // Make sure page 0 is selected or we cannot clear /WDR timer
+        memoryWrite(0xd000, 0x00);
+
+        // Phase 1: Clock till /RESET goes high
+        // This happens after 0x30035 (196,597) clocks on Defender from a cold start
+        for (UINT32 clock = 0 ; clock < 0x31000 ; clock++) {
+            int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
+            if (value == HIGH) break;
+            m_pinClock.digitalWriteHIGH();
+            m_pinClock.digitalWriteLOW();
+        }
+        lcd.setCursor(0, 1);
+        lcd.print("/RESET High     ");
+        delay(1000);
+        CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+
+        // Phase 2: Now continue to clock till /WDR pulls /RESET low 
+        // This happens after 0x186000 (1,597,440) clocks on Defender from a cold start
+        for (UINT32 clock = 0 ; clock < 0x200000 ; clock++) {
+            int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
+            if (value == LOW) break;
+            m_pinClock.digitalWriteHIGH();
+            m_pinClock.digitalWriteLOW();
+        }
+        lcd.setCursor(0, 1);
+        lcd.print("/WDR Asserted   ");
+        delay(1000);
+        CHECK_VALUE_EXIT(error, s__RESET_i, LOW);
+
+        // Phase 3: Clear /WDR timer and clock till /RESET goes high again
+        // This happens straight away if all is well
+        memoryWrite(0xc3ff, 0x38);
+        for (UINT32 clock = 0 ; clock < 0x31000 ; clock++) {
+            int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
+
+            if (value == HIGH) break;
+            
+            m_pinClock.digitalWriteHIGH();
+            m_pinClock.digitalWriteLOW();
+        }
+        lcd.setCursor(0, 1);
+        lcd.print("/WDR Cleared    ");
+        delay(1000);
+        CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+
+        // Phase 4: Now write 0x38 to address 0xc3ff at least every 0x100000 clock cycles to clear /WDR
+        // This will run to completion of 0x200000 (2,097,152) clocks to ensure /WDR does not trigger a reset
+        memoryWrite(0xc3ff, 0x38);
+        for (UINT32 clock = 0 ; clock < 0x200000 ; clock++) {
+            if (clock == 0x100000) memoryWrite(0xc3ff, 0x38);
+            int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
+            if (value == LOW) break;
+            m_pinClock.digitalWriteHIGH();
+            m_pinClock.digitalWriteLOW();
+        }
+
+        lcd.setCursor(0, 1);
+        lcd.print("/Reset Sustained");
+        delay(3000);
+        CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+
+        // Finish by cleaing /WDR timer again
+        memoryWrite(0xc3ff, 0x38);
     }
-    CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
 
     // Loop to detect E & Q by sampling and detecting both high and lows.
     {
@@ -519,7 +605,6 @@ C6809ECpu::acknowledgeInterrupt(
     *response = 0;
 
     return error;
-//     return errorNotImplemented;
 }
 
 //

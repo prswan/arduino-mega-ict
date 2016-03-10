@@ -153,7 +153,7 @@ CWilliamsBaseGame::CWilliamsBaseGame(
     PIA2Ainitialised(false),
     PIA2Binitialised(false) 
 {
-    m_cpu = new C6809ECpu(2);
+    m_cpu = new C6809ECpu(2, true);
     m_cpu->idle();
 
     // Interrupt request

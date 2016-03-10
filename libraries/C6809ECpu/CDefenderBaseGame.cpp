@@ -35,7 +35,7 @@ static LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 // 6809E GND Pin 1
 //
 // Watchdog:
-// Watchdog is cleared by the program writing 0x38 or 0x39 to address c3fc
+// Watchdog is cleared by the program writing 0x38 or 0x39 to address 0xc3ff
 // On early series boards watchdog is disabled by cutting the jumper pad between 1D and 1F on the solder side
 // On later series boards watchdog is disabled by cutting the jumper pad between 5M and 5O on the component side 
 //
@@ -195,7 +195,7 @@ CDefenderBaseGame::CDefenderBaseGame(
     PIA2Ainitialised(false),
     PIA2Binitialised(false) 
 {
-    m_cpu = new C6809ECpu(2);
+    m_cpu = new C6809ECpu(2, true);
     m_cpu->idle();
 
     // Interrupt request
@@ -757,21 +757,7 @@ CDefenderBaseGame::watchdogAndVABusTest(
     void *cDefenderBaseGame
 )
 {
-    PERROR error = errorSuccess;
-    // CDefenderBaseGame *thisGame = (CDefenderBaseGame *) cDefenderBaseGame;
-    // ICpu *cpu = thisGame->m_cpu;
 
-    // for (UINT32 loop  = 1; loop < 65535; loop++) {
-    //     cpu->clockPulse();
-    //     //cpu->memoryWrite(addressWatchdog, 0x38);
-
-    // }
-
-    // errorCustom->code = ERROR_SUCCESS;
-    // errorCustom->description = "WD Test Done!   ";
-    // error = errorCustom;
-
-    // return error;
     return errorNotImplemented;
 }
 

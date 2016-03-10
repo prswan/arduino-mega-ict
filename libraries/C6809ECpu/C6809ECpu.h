@@ -41,7 +41,8 @@ class C6809ECpu : public ICpu
         //
 
         C6809ECpu(
-            UINT8 QLoToDInClockPulses
+            UINT8 QLoToDInClockPulses,
+            boolean busTestCheckWatchdog
         );
 
         // ICpu Interface
@@ -104,6 +105,7 @@ class C6809ECpu : public ICpu
     private:
 
         UINT8         m_QLoToDInClockPulses;
+        boolean       m_busTestCheckWatchdog;
 
         CBus          m_busA;
         CFast8BitBus  m_busD;
