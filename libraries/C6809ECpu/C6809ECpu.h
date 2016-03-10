@@ -75,7 +75,7 @@ class C6809ECpu : public ICpu
         PERROR
         waitForInterrupt(
             Interrupt interrupt,
-            UINT16    timeoutInMs
+            UINT16    timeout
         );
 
         virtual

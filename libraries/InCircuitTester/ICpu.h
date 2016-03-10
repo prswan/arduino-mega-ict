@@ -33,9 +33,11 @@ class ICpu
     public:
 
         //
-        // Interrupt definitions. Most CPU's have an Non Maskable & normal interrupt
+        // Interrupt definitions.
+        // Most CPU's have reset, none maskable & normal interrupts.
         //
         typedef enum {
+            RESET,
             NMI,
             INT
         } Interrupt;
@@ -86,11 +88,14 @@ class ICpu
         // Wait for the CPU interrupt to be asserted. If a timeout occurs then a timeout error is returned.
         // In most cases this will need to be called, acked, and then waited for the next interrupt.
         //
+        // In normal asynchronous CPU's the "timeout" is in milliseconds.
+        // In clock master CPU's the "timeout" is in clock pulses.
+        //
         virtual
         PERROR
         waitForInterrupt(
             Interrupt interrupt,
-            UINT16    timeoutInMs
+            UINT16    timeout
         ) = 0;
 
         //

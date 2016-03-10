@@ -476,10 +476,47 @@ C6809ECpu::memoryWrite(
 PERROR
 C6809ECpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16 timeoutInMs
+    UINT16 timeout
 )
 {
-    return errorNotImplemented;
+    PERROR error = errorSuccess;
+    int value = 0;
+    UINT8 intPin = 0;
+    UINT16 pulseCount;
+
+    switch(interrupt)
+    {
+        case RESET : intPin = g_pinMap40DIL[s__RESET_i.pin]; break;
+        case NMI   : intPin = g_pinMap40DIL[s__NMI_i.pin]; break;
+        case INT   : intPin = g_pinMap40DIL[s__IRQ_i.pin]; break;
+        default: return errorNotImplemented;
+    }
+
+    for (pulseCount = 0 ; pulseCount < timeout ; pulseCount++)
+    {
+        value = ::digitalRead(intPin);
+
+        if (value == LOW)
+        {
+            break;
+        }
+
+        clockPulse();
+    }
+
+    //
+    // Covers the final pin state after the last or no clock pulses.
+    //
+    value = ::digitalRead(intPin);
+
+    if (value != LOW)
+    {
+        error = errorTimeout;
+    }
+
+Exit:
+
+    return error;
 }
 
 
