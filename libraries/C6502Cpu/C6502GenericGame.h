@@ -1,5 +1,5 @@
-  //
-// Copyright (c) 2015, Paul R. Swan
+//
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,21 +22,40 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <LiquidCrystal.h>
-#include <DFR_Key.h>
-#include <zutil.h>
+#ifndef C6502GenericGame_h
+#define C6502GenericGame_h
 
-#include <main.h>
+#include "CGenericBaseGame.h"
 
-#include <6502GameSelector.h>
-
-void setup()
+class C6502GenericGame : public CGenericBaseGame
 {
-  mainSetup(s_gameSelector);
-}
+    public:
 
-void loop()
-{
-  mainLoop();
-}
+        //
+        // Constructors for this game.
+        //
+
+        static IGame* createInstance2716(
+        );
+
+        static IGame* createInstance2732(
+        );
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sizes selected
+        //
+        C6502GenericGame(
+            RomSize romSize
+        );
+
+};
+
+#endif
+
 

@@ -1,5 +1,5 @@
-  //
-// Copyright (c) 2015, Paul R. Swan
+//
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,21 +22,18 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <LiquidCrystal.h>
-#include <DFR_Key.h>
-#include <zutil.h>
+#include <C6502GenericGame.h>
+#include <CTomahawk777Game.h>
 
-#include <main.h>
+//
+// The initial selector to select the game to test.
+//
+static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
+                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C6502GenericGame::createInstance2716),            false},
+                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C6502GenericGame::createInstance2732),            false},
+                                                  {"T-777   (5)    ",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceSet5),            false},
+                                                  {"T-777   (5) clk",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceClockMasterSet5), false},
+                                                  { 0, 0 }
+                                                 };
 
-#include <6502GameSelector.h>
-
-void setup()
-{
-  mainSetup(s_gameSelector);
-}
-
-void loop()
-{
-  mainLoop();
-}
 
