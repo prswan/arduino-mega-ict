@@ -295,6 +295,44 @@ CGame::romCheck(
 
 
 PERROR
+CGame::romCrc(
+    int key
+)
+{
+    PERROR error = errorSuccess;
+
+    if (key == SELECT_KEY)
+    {
+        const ROM_REGION *region = &m_romRegion[m_RomReadRegion];
+
+        CRomCheck romCheck( m_cpu,
+                            m_romRegion,
+                            (void *) this );
+
+        UINT32 crc = 0;
+
+        error = romCheck.calculateCrc(region, &crc);
+
+        if (SUCCESS(error))
+        {
+            error = errorCustom;
+
+            error->code = ERROR_SUCCESS;
+            error->description = "OK:";
+            error->description += region->location;
+            STRING_UINT32_HEX(error->description, crc);
+        }
+    }
+    else
+    {
+        error = onRomKeyMove(key);
+    }
+
+    return error;
+}
+
+
+PERROR
 CGame::romRead(
     int key
 )

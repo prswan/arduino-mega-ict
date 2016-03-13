@@ -78,6 +78,13 @@ class IGame
         ) = 0;
 
         //
+        // Calculates the CRC of the specified rom
+        //
+        virtual PERROR romCrc(
+            int key
+        ) = 0;
+
+        //
         // Basic test function to read the ROM space.
         //
         virtual PERROR romRead(

@@ -22,21 +22,40 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <LiquidCrystal.h>
-#include <DFR_Key.h>
-#include <zutil.h>
+#ifndef C8085GenericGame_h
+#define C8085GenericGame_h
 
-#include <main.h>
+#include "CGenericBaseGame.h"
 
-#include <8085GameSelector.h>
-
-void setup()
+class C8085GenericGame : public CGenericBaseGame
 {
-  mainSetup(s_gameSelector);
-}
+    public:
 
-void loop()
-{
-  mainLoop();
-}
+        //
+        // Constructors for this game.
+        //
+
+        static IGame* createInstance2716(
+        );
+
+        static IGame* createInstance2732(
+        );
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sizes selected
+        //
+        C8085GenericGame(
+            RomSize romSize
+        );
+
+};
+
+#endif
+
 

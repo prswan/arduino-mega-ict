@@ -25,29 +25,42 @@
 #include "CGameCallback.h"
 
 
-static const SELECTOR s_selector[] = { //"0123456789abcdef"
-                                        {"Bus Idle",        CGameCallback::onSelectBusIdle,        (void*) &CGameCallback::game, false},
-                                        {"Bus Check",       CGameCallback::onSelectBusCheck,       (void*) &CGameCallback::game, false},
-                                        {"ROM Check All",   CGameCallback::onSelectRomCheckAll,    (void*) &CGameCallback::game, false},
-                                        {"RAM Check All",   CGameCallback::onSelectRamCheckAll,    (void*) &CGameCallback::game, false},
-                                        {"RAM Check All CS",CGameCallback::onSelectRamCheckAllCS,  (void*) &CGameCallback::game, false},
-                                        {"Interupt Check",  CGameCallback::onSelectInterruptCheck, (void*) &CGameCallback::game, false},
-                                        {"Input Read",      CGameCallback::onSelectInputRead,      (void*) &CGameCallback::game, true},
-                                        {"Output Write",    CGameCallback::onSelectOutputWrite,    (void*) &CGameCallback::game, true},
-                                        {"ROM Check",       CGameCallback::onSelectRomCheck,       (void*) &CGameCallback::game, true},
-                                        {"ROM Read",        CGameCallback::onSelectRomRead,        (void*) &CGameCallback::game, true},
-                                        {"RAM Check",       CGameCallback::onSelectRamCheck,       (void*) &CGameCallback::game, true},
-                                        {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
-                                        {"ROM Read All",    CGameCallback::onSelectRomReadAll,     (void*) &CGameCallback::game, false},
-                                        {"RAM Write All AD",CGameCallback::onSelectRamWriteAllAD,  (void*) &CGameCallback::game, false},
-                                        {"RAM Write All Lo",CGameCallback::onSelectRamWriteAllLo,  (void*) &CGameCallback::game, false},
-                                        {"RAM Write All Hi",CGameCallback::onSelectRamWriteAllHi,  (void*) &CGameCallback::game, false},
-                                        {"RAM Read All",    CGameCallback::onSelectRamReadAll,     (void*) &CGameCallback::game, false},
-                                        {"Custom",          CGameCallback::onSelectCustom,         (void*) &CGameCallback::game, true},
-                                        { 0, 0 }
-                                     };
+static const SELECTOR s_selectorGame[] = { //"0123456789abcdef"
+                                            {"Bus Idle",        CGameCallback::onSelectBusIdle,        (void*) &CGameCallback::game, false},
+                                            {"Bus Check",       CGameCallback::onSelectBusCheck,       (void*) &CGameCallback::game, false},
+                                            {"ROM Check All",   CGameCallback::onSelectRomCheckAll,    (void*) &CGameCallback::game, false},
+                                            {"RAM Check All",   CGameCallback::onSelectRamCheckAll,    (void*) &CGameCallback::game, false},
+                                            {"RAM Check All CS",CGameCallback::onSelectRamCheckAllCS,  (void*) &CGameCallback::game, false},
+                                            {"Interupt Check",  CGameCallback::onSelectInterruptCheck, (void*) &CGameCallback::game, false},
+                                            {"Input Read",      CGameCallback::onSelectInputRead,      (void*) &CGameCallback::game, true},
+                                            {"Output Write",    CGameCallback::onSelectOutputWrite,    (void*) &CGameCallback::game, true},
+                                            {"ROM Check",       CGameCallback::onSelectRomCheck,       (void*) &CGameCallback::game, true},
+                                            {"ROM CRC",         CGameCallback::onSelectRomCrc,         (void*) &CGameCallback::game, true},
+                                            {"ROM Read",        CGameCallback::onSelectRomRead,        (void*) &CGameCallback::game, true},
+                                            {"RAM Check",       CGameCallback::onSelectRamCheck,       (void*) &CGameCallback::game, true},
+                                            {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
+                                            {"ROM Read All",    CGameCallback::onSelectRomReadAll,     (void*) &CGameCallback::game, false},
+                                            {"RAM Write All AD",CGameCallback::onSelectRamWriteAllAD,  (void*) &CGameCallback::game, false},
+                                            {"RAM Write All Lo",CGameCallback::onSelectRamWriteAllLo,  (void*) &CGameCallback::game, false},
+                                            {"RAM Write All Hi",CGameCallback::onSelectRamWriteAllHi,  (void*) &CGameCallback::game, false},
+                                            {"RAM Read All",    CGameCallback::onSelectRamReadAll,     (void*) &CGameCallback::game, false},
+                                            {"Custom",          CGameCallback::onSelectCustom,         (void*) &CGameCallback::game, true},
+                                            { 0, 0 }
+                                         };
 
-const SELECTOR *CGameCallback::selector = s_selector;
+const SELECTOR *CGameCallback::selectorGame = s_selectorGame;
+
+static const SELECTOR s_selectorGeneric[] = { //"0123456789abcdef"
+                                               {"Bus Idle",        CGameCallback::onSelectBusIdle,        (void*) &CGameCallback::game, false},
+                                               {"Bus Check",       CGameCallback::onSelectBusCheck,       (void*) &CGameCallback::game, false},
+                                               {"ROM CRC",         CGameCallback::onSelectRomCrc,         (void*) &CGameCallback::game, true},
+                                               {"ROM Read",        CGameCallback::onSelectRomRead,        (void*) &CGameCallback::game, true},
+                                               {"RAM Check",       CGameCallback::onSelectRamCheck,       (void*) &CGameCallback::game, true},
+                                               {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
+                                               { 0, 0 }
+                                            };
+
+const SELECTOR *CGameCallback::selectorGeneric = s_selectorGeneric;
 
 IGame *CGameCallback::game;
 
@@ -150,6 +163,17 @@ CGameCallback::onSelectRomCheck(
     IGame *game = *((IGame **) iGame);
 
     return game->romCheck( key );
+}
+
+PERROR
+CGameCallback::onSelectRomCrc(
+    void *iGame,
+    int  key
+)
+{
+    IGame *game = *((IGame **) iGame);
+
+    return game->romCrc( key );
 }
 
 PERROR

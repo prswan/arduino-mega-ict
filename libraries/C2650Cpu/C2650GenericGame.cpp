@@ -22,21 +22,30 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <LiquidCrystal.h>
-#include <DFR_Key.h>
-#include <zutil.h>
+#include "C2650GenericGame.h"
+#include "C2650Cpu.h"
 
-#include <main.h>
+//
+// See the base game cpp comments for details about this platform.
+//
 
-#include <8085GameSelector.h>
-
-void setup()
+IGame*
+C2650GenericGame::createInstance2716(
+)
 {
-  mainSetup(s_gameSelector);
+    return (new C2650GenericGame(I2716));
 }
 
-void loop()
+IGame*
+C2650GenericGame::createInstance2732(
+)
 {
-  mainLoop();
+    return (new C2650GenericGame(I2732));
+}
+
+C2650GenericGame::C2650GenericGame(
+    RomSize romSize
+) : CGenericBaseGame( new C2650Cpu(), romSize )
+{
 }
 

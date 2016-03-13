@@ -58,6 +58,10 @@ class CGame : public IGame
             int key
         );
 
+        virtual PERROR romCrc(
+            int key
+        );
+
         virtual PERROR romRead(
             int key
         );

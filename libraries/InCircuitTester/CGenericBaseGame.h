@@ -22,21 +22,44 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <LiquidCrystal.h>
-#include <DFR_Key.h>
-#include <zutil.h>
+#ifndef CGenericBaseGame_h
+#define CGenericBaseGame_h
 
-#include <main.h>
+#include "CGame.h"
+#include "ICpu.h"
 
-#include <8085GameSelector.h>
 
-void setup()
+class CGenericBaseGame : public CGame
 {
-  mainSetup(s_gameSelector);
-}
+    public:
 
-void loop()
-{
-  mainLoop();
-}
+        //
+        // CGenericBaseGame
+        //
+
+    protected:
+
+        //
+        // ROM size definition for the generic platform.
+        //
+        typedef enum {
+            I2716,
+            I2732
+        } RomSize;
+
+        //
+        // Parameterized for the tye of CPU and size of the ROMS.
+        // RAM is divided into 1Kb blocks.
+        //
+        CGenericBaseGame(
+            ICpu    *cpu,
+            RomSize  romSize
+        );
+
+        ~CGenericBaseGame(
+        );
+
+};
+
+#endif
 

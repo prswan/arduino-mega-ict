@@ -22,41 +22,13 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <CBus.h>
-#include <CFast8BitBus.h>
-#include <CFastPin.h>
-#include <CGame.h>
-#include <CGameCallback.h>
-#include <CRamCheck.h>
-#include <CRomCheck.h>
-#include <Error.h>
-#include <ICpu.h>
-#include <IGame.h>
-#include <main.h>
-#include <PinMap.h>
-#include <Types.h>
-
 #include <LiquidCrystal.h>
-#include <main.h>
 #include <DFR_Key.h>
 #include <zutil.h>
 
-#include <CGalaxianGame.h>
-#include <CJackrabbitGame.h>
-#include <CScrambleGame.h>
+#include <main.h>
 
-//
-// The initial selector to select the game to test.
-//
-static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),               false},
-                                    {"Galaxian   (M1)",  onSelectGame,   (void*) (CGalaxianGame::createInstanceSet1),    false},
-                                    {"Galaxian   (M2)",  onSelectGame,   (void*) (CGalaxianGame::createInstanceSet2),    false},
-                                    {"Jackrabbit  (1)",  onSelectGame,   (void*) (CJackrabbitGame::createInstanceSet1),  false},
-                                    {"Jackrabbit  (2)",  onSelectGame,   (void*) (CJackrabbitGame::createInstanceSet2),  false},
-                                    {"Scramble   (S1)",  onSelectGame,   (void*) (CScrambleGame::createInstanceSet1),    false},
-                                    { 0, 0 }
-                                   };
+#include <Z80GameSelector.h>
 
 void setup()
 {

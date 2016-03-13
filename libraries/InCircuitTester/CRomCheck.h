@@ -62,6 +62,12 @@ class CRomCheck
         );
 
         PERROR
+        calculateCrc(
+            const ROM_REGION *romRegion,
+            UINT32 *crc
+        );
+
+        PERROR
         checkCrc(
             const ROM_REGION *romRegion
         );
