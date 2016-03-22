@@ -29,17 +29,23 @@
 //
 
 //
-// Centuri Set 1 from MAME (ChampionshipSprinta)
-//                                           01   02   04   08   10   20   40   80  100  200  400  800 1000 2000   // 27128
-static const UINT8 s_romData2n_c7L[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}; // TBD
-static const UINT8 s_romData2n_c7N[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}; // TBD
+// Base set from MAME (csprint) - Rev 3
+//                                           01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
+static const UINT8 s_romData2n_c7L[]    = {0x7e,0xdf,0x04,0xdf,0x5f,0xe6,0xdf,0x00,0x00,0xd4,0xc6,0x1f,0x32,0x00};
+static const UINT8 s_romData2n_c7N[]    = {0x01,0x17,0x00,0x0b,0x00,0x10,0x15,0x18,0x0a,0x04,0xbb,0xa0,0x0a,0x0c};
+
+static const UINT8 s_romData2n_c00[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
 //
-// Base set from MAME (csprint)
+// Base set from MAME (csprint) - Rev 3
 //
 static const ROM_REGION s_romRegion[] PROGMEM = { //
-                                                 {NO_BANK_SWITCH, 0x10000|(0x8000>>1), 0x4000, s_romData2n_c7L, 0x1dcf8b98, "c7L"}, //
-                                                 {NO_BANK_SWITCH, 0x10000|(0x8000>>1), 0x4000, s_romData2n_c7N, 0xbdcbe42c, "c7N"}, //
+                                                 {NO_BANK_SWITCH, 0x10000|(0x8000>>1), (0x8000>>1), s_romData2n_c7L, 0x1dcf8b98, "c7L"}, // Fixed Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x20000|(0x8000>>1), (0x8000>>1), s_romData2n_c7N, 0xbdcbe42c, "c7N"}, // Fixed Prog. Mem Hi
+                                                 {NO_BANK_SWITCH, 0x10000|(0x6000>>1), (0x2000>>1), s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x20000|(0x6000>>1), (0x2000>>1), s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Hi
+                                                 {NO_BANK_SWITCH, 0x10000|(0x4000>>1), (0x2000>>1), s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x20000|(0x4000>>1), (0x2000>>1), s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Hi
                                                  {0} }; // end of list
 
 

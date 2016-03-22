@@ -70,7 +70,9 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 //
 // Output region is the same for all versions on this board set.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                             "012", "012345"
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                                 "012", "012345"
+                                                        {NO_BANK_SWITCH, 0x20000|(0x1400>>1), 0xFC, 0x00,  "c??", "PPage0"}, // Prog. Mem page 0
+                                                        {NO_BANK_SWITCH, 0x20000|(0x1402>>1), 0xFC, 0x00,  "c??", "PPage1"}, // Prog. Mem page 1
                                                         {0}
                                                       }; // end of list
 
