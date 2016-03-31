@@ -176,6 +176,25 @@ Exit:
     return error;
 }
 
+
+UINT8
+C6502ClockMasterCpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+C6502ClockMasterCpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
 //
 // Though there are two clock outputs the datasheet only shows timing
 // related to CLK2. It's an output from the CPU but we use it here as
@@ -188,7 +207,7 @@ Exit:
 PERROR
 C6502ClockMasterCpu::memoryReadWrite(
     UINT32 address,
-    UINT8  *data,
+    UINT16 *data,
     int    readWrite
 )
 {
@@ -275,8 +294,7 @@ C6502ClockMasterCpu::memoryReadWrite(
     {
         UINT16 data16;
 
-        m_busD.digitalRead(&data16);
-        *data = (UINT8) data16;
+        m_busD.digitalRead(data);
     }
 
     //
@@ -313,7 +331,7 @@ Exit:
 PERROR
 C6502ClockMasterCpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     return memoryReadWrite(address, data, HIGH);
@@ -323,7 +341,7 @@ C6502ClockMasterCpu::memoryRead(
 PERROR
 C6502ClockMasterCpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     return memoryReadWrite(address, &data, LOW);
@@ -345,7 +363,7 @@ C6502ClockMasterCpu::waitForInterrupt(
 //
 PERROR
 C6502ClockMasterCpu::acknowledgeInterrupt(
-    UINT8 *response
+    UINT16 *response
 )
 {
     return errorNotImplemented;

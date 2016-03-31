@@ -147,15 +147,32 @@ Exit:
 }
 
 
+UINT8
+C6502Cpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+C6502Cpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
 PERROR
 C6502Cpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
-    UINT16 data16 = 0;
 
     // Set a read cycle.
     digitalWrite(g_pinMap40DIL[s_R_W_o.pin], HIGH);
@@ -176,7 +193,7 @@ C6502Cpu::memoryRead(
     m_pinCLK2o.digitalWriteHIGH();
 
     // Read the data presented on the bus
-    m_busD.digitalRead(&data16);
+    m_busD.digitalRead(data);
 
     m_pinCLK2o.digitalWriteLOW();
     m_pinCLK1o.digitalWriteHIGH();
@@ -188,8 +205,6 @@ Exit:
         interrupts();
     }
 
-    *data = (UINT8) data16;
-
     return error;
 }
 
@@ -197,7 +212,7 @@ Exit:
 PERROR
 C6502Cpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     PERROR error = errorSuccess;
@@ -281,7 +296,7 @@ Exit:
 //
 PERROR
 C6502Cpu::acknowledgeInterrupt(
-    UINT8 *response
+    UINT16 *response
 )
 {
     PERROR error = errorSuccess;

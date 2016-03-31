@@ -56,6 +56,18 @@ class C6502Cpu : public ICpu
         check(
         );
 
+        virtual
+        UINT8
+        dataBusWidth(
+            UINT32 address
+        );
+
+        virtual
+        UINT8
+        dataAccessWidth(
+            UINT32 address
+        );
+
         // Address Space:
         // 0x00000 -> 0x0FFFF - Memory Mapped Data
         //
@@ -64,14 +76,14 @@ class C6502Cpu : public ICpu
         PERROR
         memoryRead(
             UINT32 address,
-            UINT8  *data
+            UINT16 *data
         );
 
         virtual
         PERROR
         memoryWrite(
             UINT32 address,
-            UINT8  data
+            UINT16 data
         );
 
         virtual
@@ -84,7 +96,7 @@ class C6502Cpu : public ICpu
         virtual
         PERROR
         acknowledgeInterrupt(
-            UINT8 *response
+            UINT16 *response
         );
 
         //
