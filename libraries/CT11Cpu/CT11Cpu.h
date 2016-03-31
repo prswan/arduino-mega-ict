@@ -52,27 +52,30 @@ class CT11Cpu : public ICpu
         virtual PERROR check(
         );
 
+        virtual UINT8 dataBusWidth(
+            UINT32 address
+        );
+
+        virtual UINT8 dataAccessWidth(
+            UINT32 address
+        );
+
+        //
         // The T11 is a 16-bit CPU.
-        // As a result A0 is not used and the address
-        // is shifted down by 1 bit as a result (we can't
-        // leave A0 toggling because callers expect 8-bit
-        // address access through this interface).
         //
         // T11 Address Space:
-        // 0x00000 -> 0x0FFFF - not used
-        // 0x10000 -> 0x17FFF - Memory Mapped Data, Lo Byte Access (D0-D7)
-        // 0x20000 -> 0x27FFF - Memory Mapped Data, Hi Byte Access (D8-D15)
-        // 0x30000 -> 0x37FFF - Memory Mapped Data, 16-Bit Word Access
+        // 0x00000 -> 0x0FFFF - 8-bit access where 0x0 = Lo & 0x1 == Hi.
+        // 0x10000 -> 0x1FFFF - 16-bit access.
         //
 
         virtual PERROR memoryRead(
             UINT32 address,
-            UINT8  *data
+            UINT16  *data
         );
 
         virtual PERROR memoryWrite(
             UINT32 address,
-            UINT8  data
+            UINT16  data
         );
 
         virtual
@@ -85,7 +88,7 @@ class CT11Cpu : public ICpu
         virtual
         PERROR
         acknowledgeInterrupt(
-            UINT8 *response
+            UINT16 *response
         );
 
         //

@@ -225,7 +225,7 @@ CGame::interruptCheck(
 )
 {
     PERROR error = errorSuccess;
-    UINT8 response = 0;
+    UINT16 response = 0;
 
     errorCustom->code = ERROR_SUCCESS;
     errorCustom->description = "OK:";
@@ -342,38 +342,12 @@ CGame::romRead(
     if (key == SELECT_KEY)
     {
         const ROM_REGION *region = &m_romRegion[m_RomReadRegion];
-        UINT8 data[4] = {0};
 
-        errorCustom->description = "OK:";
+        CRomCheck romCheck( m_cpu,
+                            m_romRegion,
+                            (void *) this );
 
-        //
-        // Check if we need to perform a bank switch for this region.
-        // and do that now for all the testing to be done upon it.
-        //
-        if (region->bankSwitch != NO_BANK_SWITCH)
-        {
-            error = region->bankSwitch( (void *) this );
-        }
-
-        //
-        // Read the first 4 bytes, maximum.
-        //
-        if (SUCCESS(error))
-        {
-            for (UINT16 address = 0 ; address < ARRAYSIZE(data) ; address++)
-            {
-                error = m_cpu->memoryRead( (address + region->start),
-                                           &data[address] );
-
-                if (FAILED(error))
-                {
-                    break;
-                }
-
-                STRING_UINT8_HEX(errorCustom->description, data[address]);
-                error = errorCustom;
-            }
-        }
+        error = romCheck.readData(region);
     }
     else
     {
@@ -422,71 +396,12 @@ CGame::ramWriteRead(
     {
         const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
 
-        UINT8 expData4[4] = {0x11, 0x22, 0x44, 0x88};
-        UINT8 expData1[4] = {0x55, 0xAA, 0x55, 0xAA};
-        UINT8 *expData = (UINT8*) NULL;;
-        UINT8 recData[4] = {0};
+        CRamCheck ramCheck( m_cpu,
+                            m_ramRegion,
+                            m_ramRegionWriteOnly,
+                            (void *) this );
 
-        //
-        // This is more complicated than this simple test
-        // as it needs the bit shift done to be correct.
-        //
-        if (region->mask < 4)
-        {
-            expData = expData1;
-        }
-        else
-        {
-            expData = expData4;
-        }
-
-        errorCustom->description = "OK:";
-
-        //
-        // Check if we need to perform a bank switch for this region.
-        // and do that now for all the testing to be done upon it.
-        //
-        if (region->bankSwitch != NO_BANK_SWITCH)
-        {
-            error = region->bankSwitch( (void *) this );
-        }
-
-        //
-        // Write the first 4 bytes, maximum.
-        //
-        if (SUCCESS(error))
-        {
-            for (UINT16 address = 0 ; address < ARRAYSIZE(recData) ; address++)
-            {
-                error = m_cpu->memoryWrite( (address + region->start),
-                                            expData[address] );
-
-                if (FAILED(error))
-                {
-                    break;
-                }
-            }
-        }
-
-        if (SUCCESS(error))
-        {
-            //
-            // Read the first 4 bytes, maximum.
-            //
-            for (UINT16 address = 0 ; address < ARRAYSIZE(recData) ; address++)
-            {
-                error = m_cpu->memoryRead( (address + region->start),
-                                           &recData[address] );
-
-                if (FAILED(error))
-                {
-                    break;
-                }
-
-                STRING_UINT8_HEX(errorCustom->description, (recData[address] & region->mask) );
-                error = errorCustom;
-            }
-        }
+        error = ramCheck.writeReadData(region);
     }
     else
     {
@@ -611,10 +526,11 @@ CGame::inputRead(
 
     {
         const INPUT_REGION *region = &m_inputRegion[m_inputReadRegion];
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(region->address);
 
         if (key == SELECT_KEY)
         {
-            UINT8 recData = 0;
+            UINT16 recData = 0;
 
             errorCustom->description = "OK:";
 
@@ -630,11 +546,33 @@ CGame::inputRead(
             error = m_cpu->memoryRead( region->address,
                                        &recData );
 
-            STRING_UINT8_HEX(errorCustom->description, (recData & region->mask) );
+            if (dataAccessWidth == 1)
+            {
+                STRING_UINT8_HEX(errorCustom->description, (recData & region->mask) );
+            }
+            else if (dataAccessWidth == 2)
+            {
+                STRING_UINT16_HEX(errorCustom->description, (recData & region->mask) );
+            }
+            else
+            {
+                error = errorNotImplemented;
+            }
         }
         else
         {
-            STRING_IO_SUMMARY(errorCustom, region->location, region->mask, region->description);
+            if (dataAccessWidth == 1)
+            {
+                STRING_IO8_SUMMARY(errorCustom, region->location, region->mask, region->description);
+            }
+            else if (dataAccessWidth == 2)
+            {
+                STRING_IO16_SUMMARY(errorCustom, region->location, region->mask, region->description);
+            }
+            else
+            {
+                error = errorNotImplemented;
+            }
         }
     }
 
@@ -672,6 +610,7 @@ CGame::outputWrite(
 
     {
         const OUTPUT_REGION *region = &m_outputRegion[m_outputWriteRegion];
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(region->address);
 
         if (key == SELECT_KEY)
         {
@@ -685,7 +624,7 @@ CGame::outputWrite(
             }
 
             {
-                UINT8 outData;
+                UINT16 outData;
 
                 //
                 // If we're wanting to write active(on) then just use the mask.
@@ -713,7 +652,18 @@ CGame::outputWrite(
         }
         else
         {
-            STRING_IO_SUMMARY(errorCustom, region->location, region->activeMask, region->description);
+            if (dataAccessWidth == 1)
+            {
+                STRING_IO8_SUMMARY(errorCustom, region->location, region->activeMask, region->description);
+            }
+            else if (dataAccessWidth == 2)
+            {
+                STRING_IO16_SUMMARY(errorCustom, region->location, region->activeMask, region->description);
+            }
+            else
+            {
+                error = errorNotImplemented;
+            }
         }
     }
 
@@ -781,8 +731,20 @@ CGame::onRomKeyMove(
     if (key != SELECT_KEY)
     {
         const ROM_REGION *region = &m_romRegion[m_RomReadRegion];
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(region->start);
 
-        STRING_REGION_SUMMARY(errorCustom, region->start, 0xFF, region->location);
+        if (dataAccessWidth == 1)
+        {
+            STRING_REGION8_SUMMARY(errorCustom, region->start, 0xFF, region->location);
+        }
+        else if (dataAccessWidth == 2)
+        {
+            STRING_REGION16_SUMMARY(errorCustom, region->start, 0xFFFF, region->location);
+        }
+        else
+        {
+            error = errorNotImplemented;
+        }
     }
 
     if (SUCCESS(error))
@@ -820,8 +782,20 @@ CGame::onRamKeyMove(
     if (key != SELECT_KEY)
     {
         const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(region->start);
 
-        STRING_REGION_SUMMARY(errorCustom, region->start, region->mask, region->location);
+        if (dataAccessWidth == 1)
+        {
+            STRING_REGION8_SUMMARY(errorCustom, region->start, region->mask, region->location);
+        }
+        else if (dataAccessWidth == 2)
+        {
+            STRING_REGION16_SUMMARY(errorCustom, region->start, region->mask, region->location);
+        }
+        else
+        {
+            error = errorNotImplemented;
+        }
     }
 
     if (SUCCESS(error))

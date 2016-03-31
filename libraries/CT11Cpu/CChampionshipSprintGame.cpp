@@ -40,12 +40,12 @@ static const UINT8 s_romData2n_c00[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x
 // Base set from MAME (csprint) - Rev 3
 //
 static const ROM_REGION s_romRegion[] PROGMEM = { //
-                                                 {NO_BANK_SWITCH, 0x10000|(0x8000>>1), (0x8000>>1), s_romData2n_c7L, 0x1dcf8b98, "c7L"}, // Fixed Prog. Mem Lo
-                                                 {NO_BANK_SWITCH, 0x20000|(0x8000>>1), (0x8000>>1), s_romData2n_c7N, 0xbdcbe42c, "c7N"}, // Fixed Prog. Mem Hi
-                                                 {NO_BANK_SWITCH, 0x10000|(0x6000>>1), (0x2000>>1), s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Lo
-                                                 {NO_BANK_SWITCH, 0x20000|(0x6000>>1), (0x2000>>1), s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Hi
-                                                 {NO_BANK_SWITCH, 0x10000|(0x4000>>1), (0x2000>>1), s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Lo
-                                                 {NO_BANK_SWITCH, 0x20000|(0x4000>>1), (0x2000>>1), s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Hi
+                                                 {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2n_c7L, 0x1dcf8b98, "c7L"}, // Fixed Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x8001, 0x4000, s_romData2n_c7N, 0xbdcbe42c, "c7N"}, // Fixed Prog. Mem Hi
+                                                 {NO_BANK_SWITCH, 0x6000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x6001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Hi
+                                                 {NO_BANK_SWITCH, 0x4000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x4001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Hi
                                                  {0} }; // end of list
 
 

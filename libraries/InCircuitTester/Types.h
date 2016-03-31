@@ -163,6 +163,9 @@ typedef struct _CONNECTION {
 // For example a ROM length of:-
 //  - 0x0400 bytes (max address 0x3FF) has 10 data samples.
 //  - 0x1000 bytes (max address 0xFFF) has 12 data samples.
+//
+// NOTE: ROM Regions only support 8-bit data access. I know of no games
+//       this era that used ROMS that were 16-bit access only.
 //
 
 typedef struct _ROM_REGION {
@@ -186,7 +189,7 @@ typedef struct _RAM_REGION {
     BankSwitchCallback bankSwitch;     // NULL if no bank switch is needed.
     UINT32             start;
     UINT32             end;
-    UINT8              mask;
+    UINT16             mask;
     CHAR               location[4];    // 3 characters
     CHAR               description[7]; // 6 characters
 
@@ -202,7 +205,7 @@ typedef struct _INPUT_REGION {
 
     BankSwitchCallback bankSwitch;     // NULL if no bank switch is needed.
     UINT32             address;
-    UINT8              mask;
+    UINT16             mask;
     CHAR               location[4];    // 3 characters
     CHAR               description[7]; // 6 characters
 
@@ -222,8 +225,8 @@ typedef struct _OUTPUT_REGION {
 
     BankSwitchCallback bankSwitch;     // NULL if no bank switch is needed.
     UINT32             address;
-    UINT8              activeMask;     // Bitwise: 0 - Inactive   1 - Active
-    UINT8              invertMask;     // Bitwise: 0 - Active hi, 1 - Active lo
+    UINT16             activeMask;     // Bitwise: 0 - Inactive   1 - Active
+    UINT16             invertMask;     // Bitwise: 0 - Active hi, 1 - Active lo
     CHAR               location[4];    // 3 characters
     CHAR               description[7]; // 6 characters
 
@@ -462,9 +465,12 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to check an 8-bit bus value and exit with an error if it's wrong.
 //
+// 0123456789abcdef
+// E:r22 1234 55 AA
+//
 #define CHECK_VALUE_UINT8_BREAK(error, string, address, expValue, recValue)  \
     {                                                                        \
-        if (expValue != recValue)                                            \
+        if ((UINT8) expValue != (UINT8) recValue)                            \
         {                                                                    \
             error = errorCustom;                                             \
             error->code = ERROR_FAILED;                                      \
@@ -478,11 +484,31 @@ typedef struct _INTERRUPT_DEFINITION {
     }                                                                        \
 
 //
-// Macro to load a string with a region summary.
+// Macro to check an 16-bit bus value and exit with an error if it's wrong.
+//
+// 0123456789abcdef
+// E:r22 5555 AAAA
+//
+#define CHECK_VALUE_UINT16_BREAK(error, string, address, expValue, recValue)  \
+    {                                                                        \
+        if ((UINT16) expValue != (UINT16) recValue)                            \
+        {                                                                    \
+            error = errorCustom;                                             \
+            error->code = ERROR_FAILED;                                      \
+            error->description = "E:";                                       \
+            error->description += string;                                    \
+            STRING_UINT16_HEX(error->description, expValue);                 \
+            STRING_UINT16_HEX(error->description, recValue);                 \
+            break;                                                           \
+        }                                                                    \
+    }                                                                        \
+
+//
+// Macro to load a string with an 8-bit region summary.
 // 0123456789adcdef
 //  1800 0F 11D
 //
-#define STRING_REGION_SUMMARY(error, start, mask, location)    \
+#define STRING_REGION8_SUMMARY(error, start, mask, location)    \
     {                                                          \
         error->code = ERROR_SUCCESS;                           \
         error->description = "";                               \
@@ -494,17 +520,49 @@ typedef struct _INTERRUPT_DEFINITION {
     }                                                          \
 
 //
-// Macro to load a string with an IO summary.
+// Macro to load a string with an 16-bit region summary.
+// 0123456789adcdef
+//  1800 0F0F 11D
+//
+#define STRING_REGION16_SUMMARY(error, start, mask, location)  \
+    {                                                          \
+        error->code = ERROR_SUCCESS;                           \
+        error->description = "";                               \
+        STRING_UINT16_HEX(error->description, start);          \
+        error->description += " ";                             \
+        STRING_UINT16_HEX(error->description, mask);           \
+        error->description += " ";                             \
+        error->description += location;                        \
+    }                                                          \
+
+//
+// Macro to load a string with an IO summary (8-bit)
 // 0123456789adcdef
 //  13F 0F 012345
 //
-#define STRING_IO_SUMMARY(error, location, mask, regionDescription)  \
+#define STRING_IO8_SUMMARY(error, location, mask, regionDescription)  \
     {                                                                \
         error->code = ERROR_SUCCESS;                                 \
         error->description = "";                                     \
         error->description += " ";                                   \
         error->description += location;                              \
         STRING_UINT8_HEX(error->description, mask);                  \
+        error->description += " ";                                   \
+        error->description += regionDescription;                     \
+    }                                                                \
+
+//
+// Macro to load a string with an IO summary (16-bit)
+// 0123456789adcdef
+//  13F 0F0F 012345
+//
+#define STRING_IO16_SUMMARY(error, location, mask, regionDescription)  \
+    {                                                                \
+        error->code = ERROR_SUCCESS;                                 \
+        error->description = "";                                     \
+        error->description += " ";                                   \
+        error->description += location;                              \
+        STRING_UINT16_HEX(error->description, mask);                 \
         error->description += " ";                                   \
         error->description += regionDescription;                     \
     }                                                                \

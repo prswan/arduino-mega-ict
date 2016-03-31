@@ -26,7 +26,7 @@
 #include "zutil.h"
 
 static const int s_randomSeed[] = {7, 144};
-static const int s_randomSize = 0x100;
+static const int s_randomSize = 0x10000;
 
 
 CRamCheck::CRamCheck(
@@ -253,6 +253,113 @@ CRamCheck::checkRandom(
     return error;
 }
 
+//
+// Write & read the first few data bytes and print them into the error string.
+//
+PERROR
+CRamCheck::writeReadData(
+    const RAM_REGION *ramRegion
+)
+{
+    PERROR error = errorSuccess;
+    UINT16 expData4[4] = {0x1111, 0x2222, 0x4444, 0x8888};
+    UINT16 expData1[4] = {0x5555, 0xAAAA, 0x5555, 0xAAAA};
+    UINT16 *expData = (UINT16*) NULL;;
+    UINT16 recData[4] = {0};
+
+    //
+    // This is more complicated than this simple test
+    // as it needs the bit shift done to be correct.
+    //
+    if (ramRegion->mask < 4)
+    {
+        expData = expData1;
+    }
+    else
+    {
+        expData = expData4;
+    }
+
+    errorCustom->description = "OK:";
+
+    //
+    // Check if we need to perform a bank switch for this region.
+    // and do that now for all the testing to be done upon it.
+    //
+    if (ramRegion->bankSwitch != NO_BANK_SWITCH)
+    {
+        error = ramRegion->bankSwitch( (void *) this );
+    }
+
+    //
+    // Write the first 4 bytes, maximum.
+    //
+    if (SUCCESS(error))
+    {
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
+
+        for (UINT32 address = 0 ; address < (ARRAYSIZE(recData)/dataAccessWidth) ; address += dataBusWidth)
+        {
+            error = m_cpu->memoryWrite( (address + ramRegion->start),
+                                        expData[address] );
+
+            if (FAILED(error))
+            {
+                break;
+            }
+        }
+    }
+
+    //
+    // Read the first 4 bytes, maximum.
+    //
+    if (SUCCESS(error))
+    {
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
+
+        if (dataAccessWidth == 1)
+        {
+            for (UINT32 address = 0 ; address < 4 ; address += dataBusWidth)
+            {
+                error = m_cpu->memoryRead( (address + ramRegion->start),
+                                           &recData[address] );
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+
+                STRING_UINT8_HEX(errorCustom->description, (recData[address] & ramRegion->mask) );
+                error = errorCustom;
+            }
+        }
+        else if (dataAccessWidth == 2)
+        {
+            for (UINT32 address = 0 ; address < 2 ; address += dataBusWidth)
+            {
+                error = m_cpu->memoryRead( (address + ramRegion->start),
+                                           &recData[address] );
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+
+                STRING_UINT16_HEX(errorCustom->description, (recData[address] & ramRegion->mask) );
+                error = errorCustom;
+            }
+        }
+        else
+        {
+            error = errorNotImplemented;
+        }
+    }
+
+    return error;
+}
+
 
 //
 // Perform a simple write of all of the supplied region in order.
@@ -277,7 +384,9 @@ CRamCheck::write(
 
     if (SUCCESS(error))
     {
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
+
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
         {
             //
             // The write is a simple data = address.
@@ -320,7 +429,9 @@ CRamCheck::write(
 
     if (SUCCESS(error))
     {
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
+
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
         {
             error = m_cpu->memoryWrite(address, value);
 
@@ -356,9 +467,11 @@ CRamCheck::read(
 
     if (SUCCESS(error))
     {
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
+
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
         {
-            UINT8 recData = 0;
+            UINT16 recData = 0;
 
             error = m_cpu->memoryRead(address, &recData);
 
@@ -422,8 +535,10 @@ CRamCheck::writeRandom(
 
     if (SUCCESS(error))
     {
+        UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
+
         randomSeed(seed);
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
         {
             UINT8 data = (UINT8) random(s_randomSize);
             data = (invert) ? ~data : data;
@@ -464,12 +579,15 @@ CRamCheck::readVerifyRandom(
 
     if (SUCCESS(error))
     {
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
+
         randomSeed(seed);
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
         {
-            UINT8 expData = (UINT8) random(s_randomSize);
+            UINT16 expData = (UINT16) random(s_randomSize);
             expData = (invert) ? ~expData : expData;
-            UINT8 recData = 0;
+            UINT16 recData = 0;
 
             error = m_cpu->memoryRead(address, &recData);
 
@@ -481,7 +599,18 @@ CRamCheck::readVerifyRandom(
             expData &= ramRegion->mask;
             recData &= ramRegion->mask;
 
-            CHECK_VALUE_UINT8_BREAK(error, ramRegion->location, address, expData, recData);
+            if (dataAccessWidth == 1)
+            {
+                CHECK_VALUE_UINT8_BREAK(error, ramRegion->location, address, expData, recData);
+            }
+            else if (dataAccessWidth == 2)
+            {
+                CHECK_VALUE_UINT16_BREAK(error, ramRegion->location, address, expData, recData);
+            }
+            else
+            {
+                error = errorNotImplemented;
+            }
         }
     }
     return error;

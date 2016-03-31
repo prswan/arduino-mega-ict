@@ -69,6 +69,11 @@ class CRamCheck
         );
 
         PERROR
+        writeReadData(
+            const RAM_REGION *ramRegion
+        );
+
+        PERROR
         write(
             const RAM_REGION *ramRegion
         );

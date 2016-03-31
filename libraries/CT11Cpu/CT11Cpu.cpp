@@ -92,6 +92,11 @@ static const CONNECTION s_DALLo_iot[] = { {17, "DAL0" },
                                           {11, "DAL6" },
                                           {10, "DAL7" } }; // Lower 8 of 16 bits
 
+//
+// Address flag for 16-bit selection
+//
+static const UINT32 s_16BitAddress = 0x010000;
+
 
 CT11Cpu::CT11Cpu(
 ) : m_busDALHi(g_pinMap40DIL, s_DALHi_iot,  ARRAYSIZE(s_DALHi_iot)),
@@ -271,6 +276,33 @@ Exit:
 }
 
 
+UINT8
+CT11Cpu::dataBusWidth(
+    UINT32 address
+)
+{
+    // 16-bit data bus only.
+    return 2;
+}
+
+
+UINT8
+CT11Cpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    bool is16Bit = (address & s_16BitAddress) ? true : false;
+    UINT8 width = 1;
+
+    if (is16Bit)
+    {
+        width = 2;
+    }
+
+    return width;
+}
+
+
 PERROR
 CT11Cpu::memoryReadWrite(
     UINT32 address,
@@ -281,10 +313,11 @@ CT11Cpu::memoryReadWrite(
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
     UINT16 data16 = 0;
-    UINT32 physicalAddress = address << 1;
+    UINT32 physicalAddress = address & 0xFFFE; // A0 not used
 
-    bool lo        = (address & 0x010000) ? true : false;
-    bool hi        = (address & 0x020000) ? true : false;
+    bool lo      = ((address & 1) == 0) ? true : false;
+    bool hi      = ((address & 1) == 1) ? true : false;
+    bool is16Bit = (address & s_16BitAddress) ? true : false;
  // bool readySync = (address & 0x100000) ? true : false;
 
     // Drive the address
@@ -297,12 +330,12 @@ CT11Cpu::memoryReadWrite(
     // Drive the byte lane write strobes
     if (!read)
     {
-        if (lo)
+        if (lo | is16Bit)
         {
             m_pinR_WLB.digitalWriteLOW();
         }
 
-        if (hi)
+        if (hi | is16Bit)
         {
             m_pinR_WHB.digitalWriteLOW();
         }
@@ -326,24 +359,21 @@ CT11Cpu::memoryReadWrite(
     }
     else
     {
-        if (lo)
+        if (lo | is16Bit)
         {
-            // 8 & 16-bit cycle.
+            // 8 & 16-bit cycle, Lo
             m_busDALLo.digitalWrite((*data >> 0) & 0xFF);
         }
 
-        if (hi)
+        if (is16Bit)
         {
-            if (lo)
-            {
-                // 16-bit cycle.
-                m_busDALHi.digitalWrite((*data >> 8) & 0xFF);
-            }
-            else
-            {
-                // 8-bit cycle
-                m_busDALHi.digitalWrite((*data >> 0) & 0xFF);
-            }
+            // 16-bit cycle, Hi
+            m_busDALHi.digitalWrite((*data >> 8) & 0xFF);
+        }
+        else if (hi)
+        {
+            // 8-bit cycle, Hi
+            m_busDALHi.digitalWrite((*data >> 0) & 0xFF);
         }
     }
 
@@ -362,27 +392,24 @@ CT11Cpu::memoryReadWrite(
     {
         UINT16 tempData16 = 0;
 
-        if (lo)
+        if (lo | is16Bit)
         {
-            // 8 & 16-bit cycle.
+            // 8 & 16-bit cycle, Lo
             m_busDALLo.digitalRead(&tempData16);
             data16 |= (tempData16 & 0xFF) << 0;
         }
 
-        if (hi)
+        if (is16Bit)
         {
+            // 16-bit cycle, Hi
             m_busDALHi.digitalRead(&tempData16);
-
-            if (lo)
-            {
-                // 16-bit cycle.
-                data16 |= (tempData16 & 0xFF) << 8;
-            }
-            else
-            {
-                // 8-bit cycle
-                data16 |= (tempData16 & 0xFF) << 0;
-            }
+            data16 |= (tempData16 & 0xFF) << 8;
+        }
+        else if (hi)
+        {
+            // 8-bit cycle, Hi
+            m_busDALHi.digitalRead(&tempData16);
+            data16 |= (tempData16 & 0xFF) << 0;
         }
     }
 
@@ -394,13 +421,13 @@ CT11Cpu::memoryReadWrite(
     // Restore data state
     if (!read)
     {
-        if (lo)
+        if (lo | is16Bit)
         {
             m_busDALLo.pinMode(INPUT_PULLUP);
             m_pinR_WLB.digitalWriteHIGH();
         }
 
-        if (hi)
+        if (hi | is16Bit)
         {
             m_busDALHi.pinMode(INPUT_PULLUP);
             m_pinR_WHB.digitalWriteHIGH();
@@ -414,7 +441,7 @@ Exit:
         interrupts();
     }
 
-    *data = (UINT8) data16;
+    *data = data16;
 
     return error;
 }
@@ -423,29 +450,20 @@ Exit:
 PERROR
 CT11Cpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16  *data
 )
 {
-    PERROR error;
-    UINT16 data16;
-
-    error =  memoryReadWrite(address, &data16, true);
-    *data = (UINT8) data16;
-    return error;
+    return memoryReadWrite(address, data, true);
 }
 
 
 PERROR
 CT11Cpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
-    PERROR error;
-    UINT16 data16 = data;
-
-    error = memoryReadWrite(address, &data16, false);
-    return error;
+    return memoryReadWrite(address, &data, false);
 }
 
 
@@ -464,7 +482,7 @@ CT11Cpu::waitForInterrupt(
 //
 PERROR
 CT11Cpu::acknowledgeInterrupt(
-    UINT8 *response
+    UINT16 *response
 )
 {
     PERROR error = errorSuccess;

@@ -58,28 +58,60 @@ class ICpu
         ) = 0;
 
         //
-        // Read one "data" byte from a memory "address" and return it in "byte".
+        // Returns the data bus width (in bytes) for the specified address:
+        // 1 = 1 Byte  =  8-Bit CPU
+        // 2 = 2 Bytes = 16-Bit CPU
         //
-        // 16-Bit CPU:
-        //   0x00000 -> 0x0FFFF is memory space
-        //   0x10000 -> 0x1FFFF is IO space
+        // This parameter is used to indicate indicate that the
+        // address map of the CPU looks like this in the 2-byte case:
+        //
+        //   CPU address 0000 == Lower 8 physical address 0000
+        //   CPU address 0001 == Upper 8 physical address 0000
+        //   CPU address 0002 == Lower 8 physical address 0001
+        //   CPU address 0003 == Upper 8 physical address 0001
+        //
+        // It provides a means for the caller to know how to access a specific
+        // 8-bit component on a 16-bit bus (e.g. loops require address += 2).
+        //
+        virtual
+        UINT8
+        dataBusWidth(
+            UINT32 address
+        ) = 0;
+
+        //
+        // Returns the data access bus width (in bytes) for the specified address:
+        // 1 = 1 Byte  (upper & lower always returned in the lower 8 bits)
+        // 2 = 2 Bytes
+        //
+        // Therefore, for 16-bit access "dataBusWidth" == 2 and "dataAccessWidth" == 2.
+        //
+        virtual
+        UINT8
+        dataAccessWidth(
+            UINT32 address
+        ) = 0;
+
+        //
+        // Read one "data" byte from a memory "address" and return it in "byte".
+        // 8-bit access is always in the lower 8 bits.
         //
         virtual
         PERROR
         memoryRead(
             UINT32 address,
-            UINT8  *data
+            UINT16  *data
         ) = 0;
 
         //
         // Write one "data" byte to a memory "address".
-        // See "memoryRead" for address space information.
+        // 8-bit access is always in the lower 8 bits.
         //
         virtual
         PERROR
         memoryWrite(
             UINT32 address,
-            UINT8  data
+            UINT16 data
         ) = 0;
 
         //
@@ -100,7 +132,7 @@ class ICpu
         virtual
         PERROR
         acknowledgeInterrupt(
-            UINT8 *response
+            UINT16 *response
         ) = 0;
 
 
