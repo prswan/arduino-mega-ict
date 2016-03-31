@@ -213,7 +213,7 @@ CStarWarsBaseGame::waitForMathRunLo(
 )
 {
     PERROR error = errorSuccess;
-    UINT8 recData;
+    UINT16 recData;
 
     // Poll the math run flag
     for (int x = 0; x < 128 ; x++)
@@ -254,7 +254,7 @@ CStarWarsBaseGame::testMatrix(
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
     ICpu *cpu = thisGame->m_cpu;
     PERROR error = errorSuccess;
-    UINT8  recData;
+    UINT16 recData;
     UINT16 recResult = 0;
 
     // Make sure the matrix processor is idle
@@ -296,9 +296,9 @@ CStarWarsBaseGame::testMatrix(
         recResult = 0;
 
         CHECK_CPU_READ_EXIT(error, cpu, c_MBRAM_A + (expDataAddress[x] << 1) | 0, &recData);
-        recResult |= ((UINT16) recData) << 8;
+        recResult |= (recData << 8);
         CHECK_CPU_READ_EXIT(error, cpu, c_MBRAM_A + (expDataAddress[x] << 1) | 1, &recData);
-        recResult |= ((UINT16) recData) << 0;
+        recResult |= (recData << 0);
 
         CHECK_UINT16_VALUE_EXIT(error, "MX", recResult, expData[x]);
     }
@@ -319,7 +319,7 @@ CStarWarsBaseGame::testDivider(
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
     ICpu *cpu = thisGame->m_cpu;
     PERROR error = errorSuccess;
-    UINT8  recData;
+    UINT16 recData;
     UINT16 recQuotient = 0;
 
     // Load dividend
@@ -346,9 +346,9 @@ CStarWarsBaseGame::testDivider(
 
     // Read quotient
     CHECK_CPU_READ_EXIT(error, cpu, c_REH_A, &recData);
-    recQuotient |= ((UINT16) recData) << 8;
+    recQuotient |= (recData << 8);
     CHECK_CPU_READ_EXIT(error, cpu, c_REL_A, &recData);
-    recQuotient |= ((UINT16) recData) << 0;
+    recQuotient |= (recData << 0);
 
     // Check the result is what we expect
     CHECK_UINT16_VALUE_EXIT(error, "DV", recQuotient, quotient);
@@ -366,7 +366,7 @@ CStarWarsBaseGame::testADC(
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
     C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
     PERROR error = errorCustom;
-    UINT8  data[4] = {0,0,0,0};
+    UINT16 data[4] = {0,0,0,0};
 
     for (UINT32 channel = 0 ; channel < 4 ; channel++)
     {

@@ -292,8 +292,6 @@ C6502ClockMasterCpu::memoryReadWrite(
     //
     if (readWrite == HIGH)
     {
-        UINT16 data16;
-
         m_busD.digitalRead(data);
     }
 

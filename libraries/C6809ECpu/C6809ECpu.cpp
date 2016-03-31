@@ -254,10 +254,29 @@ Exit:
     return error;
 }
 
+
+UINT8
+C6809ECpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+C6809ECpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
 PERROR
 C6809ECpu::memoryReadWrite(
     UINT32 address,
-    UINT8  *data,
+    UINT16 *data,
     int    readWrite
 )
 {
@@ -408,10 +427,7 @@ C6809ECpu::memoryReadWrite(
     //
     if (readWrite == HIGH)
     {
-        UINT16 data16;
-
-        m_busD.digitalRead(&data16);
-        *data = (UINT8) data16;
+        m_busD.digitalRead(data);
     }
 
     //
@@ -457,7 +473,7 @@ Exit:
 PERROR
 C6809ECpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     return memoryReadWrite(address, data, HIGH);
@@ -466,7 +482,7 @@ C6809ECpu::memoryRead(
 PERROR
 C6809ECpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     return memoryReadWrite(address, &data, LOW);
@@ -485,7 +501,7 @@ C6809ECpu::waitForInterrupt(
 
 PERROR
 C6809ECpu::acknowledgeInterrupt(
-    UINT8     *response
+    UINT16 *response
 )
 {
     return errorNotImplemented;
