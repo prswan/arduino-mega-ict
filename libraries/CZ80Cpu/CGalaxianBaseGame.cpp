@@ -167,7 +167,6 @@ CGalaxianBaseGame::interruptCheck(
 )
 {
     PERROR error = errorSuccess;
-    UINT8 response = 0;
 
     errorCustom->code = ERROR_SUCCESS;
     errorCustom->description = "OK:";

@@ -223,6 +223,25 @@ Exit:
     return error;
 }
 
+
+UINT8
+CZ80Cpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+CZ80Cpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
 //
 // Convert the supplied virtual address into a physical address.
 //
@@ -247,12 +266,11 @@ CZ80Cpu::selectAddressSpace(
 PERROR
 CZ80Cpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
-    UINT16 data16 = 0;
 
     // Enable the address bus and set the value (the lower 16 bits only)
     m_busA.pinMode(OUTPUT);
@@ -313,7 +331,7 @@ CZ80Cpu::memoryRead(
             if (waitValue == HIGH)
             {
                 // Read the data presented on the bus as soon as we see no WAIT set then clear _RD
-                m_busD.digitalReadThenDigitalWriteHIGH(&data16, m_pin_RD);
+                m_busD.digitalReadThenDigitalWriteHIGH(data, m_pin_RD);
 
                 break;
             }
@@ -333,9 +351,6 @@ Exit:
     {
         interrupts();
     }
-
-    *data = (UINT8) data16;
-
     return error;
 }
 
@@ -343,7 +358,7 @@ Exit:
 PERROR
 CZ80Cpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     PERROR error = errorSuccess;
@@ -355,7 +370,7 @@ CZ80Cpu::memoryWrite(
 
     // Set the databus to output and set a value.
     m_busD.pinMode(OUTPUT);
-    m_busD.digitalWrite((UINT16) data);
+    m_busD.digitalWrite(data);
 
     // Select the address space based on the supplied address
     selectAddressSpace(address);
@@ -473,7 +488,7 @@ Exit:
 //
 PERROR
 CZ80Cpu::acknowledgeInterrupt(
-    UINT8 *response
+    UINT16 *response
 )
 {
     PERROR error = errorSuccess;
