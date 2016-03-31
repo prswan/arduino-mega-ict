@@ -232,10 +232,29 @@ Exit:
     return error;
 }
 
+
+UINT8
+C2650Cpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+C2650Cpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
 PERROR
 C2650Cpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     if (address > (UINT32) 0xFFFF)
@@ -255,7 +274,7 @@ C2650Cpu::memoryRead(
 PERROR
 C2650Cpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     if (address > (UINT32) 0xFFFF)
@@ -279,13 +298,12 @@ C2650Cpu::memoryWrite(
 //
 PERROR
 C2650Cpu::read(
-    UINT16 address,
-    UINT8  *data
+    UINT32 address,
+    UINT16 *data
 )
 {
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
-    UINT16 data16 = 0;
 
     // Set a read cycle.
     digitalWrite(g_pinMap40DIL[s__RW_o.pin], LOW);
@@ -295,7 +313,7 @@ C2650Cpu::read(
 
     // Enable the address bus and set the value.
     m_busADR.pinMode(OUTPUT);
-    m_busADR.digitalWrite(address);
+    m_busADR.digitalWrite((UINT16) address);
 
     // Set the databus to input.
     m_busDBUS.pinMode(INPUT);
@@ -338,7 +356,7 @@ C2650Cpu::read(
             if (opackValue == LOW)
             {
                 // Read the data presented on the bus as soon as we see OPACK set then clear OPREQ.
-                m_busDBUS.digitalReadThenDigitalWriteLOW(&data16, m_pinOPREQ);
+                m_busDBUS.digitalReadThenDigitalWriteLOW(data, m_pinOPREQ);
 
                 break;
             }
@@ -353,9 +371,6 @@ Exit:
     {
         interrupts();
     }
-
-    *data = (UINT8) data16;
-
     return error;
 }
 
@@ -365,8 +380,8 @@ Exit:
 //
 PERROR
 C2650Cpu::write(
-    UINT16 address,
-    UINT8  data
+    UINT32 address,
+    UINT16 data
 )
 {
     PERROR error = errorSuccess;
@@ -380,11 +395,11 @@ C2650Cpu::write(
 
     // Enable the address bus and set the value.
     m_busADR.pinMode(OUTPUT);
-    m_busADR.digitalWrite(address);
+    m_busADR.digitalWrite((UINT16) address);
 
     // Set the databus to output and set a value.
     m_busDBUS.pinMode(OUTPUT);
-    m_busDBUS.digitalWrite((UINT16) data);
+    m_busDBUS.digitalWrite(data);
 
     // Critical timing section
     noInterrupts();
@@ -499,7 +514,7 @@ Exit:
 //
 PERROR
 C2650Cpu::acknowledgeInterrupt(
-    UINT8 *response
+    UINT16 *response
 )
 {
     digitalWrite(g_pinMap40DIL[s_M_IO_o.pin], LOW);
