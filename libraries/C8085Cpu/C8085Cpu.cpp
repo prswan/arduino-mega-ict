@@ -242,16 +242,33 @@ Exit:
 }
 
 
+UINT8
+C8085Cpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+C8085Cpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
 PERROR
 C8085Cpu::memoryReadWrite(
     UINT32 address,
-    UINT8  *data,
+    UINT16 *data,
     bool   read
 )
 {
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
-    UINT16 data16 = 0;
 
     bool io        = (address & 0x010000) ? true : false;
     bool readySync = (address & 0x100000) ? true : false;
@@ -290,7 +307,7 @@ C8085Cpu::memoryReadWrite(
     }
     else
     {
-        m_busAD.digitalWrite(*data);
+        m_busAD.digitalWrite(*data & 0xFF);
     }
 
     // Critical timing section
@@ -331,7 +348,7 @@ C8085Cpu::memoryReadWrite(
     if (read)
     {
         m_pin_RD.digitalWriteLOW();
-        m_busAD.digitalReadThenDigitalWriteHIGH(&data16, m_pin_RD);
+        m_busAD.digitalReadThenDigitalWriteHIGH(data, m_pin_RD);
 
         m_pinS1.digitalWriteLOW();
     }
@@ -357,8 +374,6 @@ Exit:
         interrupts();
     }
 
-    *data = (UINT8) data16;
-
     return error;
 }
 
@@ -366,7 +381,7 @@ Exit:
 PERROR
 C8085Cpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     return memoryReadWrite(address, data, true);
@@ -376,7 +391,7 @@ C8085Cpu::memoryRead(
 PERROR
 C8085Cpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     return memoryReadWrite(address, &data, false);
@@ -423,7 +438,7 @@ Exit:
 //
 PERROR
 C8085Cpu::acknowledgeInterrupt(
-    UINT8 *response
+    UINT16 *response
 )
 {
     PERROR error = errorSuccess;

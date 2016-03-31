@@ -52,6 +52,14 @@ class C8085Cpu : public ICpu
         virtual PERROR check(
         );
 
+        virtual UINT8 dataBusWidth(
+            UINT32 address
+        );
+
+        virtual UINT8 dataAccessWidth(
+            UINT32 address
+        );
+
         // 8085 Address Space:
         // 0x00000 -> 0x0FFFF - Memory Mapped Data
         // 0x10000 -> 0x1FFFF - Input/Output Ports
@@ -62,12 +70,12 @@ class C8085Cpu : public ICpu
 
         virtual PERROR memoryRead(
             UINT32 address,
-            UINT8  *data
+            UINT16 *data
         );
 
         virtual PERROR memoryWrite(
             UINT32 address,
-            UINT8  data
+            UINT16 data
         );
 
         virtual
@@ -80,7 +88,7 @@ class C8085Cpu : public ICpu
         virtual
         PERROR
         acknowledgeInterrupt(
-            UINT8 *response
+            UINT16 *response
         );
 
         //
@@ -92,7 +100,7 @@ class C8085Cpu : public ICpu
         PERROR
         memoryReadWrite(
             UINT32 address,
-            UINT8  *data,
+            UINT16 *data,
             bool   read
         );
 
