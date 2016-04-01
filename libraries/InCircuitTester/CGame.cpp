@@ -25,6 +25,7 @@
 #include "CGame.h"
 #include "CRomCheck.h"
 #include "CRamCheck.h"
+#include "CIoCheck.h"
 #include <DFR_Key.h>
 
 #include <avr/pgmspace.h>
@@ -526,41 +527,20 @@ CGame::inputRead(
 
     {
         const INPUT_REGION *region = &m_inputRegion[m_inputReadRegion];
-        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(region->address);
 
         if (key == SELECT_KEY)
         {
-            UINT16 recData = 0;
+            CIoCheck ioCheck( m_cpu,
+                              m_inputRegion,
+                              m_outputRegion,
+                              (void *) this );
 
-            errorCustom->description = "OK:";
-
-            //
-            // Check if we need to perform a bank switch for this region.
-            // and do that now for all the testing to be done upon it.
-            //
-            if (region->bankSwitch != NO_BANK_SWITCH)
-            {
-                error = region->bankSwitch( (void *) this );
-            }
-
-            error = m_cpu->memoryRead( region->address,
-                                       &recData );
-
-            if (dataAccessWidth == 1)
-            {
-                STRING_UINT8_HEX(errorCustom->description, (recData & region->mask) );
-            }
-            else if (dataAccessWidth == 2)
-            {
-                STRING_UINT16_HEX(errorCustom->description, (recData & region->mask) );
-            }
-            else
-            {
-                error = errorNotImplemented;
-            }
+            error = ioCheck.input(region);
         }
         else
         {
+            UINT8 dataAccessWidth = m_cpu->dataAccessWidth(region->address);
+
             if (dataAccessWidth == 1)
             {
                 STRING_IO8_SUMMARY(errorCustom, region->location, region->mask, region->description);
@@ -573,12 +553,12 @@ CGame::inputRead(
             {
                 error = errorNotImplemented;
             }
-        }
-    }
 
-    if (SUCCESS(error))
-    {
-        error = errorCustom;
+            if (SUCCESS(error))
+            {
+                error = errorCustom;
+            }
+        }
     }
 
     return error;
@@ -614,41 +594,14 @@ CGame::outputWrite(
 
         if (key == SELECT_KEY)
         {
-            //
-            // Check if we need to perform a bank switch for this region.
-            // and do that now for all the testing to be done upon it.
-            //
-            if (region->bankSwitch != NO_BANK_SWITCH)
-            {
-                error = region->bankSwitch( (void *) this );
-            }
+            CIoCheck ioCheck( m_cpu,
+                              m_inputRegion,
+                              m_outputRegion,
+                              (void *) this );
 
-            {
-                UINT16 outData;
+            error = ioCheck.output(region, m_outputWriteRegionOn);
 
-                //
-                // If we're wanting to write active(on) then just use the mask.
-                // else use the clear of the mask. This is a toggle.
-                //
-                if (m_outputWriteRegionOn)
-                {
-                    errorCustom->description = "OK: Active";
-
-                    outData = region->invertMask ^ region->activeMask;
-                    m_outputWriteRegionOn = false;
-
-                }
-                else
-                {
-                    errorCustom->description = "OK: Inactive";
-
-                    outData = region->invertMask;
-                    m_outputWriteRegionOn = true;
-                }
-
-                error = m_cpu->memoryWrite( region->address,
-                                            outData );
-            }
+            m_outputWriteRegionOn = !m_outputWriteRegionOn;
         }
         else
         {
@@ -664,12 +617,12 @@ CGame::outputWrite(
             {
                 error = errorNotImplemented;
             }
-        }
-    }
 
-    if (SUCCESS(error))
-    {
-        error = errorCustom;
+            if (SUCCESS(error))
+            {
+                error = errorCustom;
+            }
+        }
     }
 
     return error;
