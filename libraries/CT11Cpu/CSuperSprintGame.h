@@ -22,19 +22,37 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <CT11GenericGame.h>
-#include <CChampionshipSprintGame.h>
-#include <CSuperSprintGame.h>
+#ifndef CSuperSprintGame_h
+#define CSuperSprintGame_h
 
-//
-// The initial selector to select the game to test.
-//
-static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (CT11GenericGame::createInstance2716),      false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (CT11GenericGame::createInstance2732),      false},
-                                                  {"Champ Sprint   ",  onSelectGame,    (void*) (CChampionshipSprintGame::createInstance),  false},
-                                                  {"Super Sprint   ",  onSelectGame,    (void*) (CSuperSprintGame::createInstance),         false},
-                                                  { 0, 0 }
-                                                 };
+#include "CSystem2BaseGame.h"
+
+class CSuperSprintGame : public CSystem2BaseGame
+{
+    public:
+
+        //
+        // Constructors for this game.
+        //
+
+        static IGame* createInstance(
+        );
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CSuperSprintGame(
+            const ROM_REGION *romRegion
+        );
+
+};
+
+#endif
 
 
