@@ -235,7 +235,7 @@ CRomCheck::readData(
     //
     if (romRegion->bankSwitch != NO_BANK_SWITCH)
     {
-        error = romRegion->bankSwitch( (void *) this );
+        error = romRegion->bankSwitch( m_bankSwitchContext );
     }
 
     //

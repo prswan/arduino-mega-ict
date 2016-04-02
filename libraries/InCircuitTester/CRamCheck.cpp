@@ -25,8 +25,8 @@
 #include "CRamCheck.h"
 #include "zutil.h"
 
-static const int s_randomSeed[] = {7, 144};
-static const int s_randomSize = 0x10000;
+static const long s_randomSeed[] = {7, 144};
+static const long s_randomSize = 0x10000;
 
 
 CRamCheck::CRamCheck(
@@ -288,7 +288,7 @@ CRamCheck::writeReadData(
     //
     if (ramRegion->bankSwitch != NO_BANK_SWITCH)
     {
-        error = ramRegion->bankSwitch( (void *) this );
+        error = ramRegion->bankSwitch( m_bankSwitchContext );
     }
 
     //
@@ -540,7 +540,7 @@ CRamCheck::writeRandom(
         randomSeed(seed);
         for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
         {
-            UINT8 data = (UINT8) random(s_randomSize);
+            UINT16 data = (UINT16) random(s_randomSize);
             data = (invert) ? ~data : data;
 
             error = m_cpu->memoryWrite(address, data);
