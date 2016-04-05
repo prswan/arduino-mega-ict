@@ -86,7 +86,7 @@ CRamCheck::checkChipSelect(
     for (int i = 0 ; m_ramRegion[i].end != 0 ; i++)
     {
         error = writeRandom( &m_ramRegion[i],
-                             s_randomSeed[1],
+                             (m_ramRegion[i].start & 0xFFFF),
                              true );
 
         if (FAILED(error))
@@ -100,7 +100,7 @@ CRamCheck::checkChipSelect(
         for (int i = 0 ; m_ramRegion[i].end != 0 ; i++)
         {
             error = readVerifyRandom( &m_ramRegion[i],
-                                      s_randomSeed[1],
+                                      (m_ramRegion[i].start & 0xFFFF),
                                       true );
 
             if (FAILED(error))
