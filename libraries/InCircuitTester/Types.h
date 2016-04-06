@@ -438,6 +438,7 @@ typedef struct _INTERRUPT_DEFINITION {
             error->code = ERROR_FAILED;                                  \
             error->description  = "E:";                                  \
             error->description += connection[0].name;                    \
+            STRING_UINT8_HEX(error->description, expValue);              \
             STRING_UINT8_HEX(error->description, value);                 \
             goto Exit;                                                   \
         }                                                                \

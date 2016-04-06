@@ -49,10 +49,11 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //
                                                   // These regions are access with special support in the CT11Cpu triggered
                                                   // via address 0x10xxxx.
                                                   //
-                                                  //                                        "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x00000, 0x0FFE,   0xFF, "c7K", "Prog L"}, // Program RAM 6116, Lo
-                                                  {NO_BANK_SWITCH, 0x00001, 0x0FFF,   0xFF, "c7P", "Prog H"}, // Program RAM 6116, Hi
-                                                  {NO_BANK_SWITCH, 0x12000, 0x3FFF, 0xFFFF, "???", "V.Ram "}, // Video RAM, 16-bit only
+                                                  //                                         "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x00000, 0x00FFE,   0xFF, "c7K", "Prog L"}, // Program RAM 6116, Lo
+                                                  {NO_BANK_SWITCH, 0x00001, 0x00FFF,   0xFF, "c7P", "Prog H"}, // Program RAM 6116, Hi
+                                                  {NO_BANK_SWITCH, 0x10000, 0x10FFF, 0xFFFF, "c7?", "Prog16"}, // Program RAM 6116, 16-bit
+//                                                {NO_BANK_SWITCH, 0x12000, 0x3FFF, 0xFFFF, "???", "V.Ram "}, // Video RAM, 16-bit only
                                                   {0}
                                                 }; // end of list
 

@@ -34,18 +34,12 @@
 static const UINT8 s_romData2n_c7L[]    = {0x7e,0xdf,0x04,0xdf,0x5f,0xe6,0xdf,0x00,0x00,0xd4,0xc6,0x1f,0x32,0x00};
 static const UINT8 s_romData2n_c7N[]    = {0x01,0x17,0x00,0x0b,0x00,0x10,0x15,0x18,0x0a,0x04,0xbb,0xa0,0x0a,0x0c};
 
-static const UINT8 s_romData2n_c00[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-
 //
 // Base set from MAME (csprint) - Rev 3
 //
 static const ROM_REGION s_romRegion[] PROGMEM = { //
                                                  {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2n_c7L, 0x1dcf8b98, "c7L"}, // Fixed Prog. Mem Lo
                                                  {NO_BANK_SWITCH, 0x8001, 0x4000, s_romData2n_c7N, 0xbdcbe42c, "c7N"}, // Fixed Prog. Mem Hi
-                                                 {NO_BANK_SWITCH, 0x6000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Lo
-                                                 {NO_BANK_SWITCH, 0x6001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Hi
-                                                 {NO_BANK_SWITCH, 0x4000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Lo
-                                                 {NO_BANK_SWITCH, 0x4001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Hi
                                                  {0} }; // end of list
 
 

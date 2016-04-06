@@ -122,6 +122,10 @@ CT11Cpu::idle(
 )
 {
     pinMode(g_pinMap40DIL[s_BGND_i.pin],          INPUT);
+
+    digitalWrite(g_pinMap40DIL[s__BCLR_o.pin],    HIGH);
+    pinMode(g_pinMap40DIL[s__BCLR_o.pin],         OUTPUT);
+
     pinMode(g_pinMap40DIL[s_PUP_i.pin],           INPUT);
     pinMode(g_pinMap40DIL[s_GND_i.pin],           INPUT);
 
@@ -154,14 +158,14 @@ CT11Cpu::idle(
     m_pinPI.digitalWrite(LOW);
     m_pinPI.pinMode(OUTPUT);
 
-    pinMode(g_pinMap40DIL[s_AI10_DMR_i.pin],        INPUT);
-    pinMode(g_pinMap40DIL[s_AI11_CP3_i.pin],        INPUT);
-    pinMode(g_pinMap40DIL[s_AI12_CP2_i.pin],        INPUT);
-    pinMode(g_pinMap40DIL[s_AI13_CP1_i.pin],        INPUT);
-    pinMode(g_pinMap40DIL[s_AI14_CP0_i.pin],        INPUT);
-    pinMode(g_pinMap40DIL[s_AI15_VEC_i.pin],        INPUT);
-    pinMode(g_pinMap40DIL[s_AI16_PF_i.pin],         INPUT);
-    pinMode(g_pinMap40DIL[s_AI17_HLT_i.pin],        INPUT);
+    pinMode(g_pinMap40DIL[s_AI10_DMR_i.pin], INPUT_PULLUP);
+    pinMode(g_pinMap40DIL[s_AI11_CP3_i.pin], INPUT_PULLUP);
+    pinMode(g_pinMap40DIL[s_AI12_CP2_i.pin], INPUT_PULLUP);
+    pinMode(g_pinMap40DIL[s_AI13_CP1_i.pin], INPUT_PULLUP);
+    pinMode(g_pinMap40DIL[s_AI14_CP0_i.pin], INPUT_PULLUP);
+    pinMode(g_pinMap40DIL[s_AI15_VEC_i.pin], INPUT_PULLUP);
+    pinMode(g_pinMap40DIL[s_AI16_PF_i.pin],  INPUT_PULLUP);
+    pinMode(g_pinMap40DIL[s_AI17_HLT_i.pin], INPUT_PULLUP);
 
     pinMode(g_pinMap40DIL[s_Vcc_i.pin],             INPUT);
 
@@ -252,9 +256,6 @@ CT11Cpu::check(
         CHECK_BUS_VALUE_UINT8_EXIT(error, m_busDALHi, s_DALHi_iot, 0x36);
         CHECK_BUS_VALUE_UINT8_EXIT(error, m_busDALLo, s_DALLo_iot, 0xFF);
         ::digitalWrite(g_pinMap40DIL[s__BCLR_o.pin], HIGH);
-
-        CHECK_BUS_VALUE_UINT8_EXIT(error, m_busDALHi, s_DALHi_iot, 0xFF);
-        CHECK_BUS_VALUE_UINT8_EXIT(error, m_busDALLo, s_DALLo_iot, 0xFF);
     }
 
     // Perform the ASPI cycle to read in the control pin state on the AI lines.
@@ -270,6 +271,13 @@ CT11Cpu::check(
         m_pin_CAS.digitalWriteHIGH();
         m_pinPI.digitalWriteLOW();
     }
+
+    // Final check that the databus has gone back to idle state.
+    // Some time is needed after BCLR to allow the bus to float back
+    // to all HI
+
+    CHECK_BUS_VALUE_UINT8_EXIT(error, m_busDALHi, s_DALHi_iot, 0xFF);
+    CHECK_BUS_VALUE_UINT8_EXIT(error, m_busDALLo, s_DALLo_iot, 0xFF);
 
 Exit:
     return error;

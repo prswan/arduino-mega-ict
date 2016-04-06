@@ -34,7 +34,7 @@
 static const UINT8 s_romData2n_c7L[]    = {0x7e,0xdf,0x04,0xdf,0x5f,0xe6,0xdf,0x00,0x00,0x99,0xd7,0x40,0x5f,0x80};
 static const UINT8 s_romData2n_c7N[]    = {0x01,0x17,0x00,0x0b,0x00,0x10,0x15,0x18,0x0a,0x01,0x20,0xdc,0x08,0x1d};
 
-static const UINT8 s_romData2n_c00[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+//static const UINT8 s_romData2n_c00[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
 //
 // Base set from MAME (ssprint) - Rev 4
@@ -42,10 +42,10 @@ static const UINT8 s_romData2n_c00[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x
 static const ROM_REGION s_romRegion[] PROGMEM = { //
                                                  {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2n_c7L, 0xee312027, "c7L"}, // Fixed Prog. Mem Lo
                                                  {NO_BANK_SWITCH, 0x8001, 0x4000, s_romData2n_c7N, 0x2ef15354, "c7N"}, // Fixed Prog. Mem Hi
-                                                 {NO_BANK_SWITCH, 0x6000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Lo
-                                                 {NO_BANK_SWITCH, 0x6001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Hi
-                                                 {NO_BANK_SWITCH, 0x4000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Lo
-                                                 {NO_BANK_SWITCH, 0x4001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Hi
+//                                               {NO_BANK_SWITCH, 0x6000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Lo
+//                                               {NO_BANK_SWITCH, 0x6001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Hi
+//                                               {NO_BANK_SWITCH, 0x4000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Lo
+//                                               {NO_BANK_SWITCH, 0x4001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Hi
                                                  {0} }; // end of list
 
 

@@ -120,7 +120,7 @@ CRomCheck::checkData2n(
         UINT8  dataBusWidth      = m_cpu->dataBusWidth(romRegion->start);
         UINT16 dataBusWidthShift = (dataBusWidth == 2) ? 1 : 0;
 
-        for (UINT16 shift = 0 ; (1 << shift) < (romRegion->length * dataBusWidth) ; shift++)
+        for (UINT16 shift = 0 ; (1 << shift) < romRegion->length ; shift++)
         {
             UINT32 address = romRegion->start + (1 << (shift + dataBusWidthShift));
             UINT16 expData = romRegion->data2n[shift];
@@ -248,33 +248,33 @@ CRomCheck::readData(
 
         if (dataAccessWidth == 1)
         {
-            for (UINT32 address = 0 ; address < 4 ; address += dataBusWidth)
+            for (UINT32 index = 0 ; index < 4 ; index++)
             {
-                error = m_cpu->memoryRead( (address + romRegion->start),
-                                           &data[address] );
+                error = m_cpu->memoryRead( (index * dataBusWidth) + romRegion->start,
+                                           &data[index] );
 
                 if (FAILED(error))
                 {
                     break;
                 }
 
-                STRING_UINT8_HEX(errorCustom->description, data[address]);
+                STRING_UINT8_HEX(errorCustom->description, data[index]);
                 error = errorCustom;
             }
         }
         else if (dataAccessWidth = 2)
         {
-            for (UINT32 address = 0 ; address < 2 ; address += dataBusWidth)
+            for (UINT32 index = 0 ; index < 2 ; index++)
             {
-                error = m_cpu->memoryRead( (address + romRegion->start),
-                                           &data[address] );
+                error = m_cpu->memoryRead( (index * dataBusWidth) + romRegion->start,
+                                           &data[index] );
 
                 if (FAILED(error))
                 {
                     break;
                 }
 
-                STRING_UINT16_HEX(errorCustom->description, data[address]);
+                STRING_UINT16_HEX(errorCustom->description, data[index]);
                 error = errorCustom;
             }
         }
