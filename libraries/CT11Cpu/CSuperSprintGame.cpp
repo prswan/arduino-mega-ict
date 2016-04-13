@@ -30,22 +30,31 @@
 
 //
 // Base set from MAME (ssprint) - Rev 4
-//                                           01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
+//                                           01   02   04   08   10   20   40   80  100  200  400  800 1000 2000 4000
 static const UINT8 s_romData2n_c7L[]    = {0x7e,0xdf,0x04,0xdf,0x5f,0xe6,0xdf,0x00,0x00,0x99,0xd7,0x40,0x5f,0x80};
 static const UINT8 s_romData2n_c7N[]    = {0x01,0x17,0x00,0x0b,0x00,0x10,0x15,0x18,0x0a,0x01,0x20,0xdc,0x08,0x1d};
 
-//static const UINT8 s_romData2n_c00[]    = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+static const UINT8 s_romData2n_c6F[]    = {0x6e,0x8d,0x98,0x82,0x98,0x93,0x9b,0xd1,0xea,0x6e,0x6e,0x00,0x0f,0x00,0x00};
+static const UINT8 s_romData2n_c6N[]    = {0x05,0x05,0x00,0x06,0x00,0x06,0x06,0x06,0x06,0x05,0x05,0x00,0x0f,0x00,0x00};
+static const UINT8 s_romData2n_c6K[]    = {0x0f,0x0f,0x0f,0x0f,0x0f,0x0f,0x0f,0x01,0x01,0x01,0x01,0x58,0x0f,0x0f,0x01};
+static const UINT8 s_romData2n_c6R[]    = {0x0f,0x0f,0x0f,0x0f,0x0f,0x0f,0x0f,0x01,0x01,0x01,0x04,0x18,0x0f,0x0f,0x01};
+static const UINT8 s_romData2n_c6L[]    = {0x02,0x02,0x02,0x02,0x4b,0x41,0x61,0x7d,0x03,0x1f,0x00,0x00,0xe6,0x08,0x00};
+static const UINT8 s_romData2n_c6S[]    = {0x00,0x00,0x00,0x00,0x07,0x07,0x07,0x07,0x00,0x00,0x00,0x00,0x06,0x07,0x00};
 
 //
 // Base set from MAME (ssprint) - Rev 4
 //
 static const ROM_REGION s_romRegion[] PROGMEM = { //
-                                                 {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2n_c7L, 0xee312027, "c7L"}, // Fixed Prog. Mem Lo
-                                                 {NO_BANK_SWITCH, 0x8001, 0x4000, s_romData2n_c7N, 0x2ef15354, "c7N"}, // Fixed Prog. Mem Hi
-//                                               {NO_BANK_SWITCH, 0x6000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Lo
-//                                               {NO_BANK_SWITCH, 0x6001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 1 Prog. Mem Hi
-//                                               {NO_BANK_SWITCH, 0x4000, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Lo
-//                                               {NO_BANK_SWITCH, 0x4001, 0x1000, s_romData2n_c00, 0x00000000, "c??"}, // Page 0 Prog. Mem Hi
+                                                 {NO_BANK_SWITCH, 0x00008000, 0x4000, s_romData2n_c7L, 0xee312027, "c7L"}, // Fixed Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x00008001, 0x4000, s_romData2n_c7N, 0x2ef15354, "c7N"}, // Fixed Prog. Mem Hi
+                                                 {NO_BANK_SWITCH, 0x00800000, 0x8000, s_romData2n_c6F, 0xed1d6205, "c6F"}, // Paged Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x00800001, 0x8000, s_romData2n_c6N, 0xaecaa2bf, "c6N"}, // Paged Prog. Mem Hi
+                                                 // 6J not used
+                                                 // 6P not used
+                                                 {NO_BANK_SWITCH, 0x00A00000, 0x8000, s_romData2n_c6K, 0xde6c4db9, "c6K"}, // Paged Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x00A00001, 0x8000, s_romData2n_c6R, 0xaff23b5a, "c6R"}, // Paged Prog. Mem Hi
+                                                 {NO_BANK_SWITCH, 0x00B00000, 0x8000, s_romData2n_c6L, 0x92f5392c, "c6L"}, // Paged Prog. Mem Lo
+                                                 {NO_BANK_SWITCH, 0x00B00001, 0x8000, s_romData2n_c6S, 0x0381f362, "c6S"}, // Paged Prog. Mem Hi
                                                  {0} }; // end of list
 
 

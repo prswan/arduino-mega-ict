@@ -120,9 +120,9 @@ CRomCheck::checkData2n(
         UINT8  dataBusWidth      = m_cpu->dataBusWidth(romRegion->start);
         UINT16 dataBusWidthShift = (dataBusWidth == 2) ? 1 : 0;
 
-        for (UINT16 shift = 0 ; (1 << shift) < romRegion->length ; shift++)
+        for (UINT32 shift = 0 ; (1UL << shift) < romRegion->length ; shift++)
         {
-            UINT32 address = romRegion->start + (1 << (shift + dataBusWidthShift));
+            UINT32 address = romRegion->start + (1UL << (shift + dataBusWidthShift));
             UINT16 expData = romRegion->data2n[shift];
             UINT16 recData = 0;
 

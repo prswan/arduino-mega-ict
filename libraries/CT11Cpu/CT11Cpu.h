@@ -41,6 +41,8 @@ class CT11Cpu : public ICpu
         //
 
         CT11Cpu(
+            AddressRemapCallback  addressRemapCallback,
+            void                 *addressRemapCallbackContext
         );
 
         // ICpu Interface
@@ -64,8 +66,13 @@ class CT11Cpu : public ICpu
         // The T11 is a 16-bit CPU.
         //
         // T11 Address Space:
-        // 0x00000 -> 0x0FFFF - 8-bit access where 0x0 = Lo & 0x1 == Hi.
-        // 0x10000 -> 0x1FFFF - 16-bit access.
+        // 0x00000000 -> 8-bit access, 0x*0 = Lo & 0x*1 == Hi.
+        // 0x01000000 -> 16-bit access flag
+        // 0x02000000 -> VSYNC access flag
+        //
+        // Atari System 2 address remap callback further defines
+        // 0x00300000 -> Paged ROM Chip Select
+        // 0x000F0000 -> Extended address range (128Kb ROM addresses)
         //
 
         virtual PERROR memoryRead(
@@ -105,6 +112,9 @@ class CT11Cpu : public ICpu
         );
 
     private:
+
+        AddressRemapCallback  m_addressRemapCallback;
+        void                 *m_addressRemapCallbackContext;
 
         CFast8BitBus  m_busDALHi;
         CFast8BitBus  m_busDALLo;

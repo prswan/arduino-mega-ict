@@ -46,14 +46,13 @@
 //
 static const RAM_REGION s_ramRegion[] PROGMEM = { //
                                                   // See note above about access restrictions w.r.t video RAM access
-                                                  // These regions are access with special support in the CT11Cpu triggered
-                                                  // via address 0x10xxxx.
+                                                  // These regions are access with special support in the CT11Cpu.
                                                   //
-                                                  //                                         "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x00000, 0x00FFE,   0xFF, "c7K", "Prog L"}, // Program RAM 6116, Lo
-                                                  {NO_BANK_SWITCH, 0x00001, 0x00FFF,   0xFF, "c7P", "Prog H"}, // Program RAM 6116, Hi
-                                                  {NO_BANK_SWITCH, 0x10000, 0x10FFF, 0xFFFF, "c7?", "Prog16"}, // Program RAM 6116, 16-bit
-//                                                {NO_BANK_SWITCH, 0x12000, 0x3FFF, 0xFFFF, "???", "V.Ram "}, // Video RAM, 16-bit only
+                                                  //                                               "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x00000000, 0x00000FFE,   0xFF, "c7K", "Prog L"}, // Program RAM 6116, Lo
+                                                  {NO_BANK_SWITCH, 0x00000001, 0x00000FFF,   0xFF, "c7P", "Prog H"}, // Program RAM 6116, Hi
+                                                  {NO_BANK_SWITCH, 0x01000000, 0x01000FFF, 0xFFFF, "c7?", "Prog16"}, // Program RAM 6116, 16-bit
+//                                                {NO_BANK_SWITCH, 0x03002000, 0x01003FFF, 0xFFFF, "???", "V.Ram "}, // Video RAM, 16-bit VSYNC
                                                   {0}
                                                 }; // end of list
 
@@ -65,16 +64,18 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 //
 // Input region is the same for all games on this board set.
 //
-static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
+static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                   "012", "012345"
+                                                      {NO_BANK_SWITCH, 0x01001400, 0x00FF, "c1S", "ADC in"}, // ADC data
+                                                      {NO_BANK_SWITCH, 0x01001800, 0x00FF, "c5P", "SW in "}, // Control inpiuts
+                                                      {NO_BANK_SWITCH, 0x01001800, 0x8000, "c2F", "SlfTst"}, // Self Test
                                                       {0}
                                                     }; // end of list
 
 //
 // Output region is the same for all versions on this board set.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                                 "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x20000|(0x1400>>1), 0xFC, 0x00,  "c??", "PPage0"}, // Prog. Mem page 0
-                                                        {NO_BANK_SWITCH, 0x20000|(0x1402>>1), 0xFC, 0x00,  "c??", "PPage1"}, // Prog. Mem page 1
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                            "012", "012345"
+                                                        {NO_BANK_SWITCH, 0x01001480, 0x0001, 0x0000,  "c1S", "ADC go"}, // ADC Start
                                                         {0}
                                                       }; // end of list
 
@@ -93,7 +94,7 @@ CSystem2BaseGame::CSystem2BaseGame(
            s_outputRegion,
            s_customFunction)
 {
-    m_cpu = new CT11Cpu();
+    m_cpu = new CT11Cpu(onAddressRemap, this);
     m_cpu->idle();
 
     // Default
@@ -123,28 +124,96 @@ CSystem2BaseGame::interruptCheck(
 
 
 //
-// Select program page 0
-// TBD
+// The paged program ROMs are mapped into two small blocks. In order to
+// properly check those ROMs we remap the "virtual" address supplied
+// in the ROM description into the paged area.
 //
-PERROR
-CSystem2BaseGame::onBankSwitchProgramPage0(
-    void *cSystem2BaseGame
+// NOTE: Since this function makes calls to write on the CPU, it is
+//       recursive.
+//
+UINT32
+CSystem2BaseGame::onAddressRemap(
+    void   *cSystem2BaseGame,
+    UINT32  address
 )
 {
-    PERROR           error     = errorNotImplemented;
-    return error;
-}
+    CSystem2BaseGame *thisGame  = (CSystem2BaseGame *) cSystem2BaseGame;
+    ICpu             *cpu       = thisGame->m_cpu;
 
-//
-// Select program page 1
-// TBD
-//
-PERROR
-CSystem2BaseGame::onBankSwitchProgramPage1(
-    void *cSystem2BaseGame
-)
-{
-    PERROR           error     = errorNotImplemented;
-    return error;
+    UINT32 cpuAddress = 0;
+    UINT32 pad = 0;
+    static UINT32 curPad0 = ~0;
+    static UINT32 curPad1 = ~0;
+
+    // If not one of the remapped program ROM's we're done.
+    if ((address & 0x00F00000) == 0)
+    {
+        return address;
+    }
+
+    //
+    // PAD Calculation
+    // ---------------
+    //
+
+    // DAL -> PAD -> ROM mapping
+    //
+    // DAL15 -> PAD5 ->  CS1-B
+    // DAL14 -> PAD4 ->  CS0-A
+    // DAL13 -> PAD3 ->  A13 (LA14)
+    // DAL12 -> PAD2 ->  A12 (LA13)
+    // DAL11 -> PAD1 -> !A15 (LA16) <- extended
+    // DAL10 -> PAD0 -> !A14 (LA15)
+
+    // Set PAD 4 & 5 based on ROM selected.
+    pad |= ( address & 0x00300000) >> (20 - 4);
+
+    // Set PAD 2 & 3 based on LA 14 & 13
+    pad |= ( address & 0x00006000) >> (13 - 2);
+
+    // Set PAD 0 & 1 based on LA 16 & 15
+    pad |= (~address & 0x00018000) >> (15 - 0);
+
+    //
+    // CPU Address Calculation
+    // -----------------------
+    //
+
+    // Shave off LA0->LA12
+    cpuAddress |= (address & 0xFF001FFF);
+
+    //
+    // Select a page block to use.
+    // Either would work OK but using both validates
+    // the page register circuits more thoroughly.
+    //
+    if (address & 0x00200000)
+    {
+        // Check if the PAD has changed to gate update.
+        if (pad != curPad0)
+        {
+            // 16-bit write
+            (void) cpu->memoryWrite(0x01001400, (pad << 10));
+            curPad0 = pad;
+        }
+
+        // Add in the page address.
+        cpuAddress |= 0x4000;
+    }
+    else
+    {
+        // Check if the PAD has changed to gate update.
+        if (pad != curPad1)
+        {
+            // 16-bit write
+            (void) cpu->memoryWrite(0x01001402, (pad << 10));
+            curPad1 = pad;
+        }
+
+        // Add in the page address.
+        cpuAddress |= 0x6000;
+    }
+
+    return cpuAddress;
 }
 

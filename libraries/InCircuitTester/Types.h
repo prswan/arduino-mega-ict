@@ -94,6 +94,17 @@ typedef PERROR (*BankSwitchCallback)(void *context);
 #define NO_BANK_SWITCH ((BankSwitchCallback) (NULL))
 
 //
+// This is used as the callback for address remapping.
+// The remapped address is returned based on the supplied address.
+//
+typedef UINT32 (*AddressRemapCallback)(void *context, UINT32 address);
+
+//
+// Setting for the address remap callback that none is required.
+//
+#define NO_ADDRESS_REMAP ((AddressRemapCallback) (NULL))
+
+//
 // This is used as the callback for external interrupt setup/enable.
 //
 typedef PERROR (*ExternalIntSetupCallback)(void *context);

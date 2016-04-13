@@ -95,11 +95,20 @@ static const CONNECTION s_DALLo_iot[] = { {17, "DAL0" },
 //
 // Address flag for 16-bit selection
 //
-static const UINT32 s_16BitAddress = 0x010000;
+static const UINT32 s_16BitAddress = 0x01000000;
+
+//
+// Address flag for video sync memory access
+//
+static const UINT32 s_vSyncAddress = 0x02000000;
 
 
 CT11Cpu::CT11Cpu(
-) : m_busDALHi(g_pinMap40DIL, s_DALHi_iot,  ARRAYSIZE(s_DALHi_iot)),
+    AddressRemapCallback  addressRemapCallback,
+    void                 *addressRemapCallbackContext
+) : m_addressRemapCallback(addressRemapCallback),
+    m_addressRemapCallbackContext(addressRemapCallbackContext),
+    m_busDALHi(g_pinMap40DIL, s_DALHi_iot,  ARRAYSIZE(s_DALHi_iot)),
     m_busDALLo(g_pinMap40DIL, s_DALLo_iot,  ARRAYSIZE(s_DALLo_iot)),
     m_pinPI(g_pinMap40DIL, &s_PI_o),
     m_pinSEL0(g_pinMap40DIL, &s_SEL0_o),
@@ -321,12 +330,28 @@ CT11Cpu::memoryReadWrite(
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
     UINT16 data16 = 0;
-    UINT32 physicalAddress = address & 0xFFFE; // A0 not used
+
+    // Before processing anything, perform any address remapping.
+    if (m_addressRemapCallback)
+    {
+        address = m_addressRemapCallback(m_addressRemapCallbackContext,
+                                         address);
+    }
 
     bool lo      = ((address & 1) == 0) ? true : false;
     bool hi      = ((address & 1) == 1) ? true : false;
     bool is16Bit = (address & s_16BitAddress) ? true : false;
- // bool readySync = (address & 0x100000) ? true : false;
+    bool vSync   = (address & s_vSyncAddress) ? true : false;
+    UINT32 physicalAddress = address & 0xFFFE; // A0 not used
+
+    //
+    // To be implemented and it might be awkward since it uses
+    // clock stretching rather than READY. Why?
+    //
+    if (vSync)
+    {
+        return errorNotImplemented;
+    }
 
     // Drive the address
     m_busDALLo.pinMode(OUTPUT);

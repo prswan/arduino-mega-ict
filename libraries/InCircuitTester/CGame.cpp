@@ -30,7 +30,6 @@
 
 #include <avr/pgmspace.h>
 
-
 CGame::CGame(
     const ROM_REGION      *romRegion,
     const RAM_REGION      *ramRegion,
@@ -54,7 +53,10 @@ CGame::CGame(
         UINT16 uIndexCount = 0;
         UINT16 uRegionSize = 0;
 
-        for ( ; pgm_read_word_near(&romRegion[uIndexCount].length) != 0 ; uIndexCount++) {}
+        for ( ;
+              ((pgm_read_word_near((UINT16*) (&romRegion[uIndexCount].length) + 0) != 0) ||
+               (pgm_read_word_near((UINT16*) (&romRegion[uIndexCount].length) + 1) != 0)) ;
+              uIndexCount++) {}
 
         uRegionSize = sizeof(romRegion[0]) * (uIndexCount+1);
 
@@ -68,7 +70,10 @@ CGame::CGame(
         UINT16 uIndexCount = 0;
         UINT16 uRegionSize = 0;
 
-        for ( ; pgm_read_word_near(&ramRegion[uIndexCount].end) != 0 ; uIndexCount++) {}
+        for ( ;
+              ((pgm_read_word_near((UINT16*) (&ramRegion[uIndexCount].end) + 0) != 0) ||
+               (pgm_read_word_near((UINT16*) (&ramRegion[uIndexCount].end) + 1) != 0)) ;
+              uIndexCount++) {}
 
         uRegionSize = sizeof(ramRegion[0]) * (uIndexCount+1);
 
@@ -82,7 +87,10 @@ CGame::CGame(
         UINT16 uIndexCount = 0;
         UINT16 uRegionSize = 0;
 
-        for ( ; pgm_read_word_near(&ramRegionWriteOnly[uIndexCount].end) != 0 ; uIndexCount++) {}
+        for ( ;
+              ((pgm_read_word_near((UINT16*) (&ramRegionWriteOnly[uIndexCount].end) + 0) != 0) ||
+               (pgm_read_word_near((UINT16*) (&ramRegionWriteOnly[uIndexCount].end) + 1) != 0)) ;
+              uIndexCount++) {}
 
         uRegionSize = sizeof(ramRegionWriteOnly[0]) * (uIndexCount+1);
 
@@ -96,7 +104,7 @@ CGame::CGame(
         UINT16 uIndexCount = 0;
         UINT16 uRegionSize = 0;
 
-        for ( ; pgm_read_byte_near(&inputRegion[uIndexCount].mask) != 0 ; uIndexCount++) {}
+        for ( ; pgm_read_word_near(&inputRegion[uIndexCount].mask) != 0 ; uIndexCount++) {}
 
         uRegionSize = sizeof(inputRegion[0]) * (uIndexCount+1);
 
@@ -110,7 +118,7 @@ CGame::CGame(
         UINT16 uIndexCount = 0;
         UINT16 uRegionSize = 0;
 
-        for ( ; pgm_read_byte_near(&outputRegion[uIndexCount].activeMask) != 0 ; uIndexCount++) {}
+        for ( ; pgm_read_word_near(&outputRegion[uIndexCount].activeMask) != 0 ; uIndexCount++) {}
 
         uRegionSize = sizeof(outputRegion[0]) * (uIndexCount+1);
 

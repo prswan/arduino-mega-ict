@@ -45,7 +45,7 @@ CT11GenericGame::createInstance2732(
 
 CT11GenericGame::CT11GenericGame(
     RomSize romSize
-) : CGenericBaseGame( new CT11Cpu(), romSize )
+) : CGenericBaseGame( new CT11Cpu(NO_ADDRESS_REMAP, NULL), romSize )
 {
 }
 

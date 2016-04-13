@@ -39,12 +39,9 @@ class CSystem2BaseGame : public CGame
         virtual PERROR interruptCheck(
         );
 
-        static PERROR onBankSwitchProgramPage0(
-            void *cSystem2BaseGame
-        );
-
-        static PERROR onBankSwitchProgramPage1(
-            void *cSystem2BaseGame
+        static UINT32 onAddressRemap(
+            void   *cSystem2BaseGame,
+            UINT32  address
         );
 
     protected:
