@@ -44,6 +44,9 @@ class CPhoenixGame : public CPhoenixBaseGame
         static IGame* createInstanceGGISet2(
         );
 
+        static IGame* createInstanceGGISet5(
+        );
+
         //
         // IGame Interface - wholly implemented in the Base game.
         //

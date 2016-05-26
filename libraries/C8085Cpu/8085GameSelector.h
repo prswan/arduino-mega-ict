@@ -34,6 +34,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Phoenix (Cen 1)",  onSelectGame,    (void*) (CPhoenixGame::createInstanceCenturiSet1),  false},
                                                   {"Phoenix (GGI 1)",  onSelectGame,    (void*) (CPhoenixGame::createInstanceGGISet1),      false},
                                                   {"Phoenix (GGI 2)",  onSelectGame,    (void*) (CPhoenixGame::createInstanceGGISet2),      false},
+                                                  {"Phoenix (GGI 5)",  onSelectGame,    (void*) (CPhoenixGame::createInstanceGGISet5),      false},
                                                   { 0, 0 }
                                                  };
 
