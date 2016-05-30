@@ -401,12 +401,14 @@ C8085Cpu::memoryWrite(
 PERROR
 C8085Cpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
     PERROR error = errorSuccess;
     unsigned long startTime = millis();
     unsigned long endTime = startTime + timeoutInMs;
+    int sense = (active ? HIGH : LOW);
     int value = 0;
 
     UINT8 intPin = ((interrupt == NMI) ? (g_pinMap40DIL[s_TRAP_i.pin]) :
@@ -416,14 +418,14 @@ C8085Cpu::waitForInterrupt(
     {
         value = ::digitalRead(intPin);
 
-        if (value == HIGH)
+        if (value == sense)
         {
             break;
         }
     }
     while (millis() < endTime);
 
-    if (value != HIGH)
+    if (value != sense)
     {
         error = errorTimeout;
     }

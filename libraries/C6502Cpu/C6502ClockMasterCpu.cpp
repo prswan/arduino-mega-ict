@@ -349,7 +349,8 @@ C6502ClockMasterCpu::memoryWrite(
 PERROR
 C6502ClockMasterCpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInClockPulses
 )
 {
     return errorNotImplemented;

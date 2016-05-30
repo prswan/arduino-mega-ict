@@ -242,6 +242,7 @@ CGame::interruptCheck(
     for (int i = 0 ; i < 4 ; i++)
     {
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         3000);
         if (FAILED(error))
         {
@@ -260,6 +261,7 @@ CGame::interruptCheck(
         }
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {

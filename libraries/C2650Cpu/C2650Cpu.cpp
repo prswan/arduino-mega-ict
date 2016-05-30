@@ -473,12 +473,14 @@ C2650Cpu::senseRead(
 PERROR
 C2650Cpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
     PERROR error = errorSuccess;
     unsigned long startTime = millis();
     unsigned long endTime = startTime + timeoutInMs;
+    int sense = (active ? LOW : HIGH);
     int value = 0;
 
     UINT8 intPin = g_pinMap40DIL[s__INTREQ_i.pin];
@@ -487,14 +489,14 @@ C2650Cpu::waitForInterrupt(
     {
         value = ::digitalRead(intPin);
 
-        if (value == LOW)
+        if (value == sense)
         {
             break;
         }
     }
     while (millis() < endTime);
 
-    if (value != LOW)
+    if (value != sense)
     {
         error = errorTimeout;
     }

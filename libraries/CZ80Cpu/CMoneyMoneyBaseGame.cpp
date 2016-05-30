@@ -180,6 +180,7 @@ CMoneyMoneyBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x6C06L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         1000);
         if (FAILED(error))
         {
@@ -190,6 +191,7 @@ CMoneyMoneyBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x6C06L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {
@@ -205,6 +207,7 @@ CMoneyMoneyBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x6C06L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {
@@ -220,6 +223,7 @@ CMoneyMoneyBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x6C06L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         1000);
         if (SUCCESS(error))
         {

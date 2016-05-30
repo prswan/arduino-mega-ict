@@ -127,14 +127,18 @@ class ICpu
         ) = 0;
 
         //
-        // Wait for the CPU interrupt to be asserted. If a timeout occurs then a timeout error is returned.
+        // Wait for a CPU interrupt to be asserted (active) or de-asserted (inactive).
+        // If a timeout occurs then a timeout error is returned.
+        //  - For standard asynchronous CPU's the timeout is measured in milliseconds.
+        //  - For clock master CPU's the timeout is measured in clock pulses.
         // In most cases this will need to be called, acked, and then waited for the next interrupt.
         //
         virtual
         PERROR
         waitForInterrupt(
             Interrupt interrupt,
-            UINT16    timeoutInMs
+            bool      active,
+            UINT32    timeoutInMsOrClockPulses
         ) = 0;
 
         //

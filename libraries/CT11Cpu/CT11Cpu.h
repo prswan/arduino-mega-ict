@@ -89,7 +89,8 @@ class CT11Cpu : public ICpu
         PERROR
         waitForInterrupt(
             Interrupt interrupt,
-            UINT16    timeoutInMs
+            bool      active,
+            UINT32    timeoutInMs
         );
 
         virtual

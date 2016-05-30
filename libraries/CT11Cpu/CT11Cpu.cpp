@@ -503,7 +503,8 @@ CT11Cpu::memoryWrite(
 PERROR
 CT11Cpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
     PERROR error = errorNotImplemented;
