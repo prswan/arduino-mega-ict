@@ -166,7 +166,7 @@ CStarWarsBaseGame::CStarWarsBaseGame(
     m_cpu->idle();
 
     // A timer is on the INT pin (vector game thus no VBALNK).
-    m_interrupt = ICpu::INT;
+    m_interrupt = ICpu::IRQ0;
 
     // The interrupt uses an external ROM vector.
     m_interruptAutoVector = false;

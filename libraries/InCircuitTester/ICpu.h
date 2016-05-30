@@ -33,11 +33,23 @@ class ICpu
     public:
 
         //
-        // Interrupt definitions. Most CPU's have an Non Maskable & normal interrupt
+        // Interrupt definitions. Most CPU's have an non-maskable & normal interrupt.
+        // Additional less common interrupt sources are CPU specific with a general
+        // convention that the numerical designations match the CPU, for example on
+        // 8085 RST5==IRQ5 and on T11 CP1==IRQ1.
         //
         typedef enum {
+            RESET,
+            HALT,
             NMI,
-            INT
+            IRQ0,
+            IRQ1,
+            IRQ2,
+            IRQ3,
+            IRQ4,
+            IRQ5,
+            IRQ6,
+            IRQ7
         } Interrupt;
 
         //

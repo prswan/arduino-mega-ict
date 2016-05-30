@@ -53,7 +53,7 @@ CAstroWarsBaseGame::CAstroWarsBaseGame(
     m_cpu->idle();
 
     // There is only a single interrupt pin on the 2650.
-    m_interrupt = ICpu::INT;
+    m_interrupt = ICpu::IRQ0;
 
     // The interrupt uses an external hardware vector.
     m_interruptAutoVector = false;
