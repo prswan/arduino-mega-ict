@@ -39,9 +39,10 @@ class CSystem2BaseGame : public CGame
         virtual PERROR interruptCheck(
         );
 
-        static UINT32 onAddressRemap(
+        static PERROR onAddressRemap(
             void   *cSystem2BaseGame,
-            UINT32  address
+            UINT32  addressIn,
+            UINT32 *addressOut
         );
 
     protected:

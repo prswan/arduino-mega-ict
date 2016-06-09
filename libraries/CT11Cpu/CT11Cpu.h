@@ -109,6 +109,7 @@ class CT11Cpu : public ICpu
         memoryReadWrite(
             UINT32 address,
             UINT16 *data,
+            UINT8  *ai,
             bool   read
         );
 
@@ -119,6 +120,7 @@ class CT11Cpu : public ICpu
 
         CFast8BitBus  m_busDALHi;
         CFast8BitBus  m_busDALLo;
+        CFast8BitBus  m_busAI;
 
         CFastPin      m_pinPI;
         CFastPin      m_pinSEL0;

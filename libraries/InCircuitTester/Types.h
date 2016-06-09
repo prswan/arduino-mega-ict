@@ -97,7 +97,7 @@ typedef PERROR (*BankSwitchCallback)(void *context);
 // This is used as the callback for address remapping.
 // The remapped address is returned based on the supplied address.
 //
-typedef UINT32 (*AddressRemapCallback)(void *context, UINT32 address);
+typedef PERROR (*AddressRemapCallback)(void *context, UINT32 addressIn, UINT32 *addressOut);
 
 //
 // Setting for the address remap callback that none is required.
