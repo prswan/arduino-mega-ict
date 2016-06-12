@@ -196,10 +196,28 @@ Exit:
 }
 
 
+UINT8
+C6802Cpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+C6802Cpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
 PERROR
 C6802Cpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     PERROR error = errorSuccess;
@@ -237,7 +255,7 @@ C6802Cpu::memoryRead(
     // Set the databus to input and read data
     m_busD.pinMode(INPUT);
     m_busD.digitalRead(&data16);
-    *data = (UINT8) data16;
+    *data = data16;
 
 Exit:
 
@@ -254,12 +272,11 @@ Exit:
 PERROR
 C6802Cpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
-    UINT16 data16 = data;
 
     // The ground pins (with pullup) should be connected to GND (LOW)
     // CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
@@ -290,7 +307,7 @@ C6802Cpu::memoryWrite(
 
     // Set the databus to output and write data
     m_busD.pinMode(OUTPUT);
-    m_busD.digitalWrite((UINT16) data);
+    m_busD.digitalWrite(data);
 
 Exit:
 
@@ -298,7 +315,7 @@ Exit:
     if (interruptsDisabled) interrupts();
 
     // Go back to read mode
-    m_pinE.digitalWrite(LOW);    
+    m_pinE.digitalWrite(LOW);
     m_pinR_W.digitalWrite(HIGH);
     m_busD.pinMode(INPUT);
 
@@ -343,7 +360,7 @@ Exit:
 
 PERROR
 C6802Cpu::acknowledgeInterrupt(
-    UINT8     *response
+    UINT16 *response
 )
 {
     PERROR error = errorSuccess;
