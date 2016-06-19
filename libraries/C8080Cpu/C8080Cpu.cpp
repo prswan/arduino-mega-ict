@@ -243,6 +243,16 @@ C8080Cpu::memoryReadWrite(
     bool io        = (address & 0x010000) ? true : false;
     bool readySync = (address & 0x100000) ? true : false;
 
+    //
+    // IO addressing is 256 bytes that mirrors the low byte onto the high
+    // byte of the address bus. Space Invaders uses this effect for address
+    // decoding so we'll simulate that also.
+    //
+    if (io)
+    {
+        address = (address & ~0xFF00) | ((address & 0xFF) << 8);
+    }
+
     // Determine the processor state byte
     if (read)
     {
