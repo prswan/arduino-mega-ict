@@ -45,6 +45,10 @@ class CSystem2BaseGame : public CGame
             UINT32 *addressOut
         );
 
+        static PERROR onBankSwitchVRAM0(
+            void   *cSystem2BaseGame
+        );
+
     protected:
 
         CSystem2BaseGame(

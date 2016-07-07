@@ -37,7 +37,8 @@
 //   'v' - Video board.
 //
 // CPU Compatibility Notes
-//   * TBD. Some sort of clock stretching circuit used with VRAM access.
+//   * Some sort of clock stretching circuit i used with VRAM access.
+//     This is worked around by using the VBLANK interrupt instead.
 //
 
 //
@@ -54,15 +55,16 @@ static const UINT32 s_irq3ClearAddress = 0x010015E0;
 //
 // RAM region is the same for all games on this board set.
 //
+// NOTE: The VRAM sync limits IO to ~50 bytes/s so the VRAM test takes several minutes to complete.
+//
 static const RAM_REGION s_ramRegion[] PROGMEM = { //
                                                   // See note above about access restrictions w.r.t video RAM access
                                                   // These regions are access with special support in the CT11Cpu.
                                                   //
-                                                  //                                               "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x00000000, 0x00000FFE,   0xFF, "c7K", "Prog L"}, // Program RAM 6116, Lo
-                                                  {NO_BANK_SWITCH, 0x00000001, 0x00000FFF,   0xFF, "c7P", "Prog H"}, // Program RAM 6116, Hi
-                                                  {NO_BANK_SWITCH, 0x01000000, 0x01000FFF, 0xFFFF, "c7?", "Prog16"}, // Program RAM 6116, 16-bit
-                                                  {NO_BANK_SWITCH, 0x03002000, 0x01003FFF, 0xFFFF, "???", "V.Ram "}, // Video RAM, 16-bit VSYNC
+                                                  //                                                                    "012", "012345"
+                                                  {NO_BANK_SWITCH,                      0x00000000, 0x00000FFE,   0xFF, "c7K", "Prog L"}, // Program RAM 6116, Lo
+                                                  {NO_BANK_SWITCH,                      0x00000001, 0x00000FFF,   0xFF, "c7P", "Prog H"}, // Program RAM 6116, Hi
+                                                  {CSystem2BaseGame::onBankSwitchVRAM0, 0x03002000, 0x03003FFF, 0xFFFF, "v??", "V.Ram "}, // Video RAM, 16-bit VSYNC
                                                   {0}
                                                 }; // end of list
 
@@ -76,7 +78,7 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                   "012", "012345"
                                                       {NO_BANK_SWITCH, 0x01001400, 0x00FF, "c1S", "ADC in"}, // ADC data
-                                                      {NO_BANK_SWITCH, 0x01001800, 0x00FF, "c5P", "SW in "}, // Control inpiuts
+                                                      {NO_BANK_SWITCH, 0x01001800, 0x00FF, "c5P", "SW in "}, // Control inputs
                                                       {NO_BANK_SWITCH, 0x01001800, 0x8000, "c2F", "SlfTst"}, // Self Test
                                                       {0}
                                                     }; // end of list
@@ -130,13 +132,63 @@ CSystem2BaseGame::~CSystem2BaseGame(
 
 
 //
-// According to the schematics Pheonix has no interrupts connected.
+// Simple test that the VBLANK interrupt is generated.
 //
 PERROR
 CSystem2BaseGame::interruptCheck(
 )
 {
-    PERROR           error     = errorNotImplemented;
+    PERROR error = errorSuccess;
+
+    errorCustom->code = ERROR_SUCCESS;
+    errorCustom->description = "OK:";
+
+    // Enable the VBLANK interrupt
+    error = m_cpu->memoryWrite(s_irqEnableAddress, 0x8);
+    if (FAILED(error))
+    {
+        goto Exit;
+    }
+
+    for (int i = 0 ; i < 4 ; i++)
+    {
+        // Reset the VBLANK interrupt.
+        error = m_cpu->memoryWrite(s_irq3ClearAddress, 0x0);
+        if (FAILED(error))
+        {
+            goto Exit;
+        }
+
+        // Wait for VBLANK
+        error = m_cpu->waitForInterrupt(ICpu::IRQ3, true, 300);
+        if (FAILED(error))
+        {
+            goto Exit;
+        }
+
+        // Reset the VBLANK interrupt.
+        error = m_cpu->memoryWrite(s_irq3ClearAddress, 0x0);
+        if (FAILED(error))
+        {
+            goto Exit;
+        }
+
+        // Confirm VBLANK inactive
+        error = m_cpu->waitForInterrupt(ICpu::IRQ3, false, 0);
+        if (FAILED(error))
+        {
+            goto Exit;
+        }
+
+        // Wait for VBLANK
+        error = m_cpu->waitForInterrupt(ICpu::IRQ3, true, 300);
+        if (FAILED(error))
+        {
+            goto Exit;
+        }
+    }
+
+Exit:
     return error;
 }
 
@@ -237,12 +289,10 @@ CSystem2BaseGame::onAddressRemap(
     // Check for VBLANK synchronization
     if ((cpuAddress & 0x02000000) != 0)
     {
-        // Enable the VBLANK interrupt
-        error = cpu->memoryWrite(s_irqEnableAddress, 0x8);
-        if (FAILED(error))
-        {
-            goto Exit;
-        }
+        //
+        // The VBLANK interrupt is already enabled
+        // by the VRAM bank switch.
+        //
 
         // Reset the VBLANK interrupt.
         error = cpu->memoryWrite(s_irq3ClearAddress, 0x0);
@@ -267,6 +317,32 @@ Exit:
 
     *addressOut = cpuAddress;
 
+    return error;
+}
+
+
+//
+// Enable the VBLANK interrupt when the VRAM is selected.
+// In future the slapstic programming for the video banking
+// would go here.
+//
+PERROR
+CSystem2BaseGame::onBankSwitchVRAM0(
+    void   *cSystem2BaseGame
+)
+{
+    PERROR           error     = errorSuccess;
+    CSystem2BaseGame *thisGame  = (CSystem2BaseGame *) cSystem2BaseGame;
+    ICpu             *cpu       = thisGame->m_cpu;
+
+    // Enable the VBLANK interrupt for VRAM access sync.
+    error = cpu->memoryWrite(s_irqEnableAddress, 0x8);
+    if (FAILED(error))
+    {
+        goto Exit;
+    }
+
+Exit:
     return error;
 }
 
