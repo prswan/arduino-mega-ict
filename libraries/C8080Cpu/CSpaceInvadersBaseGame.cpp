@@ -118,7 +118,7 @@ CSpaceInvadersBaseGame::CSpaceInvadersBaseGame(
     // vector depends on the video count triggering it
     // (0xcf and 0xd7)
     //
-    m_interrupt = ICpu::INT;
+    m_interrupt = ICpu::IRQ0;
     m_interruptAutoVector = false;
 }
 
