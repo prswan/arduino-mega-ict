@@ -492,7 +492,8 @@ C6809ECpu::memoryWrite(
 PERROR
 C6809ECpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16 timeoutInMs
+    bool      active,
+    UINT32    timeoutInClockPulses
 )
 {
     return errorNotImplemented;

@@ -258,12 +258,14 @@ Exit:
 PERROR
 C6502Cpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
     PERROR error = errorSuccess;
     unsigned long startTime = millis();
     unsigned long endTime = startTime + timeoutInMs;
+    int sense = (active ? LOW : HIGH);
     int value = 0;
 
     UINT8 intPin = ((interrupt == NMI) ? (g_pinMap40DIL[s__NMI_i.pin]) :
@@ -273,14 +275,14 @@ C6502Cpu::waitForInterrupt(
     {
         value = ::digitalRead(intPin);
 
-        if (value == LOW)
+        if (value == sense)
         {
             break;
         }
     }
     while (millis() < endTime);
 
-    if (value != LOW)
+    if (value != sense)
     {
         error = errorTimeout;
     }

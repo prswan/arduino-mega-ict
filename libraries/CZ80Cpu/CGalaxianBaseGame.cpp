@@ -177,6 +177,7 @@ CGalaxianBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x7001L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         1000);
         if (FAILED(error))
         {
@@ -187,6 +188,7 @@ CGalaxianBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x7001L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {
@@ -202,6 +204,7 @@ CGalaxianBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x7001L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {
@@ -217,6 +220,7 @@ CGalaxianBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x7001L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         1000);
         if (SUCCESS(error))
         {
@@ -302,7 +306,7 @@ CGalaxianBaseGame::shellMissileTest(
             cpu->memoryWrite(intEnable, 0x00);
             cpu->memoryWrite(intEnable, 0x01);
 
-            error = cpu->waitForInterrupt(thisGame->m_interrupt, 1000);
+            error = cpu->waitForInterrupt(thisGame->m_interrupt, true, 1000);
             if (FAILED(error))
             {
                 break;

@@ -152,8 +152,8 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
 
     m_cpu->idle();
 
-    // VBLANK is on the INT pin.
-    m_interrupt = ICpu::INT;
+    // VBLANK is on the INT pin (==IRQ0).
+    m_interrupt = ICpu::IRQ0;
 
     // The interrupt is based on an internal vector
     m_interruptAutoVector = true;

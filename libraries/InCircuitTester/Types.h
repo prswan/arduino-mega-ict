@@ -97,7 +97,7 @@ typedef PERROR (*BankSwitchCallback)(void *context);
 // This is used as the callback for address remapping.
 // The remapped address is returned based on the supplied address.
 //
-typedef UINT32 (*AddressRemapCallback)(void *context, UINT32 address);
+typedef PERROR (*AddressRemapCallback)(void *context, UINT32 addressIn, UINT32 *addressOut);
 
 //
 // Setting for the address remap callback that none is required.
@@ -263,7 +263,7 @@ typedef struct _INTERRUPT_DEFINITION {
 
     ExternalIntSetupCallback externalIntSetup; // NULL if no external interrupt setup is needed.
     ExternalIntAckCallback   externalIntAck;   // NULL if no external interrupt acknowledge is needed.
-    UINT8                    type;             // 0 - NMI, 1 - INT, 2 - INTx, ICpu specific.
+    UINT8                    type;             // ICpu::Interrupt
     UINT8                    response;         // The vector, 0 if there is no external hardware vector.
     CHAR                     location[4];      // 3 characters
     CHAR                     description[7];   // 6 characters
