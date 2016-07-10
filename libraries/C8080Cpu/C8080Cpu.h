@@ -107,7 +107,7 @@ class C8080Cpu : public ICpu
 
     private:
 
-        CFast8BitBus  m_busA;
+        CBus          m_busA;
         CFast8BitBus  m_busD;
 
         CFastPin      m_pinDBIN;

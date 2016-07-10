@@ -198,7 +198,7 @@ C8080Cpu::check(
     CHECK_VALUE_EXIT(error, s_HOLD_i, LOW);
 
     // The address bus should be uncontended and pulled high.
-    CHECK_BUS_VALUE_UINT8_EXIT(error, m_busA, s_A_ot, 0xFFFF);
+    CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
 
     // The address/data bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
