@@ -22,20 +22,40 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <C8080GenericGame.h>
-#include <CTaitoSpaceInvadersGame.h>
-#include <CNichibutsuMoonBaseGame.h>
+#ifndef CNichibutsuMoonBaseGame_h
+#define CNichibutsuMoonBaseGame_h
 
-//
-// The initial selector to select the game to test.
-//
-static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C8080GenericGame::createInstance2716),          false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C8080GenericGame::createInstance2732),          false},
-                                                  {"Space Inv (SV4)",  onSelectGame,    (void*) (CTaitoSpaceInvadersGame::createInstanceSVRev4), false},
-                                                  {"Moon Base   (1)",  onSelectGame,    (void*) (CNichibutsuMoonBaseGame::createInstanceSet1),   false},
-                                                  {"Moon Base   (2)",  onSelectGame,    (void*) (CNichibutsuMoonBaseGame::createInstanceSet2),   false},
-                                                  { 0, 0 }
-                                                 };
+#include "CSpaceInvadersBaseGame.h"
+
+class CNichibutsuMoonBaseGame : public CSpaceInvadersBaseGame
+{
+    public:
+
+        //
+        // Constructors for this game.
+        //
+
+        static IGame* createInstanceSet1(
+        );
+
+        static IGame* createInstanceSet2(
+        );
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CNichibutsuMoonBaseGame(
+            const ROM_REGION *romRegion
+        );
+
+};
+
+#endif
 
 

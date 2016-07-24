@@ -75,9 +75,9 @@ static const CONNECTION s_A_ot[]   = { {25, "A0"  },
                                        {35, "A9"  },
                                        { 1, "A10" },
                                        {40, "A11" },
-                                       {39, "A12" },
+                                       {37, "A12" },
                                        {38, "A13" },
-                                       {37, "A14" },
+                                       {39, "A14" },
                                        {36, "A15" } }; // 16 bits
 
 static const CONNECTION s_D_iot[] = { {10, "D0" },
@@ -291,6 +291,7 @@ C8080Cpu::memoryReadWrite(
     m_pinSYNC.digitalWriteHIGH();
     m_pinSYNC.digitalWriteLOW();
 
+    /*
     // Perform a ready sync if needed
     if (readySync)
     {
@@ -334,7 +335,7 @@ C8080Cpu::memoryReadWrite(
         }
         CHECK_LITERAL_VALUE_EXIT(error, s_READY_i, value, HIGH);
     }
-
+*/
     // Perform the data access
     if (read)
     {
@@ -345,7 +346,6 @@ C8080Cpu::memoryReadWrite(
     }
     else
     {
-        m_busD.pinMode(OUTPUT);
         m_busD.digitalWrite(*data & 0xFF);
 
         m_pin_WR.digitalWriteLOW();
