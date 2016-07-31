@@ -287,55 +287,21 @@ C8080Cpu::memoryReadWrite(
     noInterrupts();
     interruptsDisabled = true;
 
+    //
+    // TODO: Implement support for synchronous READY timed cycles.
+    // There is no way to access the video RAM at the present time without
+    // this support :(
+    //
+    if (readySync)
+    {
+        error = errorNotImplemented;
+        goto Exit;
+    }
+
     // Pulse SYNC
     m_pinSYNC.digitalWriteHIGH();
     m_pinSYNC.digitalWriteLOW();
 
-    /*
-    // Perform a ready sync if needed
-    if (readySync)
-    {
-        int value;
-
-        // Wait for active
-        for (int i = 0 ; i < 8192 ; i++)
-        {
-            value = m_pinREADY.digitalRead();
-
-            //
-            // For Space Invaders we need to reset the ready latch
-            // using a pulse on the SYNC line.
-            //
-            m_pinSYNC.digitalWriteHIGH();
-            m_pinSYNC.digitalWriteLOW();
-
-            if (value == LOW)
-            {
-                break;
-            }
-        }
-        CHECK_LITERAL_VALUE_EXIT(error, s_READY_i, value, LOW);
-
-        // Wait for inactive
-        for (int i = 0 ; i < 8192 ; i++)
-        {
-            value = m_pinREADY.digitalRead();
-
-            //
-            // For Space Invaders we need to reset the ready latch
-            // using a pulse on the SYNC line.
-            //
-            m_pinSYNC.digitalWriteHIGH();
-            m_pinSYNC.digitalWriteLOW();
-
-            if (value == HIGH)
-            {
-                break;
-            }
-        }
-        CHECK_LITERAL_VALUE_EXIT(error, s_READY_i, value, HIGH);
-    }
-*/
     // Perform the data access
     if (read)
     {
