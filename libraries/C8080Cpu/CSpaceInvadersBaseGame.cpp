@@ -53,7 +53,7 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //
                                                   // via address 0x10xxxx.
                                                   //
                                                   //                                         "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x102000, 0x103FFF, 0xFF, "???", "VRAM  "}, // Video RAM
+                                                  {NO_BANK_SWITCH, 0x102000, 0x103FFF, 0xFF, "   ", "VRAM  "}, // Video RAM
                                                   {0}
                                                 }; // end of list
 
@@ -66,32 +66,37 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Input region is the same for all games on this board set.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
-                                                      {NO_BANK_SWITCH, 0x10000L, 0xFF, "???", "IN0   "}, // Switch Inputs (IN0)
-                                                      {NO_BANK_SWITCH, 0x10001L, 0xFF, "???", "IN1   "}, // Switch Inputs (IN1)
-                                                      {NO_BANK_SWITCH, 0x10002L, 0xFF, "???", "IN2   "}, // Switch Inputs (IN2)
-                                                      {NO_BANK_SWITCH, 0x10003L, 0xFF, "???", "ShiftR"}, // Shift Result
+                                                      {NO_BANK_SWITCH, 0x10000L, 0xFF, "   ", "IN0   "}, // Switch Inputs (IN0)
+                                                      {NO_BANK_SWITCH, 0x10001L, 0xFF, "   ", "IN1   "}, // Switch Inputs (IN1)
+                                                      {NO_BANK_SWITCH, 0x10002L, 0xFF, "   ", "IN2   "}, // Switch Inputs (IN2)
+                                                      {NO_BANK_SWITCH, 0x10003L, 0xFF, "   ", "ShiftR"}, // Shift Result
                                                       {0}
                                                     }; // end of list
 
 //
 // Output region is the same for all versions on this board set.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x10002L, 0x07, 0x00, "???", "ShiftC"}, // Shift Count
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x01, 0x00, "???", "Ufo   "}, // S0 - SM1
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x02, 0x00, "???", "Fire  "}, // S1 - SM2
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x04, 0x00, "???", "BseHit"}, // S2 - SM3
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x08, 0x00, "???", "InvHit"}, // S3 - SM4
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x10, 0x00, "???", "Bonus "}, // S4 - SM5
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x20, 0x00, "???", "Mute  "}, // S5 - Mute
-                                                        {NO_BANK_SWITCH, 0x10004L, 0xFF, 0x00, "???", "ShiftD"}, // Shift Data
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x01, 0x00, "???", "Step01"}, // S6 - Step Bit 1
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x02, 0x00, "???", "Step02"}, // S7 - Step Bit 2
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x04, 0x00, "???", "Step04"}, // S8 - Step Bit 4
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x08, 0x00, "???", "Step08"}, // S9 - Step Bit 8
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x10, 0x00, "???", "UfoHit"}, // S10
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x20, 0x00, "???", "Flip  "}, // S11 - Flip screen
-                                                        {NO_BANK_SWITCH, 0x10006L, 0x01, 0x00, "???", "Wd Res"}, // Watchdog Reset
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //
+                                                        // Note that in order to hear the sounds the Sound On bit must be high.
+                                                        // Describing that in the invert mask leaves the sound always on so that
+                                                        // the decay after trigger can be heard.
+                                                        //
+                                                        //                                     "012", "012345"
+                                                        {NO_BANK_SWITCH, 0x10002L, 0x07, 0x20, "   ", "ShiftC"}, // Shift Count
+                                                        {NO_BANK_SWITCH, 0x10003L, 0x01, 0x20, "S0 ", "Ufo   "}, // S0 - SM1
+                                                        {NO_BANK_SWITCH, 0x10003L, 0x02, 0x20, "S1 ", "Fire  "}, // S1 - SM2
+                                                        {NO_BANK_SWITCH, 0x10003L, 0x04, 0x20, "S2 ", "BseHit"}, // S2 - SM3
+                                                        {NO_BANK_SWITCH, 0x10003L, 0x08, 0x20, "S3 ", "InvHit"}, // S3 - SM4
+                                                        {NO_BANK_SWITCH, 0x10003L, 0x10, 0x20, "S4 ", "Bonus "}, // S4 - SM5
+                                                        {NO_BANK_SWITCH, 0x10003L, 0x20, 0x00, "S5 ", "Snd On"}, // S5 - Sound On
+                                                        {NO_BANK_SWITCH, 0x10004L, 0xFF, 0x00, "   ", "ShiftD"}, // Shift Data
+                                                        {NO_BANK_SWITCH, 0x10005L, 0x01, 0x20, "S6 ", "Step01"}, // S6 - Step Bit 1
+                                                        {NO_BANK_SWITCH, 0x10005L, 0x02, 0x20, "S7 ", "Step02"}, // S7 - Step Bit 2
+                                                        {NO_BANK_SWITCH, 0x10005L, 0x04, 0x20, "S8 ", "Step04"}, // S8 - Step Bit 4
+                                                        {NO_BANK_SWITCH, 0x10005L, 0x08, 0x20, "S9 ", "Step08"}, // S9 - Step Bit 8
+                                                        {NO_BANK_SWITCH, 0x10005L, 0x10, 0x20, "S10", "UfoHit"}, // S10 - UFO Hit
+                                                        {NO_BANK_SWITCH, 0x10005L, 0x20, 0x00, "S11", "Flip  "}, // S11 - Flip screen
+                                                        {NO_BANK_SWITCH, 0x10006L, 0x01, 0x00, "   ", "Wd Res"}, // Watchdog Reset
                                                         {0}
                                                       }; // end of list
 
