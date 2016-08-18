@@ -82,20 +82,20 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //
                                                         // the decay after trigger can be heard.
                                                         //
                                                         //                                     "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x10002L, 0x07, 0x20, "   ", "ShiftC"}, // Shift Count
                                                         {NO_BANK_SWITCH, 0x10003L, 0x01, 0x20, "S0 ", "Ufo   "}, // S0 - SM1
                                                         {NO_BANK_SWITCH, 0x10003L, 0x02, 0x20, "S1 ", "Fire  "}, // S1 - SM2
                                                         {NO_BANK_SWITCH, 0x10003L, 0x04, 0x20, "S2 ", "BseHit"}, // S2 - SM3
                                                         {NO_BANK_SWITCH, 0x10003L, 0x08, 0x20, "S3 ", "InvHit"}, // S3 - SM4
                                                         {NO_BANK_SWITCH, 0x10003L, 0x10, 0x20, "S4 ", "Bonus "}, // S4 - SM5
                                                         {NO_BANK_SWITCH, 0x10003L, 0x20, 0x00, "S5 ", "Snd On"}, // S5 - Sound On
-                                                        {NO_BANK_SWITCH, 0x10004L, 0xFF, 0x00, "   ", "ShiftD"}, // Shift Data
                                                         {NO_BANK_SWITCH, 0x10005L, 0x01, 0x20, "S6 ", "Step01"}, // S6 - Step Bit 1
                                                         {NO_BANK_SWITCH, 0x10005L, 0x02, 0x20, "S7 ", "Step02"}, // S7 - Step Bit 2
                                                         {NO_BANK_SWITCH, 0x10005L, 0x04, 0x20, "S8 ", "Step04"}, // S8 - Step Bit 4
                                                         {NO_BANK_SWITCH, 0x10005L, 0x08, 0x20, "S9 ", "Step08"}, // S9 - Step Bit 8
                                                         {NO_BANK_SWITCH, 0x10005L, 0x10, 0x20, "S10", "UfoHit"}, // S10 - UFO Hit
                                                         {NO_BANK_SWITCH, 0x10005L, 0x20, 0x00, "S11", "Flip  "}, // S11 - Flip screen
+                                                        {NO_BANK_SWITCH, 0x10004L, 0xFF, 0x00, "   ", "ShiftD"}, // Shift Data
+                                                        {NO_BANK_SWITCH, 0x10002L, 0x07, 0x20, "   ", "ShiftC"}, // Shift Count
                                                         {NO_BANK_SWITCH, 0x10006L, 0x01, 0x00, "   ", "Wd Res"}, // Watchdog Reset
                                                         {0}
                                                       }; // end of list
