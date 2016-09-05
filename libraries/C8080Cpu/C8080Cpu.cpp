@@ -180,22 +180,22 @@ C8080Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // These should be unconnected and thus pulled high.
-    CHECK_VALUE_EXIT(error, s_CLK1_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_CLK2_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_Vdd_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_Vbb_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK1_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK2_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vdd_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vbb_i, HIGH);
 
     // The reset pin should be no reset.
-    CHECK_VALUE_EXIT(error, s_RESET_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RESET_i, LOW);
 
     // The tester doesn't support bus sharing.
-    CHECK_VALUE_EXIT(error, s_HOLD_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_HOLD_i, LOW);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);

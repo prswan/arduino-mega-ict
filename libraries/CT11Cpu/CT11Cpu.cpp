@@ -210,17 +210,17 @@ CT11Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_BGND_i, LOW);
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_BGND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // The power-up (reset) pin should be low.
-    CHECK_VALUE_EXIT(error, s_PUP_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_PUP_i, LOW);
 
     // The READY input is not supported and it should be HIGH (ready)
-    CHECK_VALUE_EXIT(error, s_READY_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_READY_i, HIGH);
 
     // Loop to detect a clock by sampling and detecting both high and lows.
     {
@@ -243,11 +243,11 @@ CT11Cpu::check(
 
         if (loCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_XTL1_i, LOW);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_XTL1_i, LOW);
         }
         else if (hiCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_XTL1_i, HIGH);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_XTL1_i, HIGH);
         }
     }
 

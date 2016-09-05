@@ -22,12 +22,6 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-
-//
-// Replace all PinMap instances with the 8080 probe head one.
-//
-#define g_pinMap40DIL g_pinMap8080
-
 #include "Arduino.h"
 #include "Error.h"
 #include "C8080DedicatedCpu.h"
@@ -108,12 +102,12 @@ static const UINT8 s_PS_MEMRD  = 0x80; // D7 - Memory Read
 
 
 C8080DedicatedCpu::C8080DedicatedCpu(
-) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
-    m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
-    m_pinDBIN(g_pinMap40DIL, &s_DBIN_o),
-    m_pinSYNC(g_pinMap40DIL, &s_SYNC_o),
-    m_pinREADY(g_pinMap40DIL, &s_READY_i),
-    m_pin_WR(g_pinMap40DIL, &s__WR_o)
+) : m_busA(g_pinMap8080, s_A_ot,  ARRAYSIZE(s_A_ot)),
+    m_busD(g_pinMap8080, s_D_iot, ARRAYSIZE(s_D_iot)),
+    m_pinDBIN(g_pinMap8080, &s_DBIN_o),
+    m_pinSYNC(g_pinMap8080, &s_SYNC_o),
+    m_pinREADY(g_pinMap8080, &s_READY_i),
+    m_pin_WR(g_pinMap8080, &s__WR_o)
 {
 };
 
@@ -126,31 +120,31 @@ C8080DedicatedCpu::idle(
 )
 {
     // None-TTL pins set to input pullup as not connected.
-    pinMode(g_pinMap40DIL[s_CLK1_i.pin],          INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_CLK2_i.pin],          INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_Vdd_i.pin],           INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_Vbb_i.pin],           INPUT_PULLUP);
+    pinMode(g_pinMap8080[s_CLK1_i.pin],          INPUT_PULLUP);
+    pinMode(g_pinMap8080[s_CLK2_i.pin],          INPUT_PULLUP);
+    pinMode(g_pinMap8080[s_Vdd_i.pin],           INPUT_PULLUP);
+    pinMode(g_pinMap8080[s_Vbb_i.pin],           INPUT_PULLUP);
 
     // HLDA Not supported
-    digitalWrite(g_pinMap40DIL[s_HLDA_o.pin],     LOW);
-    pinMode(g_pinMap40DIL[s_HLDA_o.pin],          OUTPUT);
+    digitalWrite(g_pinMap8080[s_HLDA_o.pin],     LOW);
+    pinMode(g_pinMap8080[s_HLDA_o.pin],          OUTPUT);
 
     // WAIT Not supported
-    digitalWrite(g_pinMap40DIL[s_WAIT_o.pin],     LOW);
-    pinMode(g_pinMap40DIL[s_WAIT_o.pin],          OUTPUT);
+    digitalWrite(g_pinMap8080[s_WAIT_o.pin],     LOW);
+    pinMode(g_pinMap8080[s_WAIT_o.pin],          OUTPUT);
 
     // INTE Not supported - interrupts always enabled
-    digitalWrite(g_pinMap40DIL[s_INTE_o.pin],     HIGH);
-    pinMode(g_pinMap40DIL[s_INTE_o.pin],          OUTPUT);
+    digitalWrite(g_pinMap8080[s_INTE_o.pin],     HIGH);
+    pinMode(g_pinMap8080[s_INTE_o.pin],          OUTPUT);
 
     // Inputs Not supported
-    pinMode(g_pinMap40DIL[s_HOLD_i.pin],          INPUT);
+    pinMode(g_pinMap8080[s_HOLD_i.pin],          INPUT);
 
     // Inputs
-    pinMode(g_pinMap40DIL[s_RESET_i.pin],         INPUT);
-    pinMode(g_pinMap40DIL[s_INT_i.pin],           INPUT);
-    pinMode(g_pinMap40DIL[s_Vcc_i.pin],           INPUT);
-    pinMode(g_pinMap40DIL[s_GND_i.pin],           INPUT_PULLUP);
+    pinMode(g_pinMap8080[s_RESET_i.pin],         INPUT);
+    pinMode(g_pinMap8080[s_INT_i.pin],           INPUT);
+    pinMode(g_pinMap8080[s_Vcc_i.pin],           INPUT);
+    pinMode(g_pinMap8080[s_GND_i.pin],           INPUT_PULLUP);
 
     m_pinDBIN.digitalWrite(LOW);
     m_pinDBIN.pinMode(OUTPUT);
@@ -185,22 +179,22 @@ C8080DedicatedCpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap8080, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vcc_i, HIGH);
 
     // These should be unconnected and thus pulled high.
-    CHECK_VALUE_EXIT(error, s_CLK1_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_CLK2_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_Vdd_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_Vbb_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap8080, s_CLK1_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap8080, s_CLK2_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vdd_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vbb_i, HIGH);
 
     // The reset pin should be no reset.
-    CHECK_VALUE_EXIT(error, s_RESET_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap8080, s_RESET_i, LOW);
 
     // The tester doesn't support bus sharing.
-    CHECK_VALUE_EXIT(error, s_HOLD_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap8080, s_HOLD_i, LOW);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
@@ -367,7 +361,7 @@ C8080DedicatedCpu::waitForInterrupt(
     int sense = (active ? HIGH : LOW);
     int value = 0;
 
-    UINT8 intPin = g_pinMap40DIL[s_INT_i.pin];
+    UINT8 intPin = g_pinMap8080[s_INT_i.pin];
 
     do
     {

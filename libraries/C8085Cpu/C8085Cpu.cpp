@@ -191,16 +191,16 @@ C8085Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // The reset pin should be high (no reset).
-    CHECK_VALUE_EXIT(error, s__RESIN_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__RESIN_i, HIGH);
 
     // The tester doesn't support bus sharing.
-    CHECK_VALUE_EXIT(error, s_HOLD_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_HOLD_i, LOW);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT8_EXIT(error, m_busA, s_A_ot, 0xFF);
@@ -229,11 +229,11 @@ C8085Cpu::check(
 
         if (loCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_X1_i, LOW);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_X1_i, LOW);
         }
         else if (hiCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_X1_i, HIGH);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_X1_i, HIGH);
         }
     }
 

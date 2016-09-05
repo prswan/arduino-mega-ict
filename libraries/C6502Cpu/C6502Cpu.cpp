@@ -95,17 +95,17 @@ C6502Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
-    CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND1_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND2_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // The reset pin should be high (no reset).
-    CHECK_VALUE_EXIT(error, s_RES_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RES_i, HIGH);
 
     // Nothing should be driving wait states.
-    CHECK_VALUE_EXIT(error, s_RDY_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RDY_i, HIGH);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
@@ -134,11 +134,11 @@ C6502Cpu::check(
 
         if (loCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_CLK0i_i, LOW);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK0i_i, LOW);
         }
         else if (hiCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_CLK0i_i, HIGH);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK0i_i, HIGH);
         }
     }
 

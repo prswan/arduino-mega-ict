@@ -420,9 +420,9 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to check a single pin value and exit with an error if it's wrong.
 //
-#define CHECK_VALUE_EXIT(error, connection, expValue)                       \
+#define CHECK_VALUE_EXIT(error, pinMap, connection, expValue)               \
     {                                                                       \
-        int recValue = digitalRead(g_pinMap40DIL[connection.pin]);          \
+        int recValue = digitalRead(pinMap[connection.pin]);                 \
         CHECK_LITERAL_VALUE_EXIT(error, connection, recValue, expValue);    \
     }                                                                       \
 
@@ -430,9 +430,9 @@ typedef struct _INTERRUPT_DEFINITION {
 // Macro to check a single pin value and exit with an error if it's wrong.
 // CFastPin version.
 //
-#define CHECK_PIN_VALUE_EXIT(error, pin, connection, expValue)         \
+#define CHECK_PIN_VALUE_EXIT(error, pin, connection, expValue)              \
     {                                                                       \
-        int recValue = pin.digitalRead();      \
+        int recValue = pin.digitalRead();                                   \
         CHECK_LITERAL_VALUE_EXIT(error, connection, recValue, expValue);    \
     }                                                                       \
 

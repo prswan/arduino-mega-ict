@@ -173,16 +173,16 @@ C6809ECpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_VCC_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_VCC_i, HIGH);
 
     // The halt pin should be high (running).
-    CHECK_VALUE_EXIT(error, s__HALT_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__HALT_i, HIGH);
 
     // In everything we'll be testing, TSC is pulled low.
-    CHECK_VALUE_EXIT(error, s_TSC_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_TSC_i, LOW);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
@@ -210,7 +210,7 @@ C6809ECpu::check(
             m_pinClock.digitalWriteLOW();
         }
     }
-    CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__RESET_i, HIGH);
 
     // Loop to detect E & Q by sampling and detecting both high and lows.
     {

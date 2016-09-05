@@ -170,19 +170,19 @@ CZ80Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // The reset pin should be high (no reset).
-    CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__RESET_i, HIGH);
 
     // Nothing should be driving wait states.
-    CHECK_VALUE_EXIT(error, s__WAIT_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__WAIT_i, HIGH);
 
     // The tester doesn't support bus sharing.
-    CHECK_VALUE_EXIT(error, s__BUSREQ_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__BUSREQ_i, HIGH);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
@@ -211,11 +211,11 @@ CZ80Cpu::check(
 
         if (loCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_CLK_i, LOW);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK_i, LOW);
         }
         else if (hiCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_CLK_i, HIGH);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK_i, HIGH);
         }
     }
 
