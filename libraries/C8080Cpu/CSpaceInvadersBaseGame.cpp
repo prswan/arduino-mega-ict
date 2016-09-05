@@ -23,7 +23,14 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CSpaceInvadersBaseGame.h"
+
+#define C8080Dedicated
+
+#ifdef C8080Dedicated
+#include "C8080DedicatedCpu.h"
+#else
 #include "C8080Cpu.h"
+#endif
 
 //
 // Probe Head GND:
@@ -115,7 +122,12 @@ CSpaceInvadersBaseGame::CSpaceInvadersBaseGame(
            s_outputRegion,
            s_customFunction)
 {
+#ifdef C8080Dedicated
+    m_cpu = new C8080DedicatedCpu();
+#else
     m_cpu = new C8080Cpu();
+#endif
+
     m_cpu->idle();
 
     //
