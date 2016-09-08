@@ -383,6 +383,40 @@ typedef struct _INTERRUPT_DEFINITION {
     }                                                                       \
 
 //
+// Macro to check a boolean value and exit with an error if it's wrong.
+//
+#define CHECK_BOOL_VALUE_EXIT(error, message, recValue, expValue)               \
+        {                                                                       \
+            if (recValue != expValue)                                           \
+            {                                                                   \
+                error = errorCustom;                                            \
+                error->code = ERROR_FAILED;                                     \
+                error->description = "E:";                                      \
+                error->description += message;                                  \
+                error->description += (expValue) ? " Hi" : " Lo";               \
+                error->description += (recValue) ? " Hi" : " Lo";               \
+                goto Exit;                                                      \
+            }                                                                   \
+        }                                                                       \
+
+//
+// Macro to check an 8-bit value and exit with an error if it's wrong.
+//
+#define CHECK_UINT8_VALUE_EXIT(error, message, recValue, expValue)              \
+        {                                                                       \
+            if (recValue != expValue)                                           \
+            {                                                                   \
+                error = errorCustom;                                            \
+                error->code = ERROR_FAILED;                                     \
+                error->description = "E:";                                      \
+                error->description += message;                                  \
+                STRING_UINT8_HEX(error->description, expValue);                 \
+                STRING_UINT8_HEX(error->description, recValue);                 \
+                goto Exit;                                                      \
+            }                                                                   \
+        }                                                                       \
+
+//
 // Macro to check a 16-bit value and exit with an error if it's wrong.
 //
 #define CHECK_UINT16_VALUE_EXIT(error, message, recValue, expValue)         \

@@ -27,7 +27,7 @@
 #define C8080Dedicated
 
 #ifdef C8080Dedicated
-#include "C8080DedicatedCpu.h"
+#include "C8080DedicatedCpu2.h"
 #else
 #include "C8080Cpu.h"
 #endif
@@ -123,7 +123,7 @@ CSpaceInvadersBaseGame::CSpaceInvadersBaseGame(
            s_customFunction)
 {
 #ifdef C8080Dedicated
-    m_cpu = new C8080DedicatedCpu();
+    m_cpu = new C8080DedicatedCpu2();
 #else
     m_cpu = new C8080Cpu();
 #endif
