@@ -80,9 +80,9 @@ static const UINT32 c_ADCSTART2_A = 0x46C2; // ADC start channel 2
 //
 // RAM region is the same for all versions.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x4800,      0x4FFF,      0xFF, "2FH", "Prog. "}, // "Program RAM, 6116, CPU"
-                                                  {NO_BANK_SWITCH, c_MBRAM_A,   0x5FFF,      0xFF, "5FH", "MB AB "}, // "Matrix RAM 2x6116, 16-bit, CPU"
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                  "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x4800,      0x4FFF,      1, 0xFF, "2FH", "Prog. "}, // "Program RAM, 6116, CPU"
+                                                  {NO_BANK_SWITCH, c_MBRAM_A,   0x5FFF,      1, 0xFF, "5FH", "MB AB "}, // "Matrix RAM 2x6116, 16-bit, CPU"
                                                   {0}
                                                 }; // end of list
 

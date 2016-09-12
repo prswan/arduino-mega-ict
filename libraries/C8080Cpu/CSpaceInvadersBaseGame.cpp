@@ -54,13 +54,24 @@
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //
-                                                  // See note above about access restrictions w.r.t READY
-                                                  // These regions are access with special support in the C8080Cpu triggered
-                                                  // via address 0x10xxxx.
-                                                  //
-                                                  //                                         "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x102000, 0x103FFF, 0xFF, "   ", "VRAM  "}, // Video RAM
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
+                                                //{NO_BANK_SWITCH, 0x2000, 0x3FFF, 1, 0xFF, "   ", "VRAM  "}, // Video RAM
+                                                  {NO_BANK_SWITCH, 0x2000, 0x3FFF, 2, 0x01, "c33", "VRAM1A"}, // Video RAM - 1A
+                                                  {NO_BANK_SWITCH, 0x2000, 0x3FFF, 2, 0x02, "c31", "VRAM2A"}, // Video RAM - 2A
+                                                  {NO_BANK_SWITCH, 0x2000, 0x3FFF, 2, 0x04, "c25", "VRAM3A"}, // Video RAM - 3A
+                                                  {NO_BANK_SWITCH, 0x2000, 0x3FFF, 2, 0x08, "c23", "VRAM4A"}, // Video RAM - 4A
+                                                  {NO_BANK_SWITCH, 0x2000, 0x3FFF, 2, 0x10, "c21", "VRAM5A"}, // Video RAM - 5A
+                                                  {NO_BANK_SWITCH, 0x2000, 0x3FFF, 2, 0x20, "c17", "VRAM6A"}, // Video RAM - 6A
+                                                  {NO_BANK_SWITCH, 0x2000, 0x3FFF, 2, 0x40, "c15", "VRAM7A"}, // Video RAM - 7A
+                                                  {NO_BANK_SWITCH, 0x2000, 0x3FFF, 2, 0x80, "c10", "VRAM8A"}, // Video RAM - 8A
+                                                  {NO_BANK_SWITCH, 0x2001, 0x3FFF, 2, 0x01, "c32", "VRAM1B"}, // Video RAM - 1B
+                                                  {NO_BANK_SWITCH, 0x2001, 0x3FFF, 2, 0x02, "c30", "VRAM2B"}, // Video RAM - 2B
+                                                  {NO_BANK_SWITCH, 0x2001, 0x3FFF, 2, 0x04, "c24", "VRAM3B"}, // Video RAM - 3B
+                                                  {NO_BANK_SWITCH, 0x2001, 0x3FFF, 2, 0x08, "c22", "VRAM4B"}, // Video RAM - 4B
+                                                  {NO_BANK_SWITCH, 0x2001, 0x3FFF, 2, 0x10, "c20", "VRAM5B"}, // Video RAM - 5B
+                                                  {NO_BANK_SWITCH, 0x2001, 0x3FFF, 2, 0x20, "c16", "VRAM6B"}, // Video RAM - 6B
+                                                  {NO_BANK_SWITCH, 0x2001, 0x3FFF, 2, 0x40, "c14", "VRAM7B"}, // Video RAM - 7B
+                                                  {NO_BANK_SWITCH, 0x2001, 0x3FFF, 2, 0x80, "c9 ", "VRAM8B"}, // Video RAM - 8B
                                                   {0}
                                                 }; // end of list
 

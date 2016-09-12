@@ -52,15 +52,15 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //
                                                   // These regions are access with special support in the C8085Cpu triggered
                                                   // via address 0x10xxxx.
                                                   //
-                                                  //                                                                  "012", "012345"
-                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104000, 0x1043FF, 0x0F, "r41", "FgRam1"}, // Foreground Video RAM Bank 1, 2114
-                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104000, 0x1043FF, 0xF0, "r43", "FgRam1"}, // Foreground Video RAM Bank 1, 2114
-                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104800, 0x104BFF, 0x0F, "r25", "BgRam1"}, // Background Video RAM Bank 1, 2114
-                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104800, 0x104BFF, 0xF0, "r27", "BgRam1"}, // Background Video RAM Bank 1, 2114
-                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104000, 0x1043FF, 0x0F, "r42", "FgRam2"}, // Foreground Video RAM Bank 2, 2114
-                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104000, 0x1043FF, 0xF0, "r44", "FgRam2"}, // Foreground Video RAM Bank 2, 2114
-                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104800, 0x104BFF, 0x0F, "r26", "BgRam2"}, // Background Video RAM Bank 2, 2114
-                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104800, 0x104BFF, 0xF0, "r28", "BgRam2"}, // Background Video RAM Bank 2, 2114
+                                                  //                                                                     "012", "012345"
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104000, 0x1043FF, 1, 0x0F, "r41", "FgRam1"}, // Foreground Video RAM Bank 1, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104000, 0x1043FF, 1, 0xF0, "r43", "FgRam1"}, // Foreground Video RAM Bank 1, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104800, 0x104BFF, 1, 0x0F, "r25", "BgRam1"}, // Background Video RAM Bank 1, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104800, 0x104BFF, 1, 0xF0, "r27", "BgRam1"}, // Background Video RAM Bank 1, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104000, 0x1043FF, 1, 0x0F, "r42", "FgRam2"}, // Foreground Video RAM Bank 2, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104000, 0x1043FF, 1, 0xF0, "r44", "FgRam2"}, // Foreground Video RAM Bank 2, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104800, 0x104BFF, 1, 0x0F, "r26", "BgRam2"}, // Background Video RAM Bank 2, 2114
+                                                  {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104800, 0x104BFF, 1, 0xF0, "r28", "BgRam2"}, // Background Video RAM Bank 2, 2114
                                                   {0}
                                                 }; // end of list
 

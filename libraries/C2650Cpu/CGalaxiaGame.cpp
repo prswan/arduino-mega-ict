@@ -107,18 +107,18 @@ static const ROM_REGION s_romRegionSet4[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0
 //
 // RAM region is the same for all versions.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                       "012", "012345"
-                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      0x0F, "13F", "Prog. "}, // "Program RAM, 2114, 13F"
-                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      0xF0, "13G", "Prog. "}, // "Program RAM, 2114, 13G"
-                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      0x0F, " 3F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 3F"
-                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      0xF0, " 2F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 2F"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      0x0F, " 2C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      0xF0, " 1C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      0x02, " 1B", "Colour"},  // "Colour RAM, 2102, FLAG=Lo"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      0x01, " 3C", "Colour"},  // "Colour RAM, 2102, FLAG=Lo"
-                                                  {NO_BANK_SWITCH,                         0x1500+0x4E, 0x1500+0x6D, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1  8F Scratch RAM "
-                                                  {NO_BANK_SWITCH,                         0x1600+0x4E, 0x1600+0x6D, 0xFF, "10F", "2636-2"}, // "2636 PVI 2 10F Scratch RAM "
-                                                  {NO_BANK_SWITCH,                         0x1700+0x4E, 0x1700+0x6D, 0xFF, "11F", "2636-3"}, // "2636 PVI 3 11F Scratch RAM "
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                          "012", "012345"
+                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      1, 0x0F, "13F", "Prog. "}, // "Program RAM, 2114, 13F"
+                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      1, 0xF0, "13G", "Prog. "}, // "Program RAM, 2114, 13G"
+                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0x0F, " 3F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 3F"
+                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0xF0, " 2F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 2F"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0x0F, " 2C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0xF0, " 1C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      1, 0x02, " 1B", "Colour"},  // "Colour RAM, 2102, FLAG=Lo"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      1, 0x01, " 3C", "Colour"},  // "Colour RAM, 2102, FLAG=Lo"
+                                                  {NO_BANK_SWITCH,                         0x1500+0x4E, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1  8F Scratch RAM "
+                                                  {NO_BANK_SWITCH,                         0x1600+0x4E, 0x1600+0x6D, 1, 0xFF, "10F", "2636-2"}, // "2636 PVI 2 10F Scratch RAM "
+                                                  {NO_BANK_SWITCH,                         0x1700+0x4E, 0x1700+0x6D, 1, 0xFF, "11F", "2636-3"}, // "2636 PVI 3 11F Scratch RAM "
                                                   {0}
                                                 }; // end of list
 

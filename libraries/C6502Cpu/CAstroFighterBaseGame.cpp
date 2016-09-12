@@ -33,9 +33,9 @@
 // *** NOTE: Due the synchronous nature of the bus cycles on this platform Clock Master 'clk' form is needed
 //           for reliable memory testing!
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0x0F, "r2M", "Prog. "}, // "Program RAM, 2114, ROM PCB 2M"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0xF0, "r2F", "Prog. "}, // "Program RAM, 2114, ROM PCB 2F"
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                  "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0x0F, "r2M", "Prog. "}, // "Program RAM, 2114, ROM PCB 2M"
+                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0xF0, "r2F", "Prog. "}, // "Program RAM, 2114, ROM PCB 2F"
                                                   //
                                                   // *** NOTE: 0x4000-0x5FFF is 8K of DRAM ***
                                                   //
@@ -47,28 +47,28 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
                                                   // Split into two halves seems to work OK with ITT 4116 (single block testing yielded a
                                                   // consistent single bit error in the test).
                                                   //
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x01, "c2T", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x02, "c2M", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x04, "c2F", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x08, "c2E", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x10, "c2D", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x20, "c2C", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x40, "c2B", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x80, "c2A", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x01, "c2T", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x02, "c2M", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x04, "c2F", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x08, "c2E", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x10, "c2D", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x20, "c2C", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x40, "c2B", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x80, "c2A", "V.DRAM"}, // "Video RAM, lower"
                                                   //
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x01, "c1T", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x02, "c1M", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x04, "c1F", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x08, "c1E", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x10, "c1D", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x20, "c1C", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x40, "c1B", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x80, "c1A", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x01, "c1T", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x02, "c1M", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x04, "c1F", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x08, "c1E", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x10, "c1D", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x20, "c1C", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x40, "c1B", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x80, "c1A", "V.DRAM"}, // "Video RAM, upper"
                                                   //
                                                   // Duplicate entries to ease reliability testing of the DRAM byte-wide
                                                   //
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0xFF, "2AT", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0xFF, "1AT", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0xFF, "2AT", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0xFF, "1AT", "V.DRAM"}, // "Video RAM, upper"
                                                   {0}
                                                 }; // end of list
 

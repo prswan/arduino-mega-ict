@@ -306,7 +306,7 @@ CRamCheck::writeReadData(
     {
         for (UINT32 index = 0 ; index < (4 / dataAccessWidth) ; index++)
         {
-            error = m_cpu->memoryWrite( (index * dataBusWidth) + ramRegion->start,
+            error = m_cpu->memoryWrite( (index * (dataBusWidth * ramRegion->step)) + ramRegion->start,
                                         expData[index] );
 
             if (FAILED(error))
@@ -325,7 +325,7 @@ CRamCheck::writeReadData(
         {
             for (UINT32 index = 0 ; index < 4 ; index++)
             {
-                error = m_cpu->memoryRead( (index * dataBusWidth) + ramRegion->start,
+                error = m_cpu->memoryRead( (index * (dataBusWidth * ramRegion->step)) + ramRegion->start,
                                            &recData[index] );
 
                 if (FAILED(error))
@@ -341,7 +341,7 @@ CRamCheck::writeReadData(
         {
             for (UINT32 index = 0 ; index < 2 ; index++)
             {
-                error = m_cpu->memoryRead( (index * dataBusWidth) + ramRegion->start,
+                error = m_cpu->memoryRead( (index * (dataBusWidth * ramRegion->step)) + ramRegion->start,
                                            &recData[index] );
 
                 if (FAILED(error))
@@ -388,7 +388,7 @@ CRamCheck::write(
     {
         UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
 
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
             //
             // The write is a simple data = address.
@@ -433,7 +433,7 @@ CRamCheck::write(
     {
         UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
 
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
             error = m_cpu->memoryWrite(address, value);
 
@@ -471,7 +471,7 @@ CRamCheck::read(
     {
         UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
 
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
             UINT16 recData = 0;
 
@@ -541,7 +541,7 @@ CRamCheck::writeRandom(
         UINT8 dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
 
         randomSeed(seed);
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
             UINT16 data = (UINT16) random(s_randomSize);
             data = (invert) ? ~data : data;
@@ -599,7 +599,7 @@ CRamCheck::readVerifyRandom(
         UINT8 dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
 
         randomSeed(seed);
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += dataBusWidth)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
             UINT16 expData = (UINT16) random(s_randomSize);
             expData = (invert) ? ~expData : expData;

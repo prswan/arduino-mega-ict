@@ -61,10 +61,10 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //
                                                   // See note above about access restrictions w.r.t video RAM access
                                                   // These regions are access with special support in the CT11Cpu.
                                                   //
-                                                  //                                                                    "012", "012345"
-                                                  {NO_BANK_SWITCH,                      0x00000000, 0x00000FFE,   0xFF, "c7K", "Prog L"}, // Program RAM 6116, Lo
-                                                  {NO_BANK_SWITCH,                      0x00000001, 0x00000FFF,   0xFF, "c7P", "Prog H"}, // Program RAM 6116, Hi
-                                                  {CSystem2BaseGame::onBankSwitchVRAM0, 0x03002000, 0x03003FFF, 0xFFFF, "v??", "V.Ram "}, // Video RAM, 16-bit VSYNC
+                                                  //                                                                       "012", "012345"
+                                                  {NO_BANK_SWITCH,                      0x00000000, 0x00000FFE, 1,   0xFF, "c7K", "Prog L"}, // Program RAM 6116, Lo
+                                                  {NO_BANK_SWITCH,                      0x00000001, 0x00000FFF, 1,   0xFF, "c7P", "Prog H"}, // Program RAM 6116, Hi
+                                                  {CSystem2BaseGame::onBankSwitchVRAM0, 0x03002000, 0x03003FFF, 1, 0xFFFF, "v??", "V.Ram "}, // Video RAM, 16-bit VSYNC
                                                   {0}
                                                 }; // end of list
 

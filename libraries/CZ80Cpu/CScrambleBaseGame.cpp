@@ -54,20 +54,20 @@
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                     "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 0x0F, " 1K", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 0xF0, " 1G", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 0x0F, " 1J", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 0xF0, " 1H", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x5000, 0x50FF, 0x0F, " 3L", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
-                                                  {NO_BANK_SWITCH, 0x5000, 0x50FF, 0xF0, " 3M", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0x0F, " 1K", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0xF0, " 1G", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 1, 0x0F, " 1J", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 1, 0xF0, " 1H", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x5000, 0x50FF, 1, 0x0F, " 3L", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
+                                                  {NO_BANK_SWITCH, 0x5000, 0x50FF, 1, 0xF0, " 3M", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
                                                   //
                                                   // See note above about access restrictions w.r.t HBLANK & WAIT.
                                                   // These regions are access with special support in the CZ80Cpu triggered via address 0x10xxxx.
                                                   //
-                                                  //                                         "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 0x0F, " 3K", "BkVRam"}, // "Background VRAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 0xF0, " 3J", "BkVRam"}, // "Background VRAM, 2114"
+                                                  //                                            "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0x0F, " 3K", "BkVRam"}, // "Background VRAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0xF0, " 3J", "BkVRam"}, // "Background VRAM, 2114"
                                                   {0}
                                                 }; // end of list
 

@@ -54,18 +54,18 @@
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                     "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 0x0F, " 7P", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 0xF0, " 7N", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x5800, 0x58FF, 0x0F, " 4F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
-                                                  {NO_BANK_SWITCH, 0x5800, 0x58FF, 0xF0, " 5F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0x0F, " 7P", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0xF0, " 7N", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x5800, 0x58FF, 1, 0x0F, " 4F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
+                                                  {NO_BANK_SWITCH, 0x5800, 0x58FF, 1, 0xF0, " 5F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
                                                   //
                                                   // See note above about access restrictions w.r.t HBLANK & WAIT.
                                                   // These regions are access with special support in the CZ80Cpu triggered via address 0x10xxxx.
                                                   //
-                                                  //                                         "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x105000, 0x1053FF, 0x0F, " 3H", "BkVRam"}, // "Background VRAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x105000, 0x1053FF, 0xF0, " 3F", "BkVRam"}, // "Background VRAM, 2114"
+                                                  //                                            "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x105000, 0x1053FF, 1, 0x0F, " 3H", "BkVRam"}, // "Background VRAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x105000, 0x1053FF, 1, 0xF0, " 3F", "BkVRam"}, // "Background VRAM, 2114"
                                                   {0}
                                                 }; // end of list
 

@@ -194,12 +194,22 @@ typedef struct _ROM_REGION {
 //
 // RAM region definition for one device (maskable)
 //
+// step
+//   Step use to support interleaved memory arrangements e.g.
+//    - 8-bit access to 8-bit memories on an 8-bit bus then step == 1
+//    - 2 x 8-bit RAMS configured as a 16-bit word on an 8-bit bus then step == 2
+//    - 4 x 8-bit RAMS configured as a 32-bit word on an 8-bit bus then step == 4
+//
+//    - 16-bit access to 16-bit memories on an 16-bit bus then step == 1
+//    - 2 x 16-bit RAMS configured as a 32-bit word on an 16-bit bus then step == 2
+//
 
 typedef struct _RAM_REGION {
 
     BankSwitchCallback bankSwitch;     // NULL if no bank switch is needed.
     UINT32             start;
     UINT32             end;
+    UINT8              step;           // See note above
     UINT16             mask;
     CHAR               location[4];    // 3 characters
     CHAR               description[7]; // 6 characters
