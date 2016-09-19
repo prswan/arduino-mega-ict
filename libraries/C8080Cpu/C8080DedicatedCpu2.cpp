@@ -85,8 +85,11 @@ C8080DedicatedCpu2::idle(
     digitalWrite(g_pinMap8080[s_INTE_o.pin],     HIGH);
     pinMode(g_pinMap8080[s_INTE_o.pin],          OUTPUT);
 
-    // Control inputs are always input with no pullup
-    *g_portOutControlIn  = s_PORT_BYTE_OFF;
+    //
+    // Control inputs are always input with no pullup except CLK1 & CLK2
+    // to give the rising edge a minor boost.
+    //
+    *g_portOutControlIn  = (s_BIT_IN_CLK1 | s_BIT_IN_CLK2);
     *g_dirControlIn      = s_DIR_BYTE_INPUT;
 
     // Set address to input with pullup for bus check.
@@ -317,13 +320,37 @@ C8080DedicatedCpu2::memoryRead(
         }
     }
 
+    //
     // Assert SYNC and use dummy writes to hold it.
+    //
+    // WARNING: This is manually tuned with a scope!
+    //
+    // According to the 8080 datasheet, SYNC is asserted
+    // during CLK2-Hi, held, and de-asserted during the next
+    // CLK2-Hi. Space Invaders latches the CPU status using CLK1
+    // that pules high in between them, thus:-
+    //
+    // CLK2  ----    ----    ----    ----    ----    ----
+    //       |  |    |  |    |  |    |  |    |  |    |  |
+    //      -    ----    ----    ----    ----    ----    -
+    //
+    // CLK1       --      --      --      --      --
+    //            ||      ||      ||      ||      ||
+    //      ------  ------  ------  ------  ------  ------
+    //
+    // SYNC    --------
+    //         |      |
+    //      ---        ------------------------------------
+    //
+    // The timing below manually extends SYNC to fall in the CLK2-Hi period.
+    //
     *portOutControlOut = byteOutWR_SYNC; //  62.5ns
     *portOutControlOut = byteOutWR_SYNC; // 125.0ns
     *portOutControlOut = byteOutWR_SYNC; // 187.5ns
+    *portOutControlOut = byteOutWR_SYNC; // 250.0ns
 
     // Deassert SYNC.
-    *portOutControlOut = byteOutWR;      // 250.0ns
+    *portOutControlOut = byteOutWR;
 
     // Switch the data bus to input.
     *dirData = s_DIR_BYTE_INPUT;
@@ -422,13 +449,17 @@ C8080DedicatedCpu2::memoryWrite(
         }
     }
 
+    //
     // Assert SYNC and use dummy writes to hold it.
+    // See the note in memoryRead above.
+    //
     *portOutControlOut = byteOutWR_SYNC; //  62.5ns
     *portOutControlOut = byteOutWR_SYNC; // 125.0ns
     *portOutControlOut = byteOutWR_SYNC; // 187.5ns
+    *portOutControlOut = byteOutWR_SYNC; // 250.0ns
 
     // Deassert SYNC.
-    *portOutControlOut = byteOutWR;      // 250.0ns
+    *portOutControlOut = byteOutWR;
 
     // Output the data and assert WR.
     *portOutData = (UINT8) data;
