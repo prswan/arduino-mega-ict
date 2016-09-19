@@ -185,8 +185,8 @@ C8080DedicatedCpu::check(
     CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vcc_i, HIGH);
 
     // These should be unconnected and thus pulled high.
-    CHECK_VALUE_EXIT(error, g_pinMap8080, s_CLK1_i, HIGH);
-    CHECK_VALUE_EXIT(error, g_pinMap8080, s_CLK2_i, HIGH);
+//    CHECK_VALUE_EXIT(error, g_pinMap8080, s_CLK1_i, HIGH);
+//    CHECK_VALUE_EXIT(error, g_pinMap8080, s_CLK2_i, HIGH);
     CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vdd_i, HIGH);
     CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vbb_i, HIGH);
 

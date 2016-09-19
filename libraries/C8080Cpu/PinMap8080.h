@@ -33,7 +33,7 @@
 //
 static const UINT8 g_pinMap8080[] = { 0xFF,   //        0 - Not used
                                         24,   // 24-PA2-1-A10
-                                        15,   // 15-PJ0-2-GND
+                                        16,   // 16-PH1-2-GND
                                         33,   // 33-PC4-3-D4
                                         32,   // 32-PC5-4-D5
                                         31,   // 31-PC6-5-D6
@@ -45,7 +45,7 @@ static const UINT8 g_pinMap8080[] = { 0xFF,   //        0 - Not used
                                       0xFF,   // n/c   -11-VBB(-5V)
                                         14,   // 14-PJ1-12-RESET
                                         50,   // 50-PB3-13-HOLD
-                                        16,   // 16-PH1-14-INT
+                                        39,   // 39-PG2-14-INT
                                         51,   // 51-PB2-15-CLK2
                                         40,   // 40-PG1-16-INTE
                                         18,   // 18-PD3-17-DBIN
