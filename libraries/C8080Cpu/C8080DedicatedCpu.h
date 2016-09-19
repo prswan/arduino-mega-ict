@@ -27,9 +27,6 @@
 
 #include "Arduino.h"
 #include "ICpu.h"
-#include "CBus.h"
-#include "CFast8BitBus.h"
-#include "CFastPin.h"
 
 
 class C8080DedicatedCpu : public ICpu
@@ -60,14 +57,13 @@ class C8080DedicatedCpu : public ICpu
             UINT32 address
         );
 
+        //
         // 8080 Address Space:
         // 0x00000 -> 0x0FFFF - Memory Mapped Data
         // 0x10000 -> 0x1FFFF - Input/Output Ports
         //
-        // Game Specific Address Space
-        // 0x100000 -> 0x10FFFF - READY pre-synchronized memory cycle.
-        // 0x110000 -> 0x11FFFF - READY pre-synchronized I/O cycle.
-
+        // READY synchronization is always enabled.
+        //
         virtual PERROR memoryRead(
             UINT32 address,
             UINT16 *data
@@ -98,22 +94,13 @@ class C8080DedicatedCpu : public ICpu
 
     private:
 
-        PERROR
-        memoryReadWrite(
+        void
+        outputAddressAndStatus(
             UINT32 address,
-            UINT16 *data,
             bool   read
         );
 
     private:
-
-        CBus          m_busA;
-        CFast8BitBus  m_busD;
-
-        CFastPin      m_pinDBIN;
-        CFastPin      m_pinSYNC;
-        CFastPin      m_pin_WR;
-        CFastPin      m_pinREADY;
 
 };
 

@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "C8080GenericGame.h"
-#include "C8080Cpu.h"
+#include "C8080DedicatedCpu.h"
 
 //
 // See the base game cpp comments for details about this platform.
@@ -45,7 +45,7 @@ C8080GenericGame::createInstance2732(
 
 C8080GenericGame::C8080GenericGame(
     RomSize romSize
-) : CGenericBaseGame( new C8080Cpu(), romSize )
+) : CGenericBaseGame( new C8080DedicatedCpu(), romSize )
 {
 }
 

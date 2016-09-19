@@ -23,18 +23,11 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CSpaceInvadersBaseGame.h"
-
-#define C8080Dedicated
-
-#ifdef C8080Dedicated
-#include "C8080DedicatedCpu2.h"
-#else
-#include "C8080Cpu.h"
-#endif
+#include "C8080DedicatedCpu.h"
 
 //
 // Probe Head GND:
-//   The 8080 specific probe head must be used that has the none-TTL voltages isolated.
+//   The 8080 specific probe head must be used.
 //
 // Watchdog Disable:
 //   TBD.
@@ -46,10 +39,7 @@
 //
 // CPU Compatibility Notes
 //   * READY is used to hold off the CPU. This is for holding off access to the shared VRAM.
-//     There is a workaround in the 8080 CPU implementation to pre-synchronize with READY to
-//     ensure that the access to VRAM works properly.
 //
-
 
 //
 // RAM region is the same for all games on this board set.
@@ -133,12 +123,7 @@ CSpaceInvadersBaseGame::CSpaceInvadersBaseGame(
            s_outputRegion,
            s_customFunction)
 {
-#ifdef C8080Dedicated
-    m_cpu = new C8080DedicatedCpu2();
-#else
-    m_cpu = new C8080Cpu();
-#endif
-
+    m_cpu = new C8080DedicatedCpu();
     m_cpu->idle();
 
     //

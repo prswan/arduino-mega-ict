@@ -43,50 +43,11 @@
 // Control Pins
 //
 static const CONNECTION s_GND_i     = {  2, "GND"      };
-static const CONNECTION s_Vbb_i     = { 11, "Vbb"      }; // -5V - Do Not Connect!
 static const CONNECTION s_RESET_i   = { 12, "RESET"    };
-static const CONNECTION s_HOLD_i    = { 13, "HOLD"     };
 static const CONNECTION s_INT_i     = { 14, "INT"      };
-static const CONNECTION s_CLK2_i    = { 15, "CLK2"     }; // +12V - Do Not Connect!
 static const CONNECTION s_INTE_o    = { 16, "INTE"     };
-static const CONNECTION s_DBIN_o    = { 17, "DBIN"     };
-static const CONNECTION s__WR_o     = { 18, "_WR"      };
-static const CONNECTION s_SYNC_o    = { 19, "SYNC"     };
 static const CONNECTION s_Vcc_i     = { 20, "Vcc"      };
-static const CONNECTION s_HLDA_o    = { 21, "HLDA"     };
-static const CONNECTION s_CLK1_i    = { 22, "CLK1"     }; // +12V - Do Not Connect
-static const CONNECTION s_READY_i   = { 23, "READY"    };
-static const CONNECTION s_WAIT_o    = { 24, "WAIT"     };
-static const CONNECTION s_Vdd_i     = { 28, "Vdd"      }; // +12V - Do Not Connect
 
-//
-// Bus pins
-//
-static const CONNECTION s_A_ot[]   = { {25, "A0"  },
-                                       {26, "A1"  },
-                                       {27, "A2"  },
-                                       {29, "A3"  },
-                                       {30, "A4"  },
-                                       {31, "A5"  },
-                                       {32, "A6"  },
-                                       {33, "A7"  },
-                                       {34, "A8"  },
-                                       {35, "A9"  },
-                                       { 1, "A10" },
-                                       {40, "A11" },
-                                       {37, "A12" },
-                                       {38, "A13" },
-                                       {39, "A14" },
-                                       {36, "A15" } }; // 16 bits
-
-static const CONNECTION s_D_iot[] = { {10, "D0" },
-                                      { 9, "D1" },
-                                      { 8, "D2" },
-                                      { 7, "D3" },
-                                      { 3, "D4" },
-                                      { 4, "D5" },
-                                      { 5, "D6" },
-                                      { 6, "D7" } }; // 8 bits.
 //
 // Definitions for the processor state byte output during the
 // SYNC phase.
@@ -102,12 +63,7 @@ static const UINT8 s_PS_MEMRD  = 0x80; // D7 - Memory Read
 
 
 C8080DedicatedCpu::C8080DedicatedCpu(
-) : m_busA(g_pinMap8080, s_A_ot,  ARRAYSIZE(s_A_ot)),
-    m_busD(g_pinMap8080, s_D_iot, ARRAYSIZE(s_D_iot)),
-    m_pinDBIN(g_pinMap8080, &s_DBIN_o),
-    m_pinSYNC(g_pinMap8080, &s_SYNC_o),
-    m_pinREADY(g_pinMap8080, &s_READY_i),
-    m_pin_WR(g_pinMap8080, &s__WR_o)
+)
 {
 };
 
@@ -119,47 +75,36 @@ PERROR
 C8080DedicatedCpu::idle(
 )
 {
-    // None-TTL pins set to input pullup as not connected.
-    pinMode(g_pinMap8080[s_CLK1_i.pin],          INPUT_PULLUP);
-    pinMode(g_pinMap8080[s_CLK2_i.pin],          INPUT_PULLUP);
-    pinMode(g_pinMap8080[s_Vdd_i.pin],           INPUT_PULLUP);
-    pinMode(g_pinMap8080[s_Vbb_i.pin],           INPUT_PULLUP);
-
-    // HLDA Not supported
-    digitalWrite(g_pinMap8080[s_HLDA_o.pin],     LOW);
-    pinMode(g_pinMap8080[s_HLDA_o.pin],          OUTPUT);
-
-    // WAIT Not supported
-    digitalWrite(g_pinMap8080[s_WAIT_o.pin],     LOW);
-    pinMode(g_pinMap8080[s_WAIT_o.pin],          OUTPUT);
-
-    // INTE Not supported - interrupts always enabled
-    digitalWrite(g_pinMap8080[s_INTE_o.pin],     HIGH);
-    pinMode(g_pinMap8080[s_INTE_o.pin],          OUTPUT);
-
-    // Inputs Not supported
-    pinMode(g_pinMap8080[s_HOLD_i.pin],          INPUT);
-
-    // Inputs
+    // Traditional Inputs
     pinMode(g_pinMap8080[s_RESET_i.pin],         INPUT);
     pinMode(g_pinMap8080[s_INT_i.pin],           INPUT);
     pinMode(g_pinMap8080[s_Vcc_i.pin],           INPUT);
     pinMode(g_pinMap8080[s_GND_i.pin],           INPUT_PULLUP);
 
-    m_pinDBIN.digitalWrite(LOW);
-    m_pinDBIN.pinMode(OUTPUT);
+    // Traditional outputs - INTE Not supported - interrupts always enabled
+    digitalWrite(g_pinMap8080[s_INTE_o.pin],     HIGH);
+    pinMode(g_pinMap8080[s_INTE_o.pin],          OUTPUT);
 
-    m_pinSYNC.digitalWrite(LOW);
-    m_pinSYNC.pinMode(OUTPUT);
+    //
+    // Control inputs are always input with no pullup except CLK1 & CLK2
+    // to give the rising edge a minor boost.
+    //
+    *g_portOutControlIn  = (s_BIT_IN_CLK1 | s_BIT_IN_CLK2);
+    *g_dirControlIn      = s_DIR_BYTE_INPUT;
 
-    m_pin_WR.digitalWrite(HIGH);
-    m_pin_WR.pinMode(OUTPUT);
+    // Set address to input with pullup for bus check.
+    *g_portOutAddressHi  = s_PORT_BYTE_PULLUP;
+    *g_dirAddressHi      = s_DIR_BYTE_INPUT;
+    *g_portOutAddressLo  = s_PORT_BYTE_PULLUP;
+    *g_dirAddressLo      = s_DIR_BYTE_INPUT;
 
-    m_pinREADY.pinMode(INPUT);
+    // Set data to input with pullup for bus check.
+    *g_portOutData       = s_PORT_BYTE_PULLUP;
+    *g_dirData           = s_DIR_BYTE_INPUT;
 
-    // Use the pullup input as the float to detect shorts to ground.
-    m_busA.pinMode(INPUT_PULLUP);
-    m_busD.pinMode(INPUT_PULLUP);
+    // Control outputs are always outputs - !WR is inactive and thus high.
+    *g_portOutControlOut = s_BIT_OUT_WR;
+    *g_dirControlOut     = s_DIR_BYTE_OUTPUT;
 
     return errorSuccess;
 }
@@ -184,26 +129,61 @@ C8080DedicatedCpu::check(
     // The Vcc pin should be high (power is on).
     CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vcc_i, HIGH);
 
-    // These should be unconnected and thus pulled high.
-//    CHECK_VALUE_EXIT(error, g_pinMap8080, s_CLK1_i, HIGH);
-//    CHECK_VALUE_EXIT(error, g_pinMap8080, s_CLK2_i, HIGH);
-    CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vdd_i, HIGH);
-    CHECK_VALUE_EXIT(error, g_pinMap8080, s_Vbb_i, HIGH);
-
     // The reset pin should be no reset.
     CHECK_VALUE_EXIT(error, g_pinMap8080, s_RESET_i, LOW);
 
-    // The tester doesn't support bus sharing.
-    CHECK_VALUE_EXIT(error, g_pinMap8080, s_HOLD_i, LOW);
+    {
+        // The tester doesn't support bus sharing.
+        UINT8 controlIn = *g_portInControlIn;
+        CHECK_BOOL_VALUE_EXIT(error, "HOLD 13", (controlIn & s_BIT_IN_HOLD), false);
+    }
 
-    // The address bus should be uncontended and pulled high.
-    CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
+    {
+        UINT16 address = ((UINT16) *g_portInAddressHi << 8) | (*g_portInAddressLo);
+        CHECK_UINT16_VALUE_EXIT(error, "A", address, 0xFFFF);
+    }
 
-    // The address/data bus should be uncontended and pulled high.
-    CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
+    {
+        UINT8 data = *g_portInData;
+        CHECK_UINT8_VALUE_EXIT(error, "D", data, 0xFF);
+    }
 
-    // The clocks are none-TTL so we can't use the tester to verify the CPU clocks.
-    // Use a scope instead.
+    // Loop to detect a clock by sampling and detecting both high and lows.
+    {
+        UINT16 clk1CountHi = 0;
+        UINT16 clk1CountLo = 0;
+        UINT16 clk2CountHi = 0;
+        UINT16 clk2CountLo = 0;
+
+        for (int i = 0 ; i < 1000 ; i++)
+        {
+            UINT8 controlIn = *g_portInControlIn;
+
+            if (controlIn & s_BIT_IN_CLK1)
+            {
+                clk1CountHi++;
+            }
+            else
+            {
+                clk1CountLo++;
+            }
+
+            if (controlIn & s_BIT_IN_CLK2)
+            {
+                clk2CountHi++;
+            }
+            else
+            {
+                clk2CountLo++;
+            }
+        }
+
+        CHECK_BOOL_VALUE_EXIT(error, "CLK1 22", (clk1CountHi != 0), true);
+        CHECK_BOOL_VALUE_EXIT(error, "CLK1 22", (clk1CountLo == 0), false);
+
+        CHECK_BOOL_VALUE_EXIT(error, "CLK2 15", (clk2CountHi != 0), true);
+        CHECK_BOOL_VALUE_EXIT(error, "CLK2 15", (clk2CountLo == 0), false);
+    }
 
 Exit:
     return error;
@@ -228,19 +208,15 @@ C8080DedicatedCpu::dataAccessWidth(
 }
 
 
-PERROR
-C8080DedicatedCpu::memoryReadWrite(
+void
+C8080DedicatedCpu::outputAddressAndStatus(
     UINT32 address,
-    UINT16 *data,
     bool   read
 )
 {
-    PERROR error = errorSuccess;
-    bool interruptsDisabled = false;
     UINT8 procState = 0x00;
 
-    bool io        = (address & 0x010000) ? true : false;
-    bool readySync = (address & 0x100000) ? true : false;
+    bool io = (address & 0x010000) ? true : false;
 
     //
     // IO addressing is 256 bytes that mirrors the low byte onto the high
@@ -275,56 +251,16 @@ C8080DedicatedCpu::memoryReadWrite(
     }
 
     // Assert the address
-    m_busA.pinMode(OUTPUT);
-    m_busA.digitalWrite((UINT16) (address & 0xFFFF));
+    *g_portOutAddressHi = ((address >> 8) & 0xFF);
+    *g_portOutAddressLo = ((address >> 0) & 0xFF);
 
-    // Output the proessor status on the data bus.
-    m_busD.pinMode(OUTPUT);
-    m_busD.digitalWrite(procState);
+    *g_dirAddressHi = s_DIR_BYTE_OUTPUT;
+    *g_dirAddressLo = s_DIR_BYTE_OUTPUT;
 
-    // Critical timing section
-    noInterrupts();
-    interruptsDisabled = true;
+    // Output the processor status on the data bus.
+    *g_portOutData = procState;
+    *g_dirData     = s_DIR_BYTE_OUTPUT;
 
-    //
-    // TODO: Implement support for synchronous READY timed cycles.
-    // There is no way to access the video RAM at the present time without
-    // this support :(
-    //
-    if (readySync)
-    {
-        error = errorNotImplemented;
-        goto Exit;
-    }
-
-    // Pulse SYNC
-    m_pinSYNC.digitalWriteHIGH();
-    m_pinSYNC.digitalWriteLOW();
-
-    // Perform the data access
-    if (read)
-    {
-        m_busD.pinMode(INPUT);
-
-        m_pinDBIN.digitalWriteHIGH();
-        m_busD.digitalReadThenDigitalWriteLOW(data, m_pinDBIN);
-    }
-    else
-    {
-        m_busD.digitalWrite(*data & 0xFF);
-
-        m_pin_WR.digitalWriteLOW();
-        m_pin_WR.digitalWriteHIGH();
-    }
-
-Exit:
-
-    if (interruptsDisabled)
-    {
-        interrupts();
-    }
-
-    return error;
 }
 
 
@@ -334,7 +270,127 @@ C8080DedicatedCpu::memoryRead(
     UINT16 *data
 )
 {
-    return memoryReadWrite(address, data, true);
+    PERROR error = errorSuccess;
+
+    outputAddressAndStatus(address, true);
+
+    //
+    // These are all ignored by the compiler because the port address are all
+    // less than 0xF and thus are rolled into the IO instruction itself.
+    // i.e. ports A through D are faster to work with. That was lucky.
+    //
+    register volatile UINT8 * const portOutControlOut = g_portOutControlOut;
+    register volatile UINT8 * const portInControlIn   = g_portInControlIn;
+    register volatile UINT8 * const portInData        = g_portInData;
+    register volatile UINT8 * const dirData           = g_dirData;
+
+    register const UINT8 bitInCLK2      = (s_BIT_IN_CLK2);
+    register const UINT8 bitInREADY     = (s_BIT_IN_READY);
+
+    register const UINT8 byteOutWR      = (s_BIT_OUT_WR);
+    register const UINT8 byteOutWR_SYNC = (s_BIT_OUT_WR |  s_BIT_OUT_SYNC);
+    register const UINT8 byteOutWR_DBIN = (s_BIT_OUT_WR |  s_BIT_OUT_DBIN);
+
+    //
+    // Using separate counts saves 4 instructions because the compiler
+    // optimizes out the pre-loop test (it knows the 1st time x > 0).
+    //
+    register UINT8 x = 255;
+    register UINT8 y = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+
+    // Critical timing section
+    noInterrupts();
+
+    //
+    // Wait for CLK2 rising edge to be detected.
+    // This loop is 8 instructions total, 500ns.
+    //
+    for ( ; x > 0 ; x--)
+    {
+        r1 = *portInControlIn;
+        r2 = *portInControlIn;
+
+        if (!(r1 & bitInCLK2) &&
+             (r2 & bitInCLK2))
+        {
+            break;
+        }
+    }
+
+    //
+    // Assert SYNC and use dummy writes to hold it.
+    //
+    // WARNING: This is manually tuned with a scope!
+    //
+    // According to the 8080 datasheet, SYNC is asserted
+    // during CLK2-Hi, held, and de-asserted during the next
+    // CLK2-Hi. Space Invaders latches the CPU status using CLK1
+    // that pules high in between them, thus:-
+    //
+    // CLK2  ----    ----    ----    ----    ----    ----
+    //       |  |    |  |    |  |    |  |    |  |    |  |
+    //      -    ----    ----    ----    ----    ----    -
+    //
+    // CLK1       --      --      --      --      --
+    //            ||      ||      ||      ||      ||
+    //      ------  ------  ------  ------  ------  ------
+    //
+    // SYNC    --------
+    //         |      |
+    //      ---        ------------------------------------
+    //
+    // The timing below manually extends SYNC to fall in the CLK2-Hi period.
+    //
+    *portOutControlOut = byteOutWR_SYNC; //  62.5ns
+    *portOutControlOut = byteOutWR_SYNC; // 125.0ns
+    *portOutControlOut = byteOutWR_SYNC; // 187.5ns
+    *portOutControlOut = byteOutWR_SYNC; // 250.0ns
+
+    // Deassert SYNC.
+    *portOutControlOut = byteOutWR;
+
+    // Switch the data bus to input.
+    *dirData = s_DIR_BYTE_INPUT;
+    *portOutControlOut = byteOutWR_DBIN;
+
+    //
+    // Wait for READY high.
+    // This loop is 4 instructions total, 250ns.
+    //
+    for ( ; y > 0 ; y--)
+    {
+        r1 = *portInControlIn;
+
+        if (r1 & bitInREADY)
+        {
+            break;
+        }
+    }
+
+    // Read in the data
+    r1 = *portInData;
+
+    // Deassert DBIN and set data out.
+    *portOutControlOut = byteOutWR;
+    *dirData = s_DIR_BYTE_OUTPUT;
+
+    if ((x == 0) ||
+        (y == 0))
+    {
+        error = errorTimeout;
+        goto Exit;
+    }
+
+    *data = r1;
+
+Exit:
+
+    interrupts();
+
+    return error;
 }
 
 
@@ -344,7 +400,100 @@ C8080DedicatedCpu::memoryWrite(
     UINT16 data
 )
 {
-    return memoryReadWrite(address, &data, false);
+    PERROR error = errorSuccess;
+
+    outputAddressAndStatus(address, false);
+
+    //
+    // These are all ignored by the compiler because the port address are all
+    // less than 0xF and thus are rolled into the IO instruction itself.
+    // i.e. ports A through D are faster to work with. That was lucky.
+    //
+    register volatile UINT8 * const portOutControlOut = g_portOutControlOut;
+    register volatile UINT8 * const portInControlIn   = g_portInControlIn;
+    register volatile UINT8 * const portOutData       = g_portOutData;
+
+    register const UINT8 bitInCLK2      = (s_BIT_IN_CLK2);
+    register const UINT8 bitInREADY     = (s_BIT_IN_READY);
+
+    register const UINT8 byteOutWR      = (s_BIT_OUT_WR);
+    register const UINT8 byteOutWR_SYNC = (s_BIT_OUT_WR |  s_BIT_OUT_SYNC);
+    register const UINT8 byteOut0       = 0;
+
+    //
+    // Using separate counts saves 4 instructions because the compiler
+    // optimizes out the pre-loop test (it knows the 1st time x > 0).
+    //
+    register UINT8 x = 255;
+    register UINT8 y = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+
+    // Critical timing section
+    noInterrupts();
+
+    //
+    // Wait for CLK2 rising edge to be detected.
+    // This loop is 8 instructions total, 500ns.
+    //
+    for ( ; x > 0 ; x--)
+    {
+        r1 = *portInControlIn;
+        r2 = *portInControlIn;
+
+        if (!(r1 & bitInCLK2) &&
+             (r2 & bitInCLK2))
+        {
+            break;
+        }
+    }
+
+    //
+    // Assert SYNC and use dummy writes to hold it.
+    // See the note in memoryRead above.
+    //
+    *portOutControlOut = byteOutWR_SYNC; //  62.5ns
+    *portOutControlOut = byteOutWR_SYNC; // 125.0ns
+    *portOutControlOut = byteOutWR_SYNC; // 187.5ns
+    *portOutControlOut = byteOutWR_SYNC; // 250.0ns
+
+    // Deassert SYNC.
+    *portOutControlOut = byteOutWR;
+
+    // Output the data and assert WR.
+    *portOutData = (UINT8) data;
+    *portOutControlOut = byteOut0;
+
+    //
+    // Wait for READY high.
+    // This loop is 4 instructions total, 250ns.
+    //
+    for ( ; y > 0 ; y--)
+    {
+        r1 = *portInControlIn;
+
+        if (r1 & bitInREADY)
+        {
+            break;
+        }
+    }
+
+    // Deassert WR.
+    *portOutControlOut = byteOutWR;
+
+    if ((x == 0) ||
+        (y == 0))
+    {
+        error = errorTimeout;
+        goto Exit;
+    }
+
+Exit:
+
+    interrupts();
+
+    return error;
 }
 
 
