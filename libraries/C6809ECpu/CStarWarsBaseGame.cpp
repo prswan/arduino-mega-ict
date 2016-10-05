@@ -155,6 +155,7 @@ CStarWarsBaseGame::CStarWarsBaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegion, // It's all Byte wide
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,

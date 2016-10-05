@@ -240,6 +240,7 @@ CGenericBaseGame::CGenericBaseGame(
     RomSize romSize
 ) : CGame( ((romSize == I2716) ? s_romRegion2716 : s_romRegion2732),
            s_ramRegion,
+           s_ramRegion, // All Byte-wide.
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,

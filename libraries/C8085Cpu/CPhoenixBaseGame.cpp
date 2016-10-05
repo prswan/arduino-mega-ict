@@ -65,6 +65,17 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //
                                                 }; // end of list
 
 //
+// RAM region is the same for all games on this board set.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                     "012", "012345"
+                                                          {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104000, 0x1043FF, 1, 0xFF, "r4?", "FgRam1"}, // Foreground Video RAM Bank 1, 2114, 41/43
+                                                          {CPhoenixBaseGame::onBankSwitchVRamBank1, 0x104800, 0x104BFF, 1, 0xFF, "r2?", "BgRam1"}, // Background Video RAM Bank 1, 2114, 25/27
+                                                          {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104000, 0x1043FF, 1, 0xFF, "r4?", "FgRam2"}, // Foreground Video RAM Bank 2, 2114, 42/44
+                                                          {CPhoenixBaseGame::onBankSwitchVRamBank2, 0x104800, 0x104BFF, 1, 0xFF, "r2?", "BgRam2"}, // Background Video RAM Bank 2, 2114, 26/28
+                                                          {0}
+                                                        }; // end of list
+
+//
 // No write-only RAM on this platform. Yay!
 //
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
@@ -110,6 +121,7 @@ CPhoenixBaseGame::CPhoenixBaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,

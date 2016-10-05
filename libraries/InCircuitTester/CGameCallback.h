@@ -78,6 +78,11 @@ class CGameCallback
             int  key
         );
 
+        static PERROR onSelectRamCheckAllRA(
+            void *iGame,
+            int  key
+        );
+
         static PERROR onSelectRamCheckAllCS(
             void *iGame,
             int  key
@@ -104,6 +109,11 @@ class CGameCallback
         );
 
         static PERROR onSelectRamCheck(
+            void *iGame,
+            int  key
+        );
+
+        static PERROR onSelectRamCheckRA(
             void *iGame,
             int  key
         );

@@ -41,11 +41,13 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 CQuasarBaseGame::CQuasarBaseGame(
     const ROM_REGION    *romRegion,
     const RAM_REGION    *ramRegion,
+    const RAM_REGION    *ramRegionByteOnly,
     const RAM_REGION    *ramRegionWriteOnly,
     const INPUT_REGION  *inputRegion,
     const OUTPUT_REGION *outputRegion
 ) : CGame( romRegion,
            ramRegion,
+           ramRegionByteOnly,
            ramRegionWriteOnly,
            inputRegion,
            outputRegion,

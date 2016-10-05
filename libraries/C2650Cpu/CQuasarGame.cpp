@@ -115,6 +115,21 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
                                                   {0}
                                                 }; // end of list
 
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                             "012", "012345"
+                                                          {NO_BANK_SWITCH,                            0x1C00,      0x1FFF,      1, 0xFF, "76E", "Prog. "}, // "Program RAM, 2114, 7E/6E"
+                                                          {CQuasarBaseGame::onBankSwitchCharacterRam, 0x1800,      0x1BFF,      1, 0xFF, "1?F", "Char. "}, // "Video Character RAM, 2114, 12F/11F"
+                                                          {CQuasarBaseGame::onBankSwitchEffectRam,    0x1800,      0x1BFF,      1, 0xFF, " 98", "Effect"}, // "Video Effect RAM, 2114, 9/8" - Note the flipped Dbus
+                                                          {NO_BANK_SWITCH,                            0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                            0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                            0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                            0x1600+0x00, 0x1600+0x2D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                            0x1600+0x40, 0x1600+0x6D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                            0x1600+0x80, 0x1600+0xAD, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                            0x1700+0x00, 0x1700+0x2D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+                                                          {NO_BANK_SWITCH,                            0x1700+0x40, 0x1700+0x6D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+                                                          {NO_BANK_SWITCH,                            0x1700+0x80, 0x1700+0xAD, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+                                                          {0}
+                                                        }; // end of list
 
 //
 // This region allows the bullet RAM & PVI's to be initialized.
@@ -190,6 +205,7 @@ CQuasarGame::CQuasarGame(
     const ROM_REGION *romRegion
 ) : CQuasarBaseGame( romRegion,
                      s_ramRegion,
+                     s_ramRegionByteOnly,
                      s_ramRegionWriteOnly,
                      s_inputRegion,
                      s_outputRegion )

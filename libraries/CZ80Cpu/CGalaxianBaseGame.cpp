@@ -70,6 +70,21 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
                                                 }; // end of list
 
 //
+// RAM region is the same for all games on this board set.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                        "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0xFF, "7PN", "Prog. "}, // "Program RAM, 2114, 7P/7N"
+                                                          {NO_BANK_SWITCH, 0x5800, 0x58FF, 1, 0xFF, "45F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used., 4F/5F"
+                                                          //
+                                                          // See note above about access restrictions w.r.t HBLANK & WAIT.
+                                                          // These regions are access with special support in the CZ80Cpu triggered via address 0x10xxxx.
+                                                          //
+                                                          //                                            "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x105000, 0x1053FF, 1, 0xFF, "3HF", "BkVRam"}, // "Background VRAM, 2114, 3H/3F"
+                                                          {0}
+                                                        }; // end of list
+
+//
 // No write-only RAM on this platform. Yay!
 //
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
@@ -135,6 +150,7 @@ CGalaxianBaseGame::CGalaxianBaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,

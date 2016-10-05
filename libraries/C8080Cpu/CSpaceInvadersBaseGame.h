@@ -39,6 +39,13 @@ class CSpaceInvadersBaseGame : public CGame
         virtual PERROR interruptCheck(
         );
 
+        //
+        // Custom function to test the shifter circuit
+        //
+        static PERROR testShifter(
+            void *context
+        );
+
     protected:
 
         CSpaceInvadersBaseGame(

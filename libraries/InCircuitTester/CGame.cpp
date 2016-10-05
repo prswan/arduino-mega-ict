@@ -33,6 +33,7 @@
 CGame::CGame(
     const ROM_REGION      *romRegion,
     const RAM_REGION      *ramRegion,
+    const RAM_REGION      *ramRegionByteOnly,
     const RAM_REGION      *ramRegionWriteOnly,
     const INPUT_REGION    *inputRegion,
     const OUTPUT_REGION   *outputRegion,
@@ -42,6 +43,7 @@ CGame::CGame(
     m_interruptResponse(0),
     m_RomReadRegion(0),
     m_RamWriteReadRegion(0),
+    m_RamWriteReadByteRegion(0),
     m_inputReadRegion(0),
     m_outputWriteRegion(0),
     m_outputWriteRegionOn(true),
@@ -80,6 +82,28 @@ CGame::CGame(
         m_ramRegion = (PRAM_REGION) malloc( uRegionSize );
 
         memcpy_P( m_ramRegion, ramRegion, uRegionSize );
+    }
+
+    // Copy the PROGMEM based region into local SRAM if it's different.
+    if (ramRegion != ramRegionByteOnly)
+    {
+        UINT16 uIndexCount = 0;
+        UINT16 uRegionSize = 0;
+
+        for ( ;
+              ((pgm_read_word_near((UINT16*) (&ramRegionByteOnly[uIndexCount].end) + 0) != 0) ||
+               (pgm_read_word_near((UINT16*) (&ramRegionByteOnly[uIndexCount].end) + 1) != 0)) ;
+              uIndexCount++) {}
+
+        uRegionSize = sizeof(ramRegionByteOnly[0]) * (uIndexCount+1);
+
+        m_ramRegionByteOnly = (PRAM_REGION) malloc( uRegionSize );
+
+        memcpy_P( m_ramRegionByteOnly, ramRegionByteOnly, uRegionSize );
+    }
+    else
+    {
+        m_ramRegionByteOnly = m_ramRegion;
     }
 
     // Copy the PROGMEM based region into local SRAM
@@ -149,6 +173,12 @@ CGame::~CGame(
 {
     free( m_romRegion );
     free( m_ramRegion );
+
+    if (m_ramRegionByteOnly != m_ramRegion)
+    {
+        free( m_ramRegionByteOnly );
+    }
+
     free( m_ramRegionWriteOnly );
     free( m_inputRegion );
     free( m_outputRegion );
@@ -203,6 +233,7 @@ CGame::ramCheckAll(
 
     CRamCheck ramCheck( m_cpu,
                         m_ramRegion,
+                        m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
                         (void *) this );
 
@@ -220,10 +251,29 @@ CGame::ramCheckAllChipSelect(
 
     CRamCheck ramCheck( m_cpu,
                         m_ramRegion,
+                        m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
                         (void *) this );
 
     error = ramCheck.checkChipSelect();
+
+    return error;
+}
+
+
+PERROR
+CGame::ramCheckAllRandomAccess(
+)
+{
+    PERROR error = errorSuccess;
+
+    CRamCheck ramCheck( m_cpu,
+                        m_ramRegion,
+                        m_ramRegionByteOnly,
+                        m_ramRegionWriteOnly,
+                        (void *) this );
+
+    error = ramCheck.checkRandomAccess();
 
     return error;
 }
@@ -382,6 +432,7 @@ CGame::ramCheck(
 
         CRamCheck ramCheck( m_cpu,
                             m_ramRegion,
+                            m_ramRegionByteOnly,
                             m_ramRegionWriteOnly,
                             (void *) this );
 
@@ -390,6 +441,34 @@ CGame::ramCheck(
     else
     {
         error = onRamKeyMove(key);
+    }
+
+    return error;
+}
+
+
+PERROR
+CGame::ramCheckRandomAccess(
+    int key
+)
+{
+    PERROR error = errorSuccess;
+
+    if (key == SELECT_KEY)
+    {
+        const RAM_REGION *region = &m_ramRegionByteOnly[m_RamWriteReadByteRegion];
+
+        CRamCheck ramCheck( m_cpu,
+                            m_ramRegion,
+                            m_ramRegionByteOnly,
+                            m_ramRegionWriteOnly,
+                            (void *) this );
+
+        error = ramCheck.checkRandomAccess(region);
+    }
+    else
+    {
+        error = onRamByteKeyMove(key);
     }
 
     return error;
@@ -409,6 +488,7 @@ CGame::ramWriteRead(
 
         CRamCheck ramCheck( m_cpu,
                             m_ramRegion,
+                            m_ramRegionByteOnly,
                             m_ramRegionWriteOnly,
                             (void *) this );
 
@@ -449,6 +529,7 @@ CGame::ramWriteAllAD(
 
     CRamCheck ramCheck( m_cpu,
                         m_ramRegion,
+                        m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
                         (void *) this );
 
@@ -467,6 +548,7 @@ CGame::ramWriteAllLo(
 
     CRamCheck ramCheck( m_cpu,
                         m_ramRegion,
+                        m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
                         (void *) this );
 
@@ -485,6 +567,7 @@ CGame::ramWriteAllHi(
 
     CRamCheck ramCheck( m_cpu,
                         m_ramRegion,
+                        m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
                         (void *) this );
 
@@ -503,6 +586,7 @@ CGame::ramReadAll(
 
     CRamCheck ramCheck( m_cpu,
                         m_ramRegion,
+                        m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
                         (void *) this );
 
@@ -745,6 +829,57 @@ CGame::onRamKeyMove(
     if (key != SELECT_KEY)
     {
         const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(region->start);
+
+        if (dataAccessWidth == 1)
+        {
+            STRING_REGION8_SUMMARY(errorCustom, region->start, region->mask, region->location);
+        }
+        else if (dataAccessWidth == 2)
+        {
+            STRING_REGION16_SUMMARY(errorCustom, region->start, region->mask, region->location);
+        }
+        else
+        {
+            error = errorNotImplemented;
+        }
+    }
+
+    if (SUCCESS(error))
+    {
+        error = errorCustom;
+    }
+
+    return error;
+}
+
+
+PERROR
+CGame::onRamByteKeyMove(
+    int key
+)
+{
+    PERROR error = errorSuccess;
+
+    if (key == DOWN_KEY)
+    {
+        if (m_RamWriteReadByteRegion > 0)
+        {
+            m_RamWriteReadByteRegion--;
+        }
+    }
+
+    if (key == UP_KEY)
+    {
+        if (m_ramRegionByteOnly[m_RamWriteReadByteRegion+1].end != 0)
+        {
+            m_RamWriteReadByteRegion++;
+        }
+    }
+
+    if (key != SELECT_KEY)
+    {
+        const RAM_REGION *region = &m_ramRegionByteOnly[m_RamWriteReadByteRegion];
         UINT8 dataAccessWidth = m_cpu->dataAccessWidth(region->start);
 
         if (dataAccessWidth == 1)

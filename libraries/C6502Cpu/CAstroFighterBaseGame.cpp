@@ -64,13 +64,19 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
                                                   {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x20, "c1C", "V.DRAM"}, // "Video RAM, upper"
                                                   {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x40, "c1B", "V.DRAM"}, // "Video RAM, upper"
                                                   {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x80, "c1A", "V.DRAM"}, // "Video RAM, upper"
-                                                  //
-                                                  // Duplicate entries to ease reliability testing of the DRAM byte-wide
-                                                  //
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0xFF, "2AT", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0xFF, "1AT", "V.DRAM"}, // "Video RAM, upper"
                                                   {0}
                                                 }; // end of list
+
+//
+// RAM region is the same for all games on this board set.
+// This description is used for the byte-wide intensive random access memory test.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                  "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0xFF, "2MF", "Prog. "}, // "Program RAM, 2114, ROM PCB 2M/2F"
+                                                          {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0xFF, "2AT", "V.DRAM"}, // "Video RAM, lower"
+                                                          {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0xFF, "1AT", "V.DRAM"}, // "Video RAM, upper"
+                                                          {0}
+                                                        }; // end of list
 
 //
 // No write-only RAM on this platform. Yay!
@@ -110,6 +116,7 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
     const OUTPUT_REGION *outputRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            inputRegion,
            outputRegion,

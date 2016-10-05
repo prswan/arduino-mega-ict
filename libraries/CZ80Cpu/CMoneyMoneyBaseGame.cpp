@@ -83,6 +83,17 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
                                                 }; // end of list
 
 //
+// RAM region is the same for all games on this board set.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                            "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x7000,   0x73FF,   1, 0xFF, "2AB", "Prog. "}, // "Program RAM, 2114, 2A/2B"
+                                                          {NO_BANK_SWITCH, 0x7400,   0x77FF,   1, 0xFF, "2CD", "Prog. "}, // "Program RAM, 2114, 2C/2D"
+                                                          {NO_BANK_SWITCH, 0x6800,   0x68FF,   1, 0xFF, "1LM", "Obj.  "}, // "Object RAM, 2114, 256 Bytes used, 1L/1M"
+                                                          {NO_BANK_SWITCH, 0x106000, 0x1063FF, 1, 0x0F, "2CB", "Bkg.  "}, // "Background RAM, 2114, 2C/2B"
+                                                          {0}
+                                                        }; // end of list
+
+//
 // No write-only RAM on this platform. Yay!
 //
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
@@ -138,6 +149,7 @@ CMoneyMoneyBaseGame::CMoneyMoneyBaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,

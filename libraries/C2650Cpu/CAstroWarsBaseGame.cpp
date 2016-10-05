@@ -40,10 +40,12 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 CAstroWarsBaseGame::CAstroWarsBaseGame(
     const ROM_REGION    *romRegion,
     const RAM_REGION    *ramRegion,
+    const RAM_REGION    *ramRegionByteOnly,
     const INPUT_REGION  *inputRegion,
     const OUTPUT_REGION *outputRegion
 ) : CGame( romRegion,
            ramRegion,
+           ramRegionByteOnly,
            s_ramRegionWriteOnly,
            inputRegion,
            outputRegion,

@@ -72,6 +72,17 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
                                                 }; // end of list
 
 //
+// RAM region is the same for all games on this board set.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                            "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x4000,   0x43FF,   1, 0xFF, "1KG", "Prog. "}, // "Program RAM, 2114, 1K/1G"
+                                                          {NO_BANK_SWITCH, 0x4400,   0x47FF,   1, 0xFF, "1JH", "Prog. "}, // "Program RAM, 2114, 1J/1H"
+                                                          {NO_BANK_SWITCH, 0x5000,   0x50FF,   1, 0xFF, "3LM", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used, 3L/3M"
+                                                          {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0xFF, "3KJ", "BkVRam"}, // "Background VRAM, 2114, 3K/3J"
+                                                          {0}
+                                                        }; // end of list
+
+//
 // No write-only RAM on this platform. Yay!
 //
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
@@ -116,6 +127,7 @@ CScrambleBaseGame::CScrambleBaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,
