@@ -43,6 +43,13 @@
 //
 
 //
+// The shifter port mappings
+//
+static const UINT32 s_shifterCount  = 0x10002L;
+static const UINT32 s_shifterResult = 0x10003L;
+static const UINT32 s_shifterData   = 0x10004L;
+
+//
 // RAM region is the same for all games on this board set.
 //
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
@@ -84,11 +91,11 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 //
 // Input region is the same for all games on this board set.
 //
-static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
-                                                      {NO_BANK_SWITCH, 0x10000L, 0xFF, "   ", "IN0   "}, // Switch Inputs (IN0)
-                                                      {NO_BANK_SWITCH, 0x10001L, 0xFF, "   ", "IN1   "}, // Switch Inputs (IN1)
-                                                      {NO_BANK_SWITCH, 0x10002L, 0xFF, "   ", "IN2   "}, // Switch Inputs (IN2)
-                                                      {NO_BANK_SWITCH, 0x10003L, 0xFF, "   ", "ShiftR"}, // Shift Result
+static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                      "012", "012345"
+                                                      {NO_BANK_SWITCH, 0x10000L,        0xFF, "   ", "IN0   "}, // Switch Inputs (IN0)
+                                                      {NO_BANK_SWITCH, 0x10001L,        0xFF, "   ", "IN1   "}, // Switch Inputs (IN1)
+                                                      {NO_BANK_SWITCH, 0x10002L,        0xFF, "   ", "IN2   "}, // Switch Inputs (IN2)
+                                                      {NO_BANK_SWITCH, s_shifterResult, 0xFF, "   ", "ShiftR"}, // Shift Result
                                                       {0}
                                                     }; // end of list
 
@@ -100,22 +107,22 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //
                                                         // Describing that in the invert mask leaves the sound always on so that
                                                         // the decay after trigger can be heard.
                                                         //
-                                                        //                                     "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x01, 0x20, "S0 ", "Ufo   "}, // S0 - SM1
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x02, 0x20, "S1 ", "Fire  "}, // S1 - SM2
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x04, 0x20, "S2 ", "BseHit"}, // S2 - SM3
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x08, 0x20, "S3 ", "InvHit"}, // S3 - SM4
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x10, 0x20, "S4 ", "Bonus "}, // S4 - SM5
-                                                        {NO_BANK_SWITCH, 0x10003L, 0x20, 0x00, "S5 ", "Snd On"}, // S5 - Sound On
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x01, 0x00, "S6 ", "Step01"}, // S6 - Step Bit 1
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x02, 0x00, "S7 ", "Step02"}, // S7 - Step Bit 2
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x04, 0x00, "S8 ", "Step04"}, // S8 - Step Bit 4
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x08, 0x00, "S9 ", "Step08"}, // S9 - Step Bit 8
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x10, 0x00, "S10", "UfoHit"}, // S10 - UFO Hit
-                                                        {NO_BANK_SWITCH, 0x10005L, 0x20, 0x00, "S11", "Flip  "}, // S11 - Flip screen
-                                                        {NO_BANK_SWITCH, 0x10004L, 0xFF, 0x00, "   ", "ShiftD"}, // Shift Data
-                                                        {NO_BANK_SWITCH, 0x10002L, 0x07, 0x00, "   ", "ShiftC"}, // Shift Count
-                                                        {NO_BANK_SWITCH, 0x10006L, 0x01, 0x00, "   ", "Wd Res"}, // Watchdog Reset
+                                                        //                                           "012", "012345"
+                                                        {NO_BANK_SWITCH, 0x10003L,       0x01, 0x20, "S0 ", "Ufo   "}, // S0 - SM1
+                                                        {NO_BANK_SWITCH, 0x10003L,       0x02, 0x20, "S1 ", "Fire  "}, // S1 - SM2
+                                                        {NO_BANK_SWITCH, 0x10003L,       0x04, 0x20, "S2 ", "BseHit"}, // S2 - SM3
+                                                        {NO_BANK_SWITCH, 0x10003L,       0x08, 0x20, "S3 ", "InvHit"}, // S3 - SM4
+                                                        {NO_BANK_SWITCH, 0x10003L,       0x10, 0x20, "S4 ", "Bonus "}, // S4 - SM5
+                                                        {NO_BANK_SWITCH, 0x10003L,       0x20, 0x00, "S5 ", "Snd On"}, // S5 - Sound On
+                                                        {NO_BANK_SWITCH, 0x10005L,       0x01, 0x00, "S6 ", "Step01"}, // S6 - Step Bit 1
+                                                        {NO_BANK_SWITCH, 0x10005L,       0x02, 0x00, "S7 ", "Step02"}, // S7 - Step Bit 2
+                                                        {NO_BANK_SWITCH, 0x10005L,       0x04, 0x00, "S8 ", "Step04"}, // S8 - Step Bit 4
+                                                        {NO_BANK_SWITCH, 0x10005L,       0x08, 0x00, "S9 ", "Step08"}, // S9 - Step Bit 8
+                                                        {NO_BANK_SWITCH, 0x10005L,       0x10, 0x00, "S10", "UfoHit"}, // S10 - UFO Hit
+                                                        {NO_BANK_SWITCH, 0x10005L,       0x20, 0x00, "S11", "Flip  "}, // S11 - Flip screen
+                                                        {NO_BANK_SWITCH, s_shifterData,  0xFF, 0x00, "   ", "ShiftD"}, // Shift Data
+                                                        {NO_BANK_SWITCH, s_shifterCount, 0x07, 0x00, "   ", "ShiftC"}, // Shift Count
+                                                        {NO_BANK_SWITCH, 0x10006L,       0x01, 0x00, "   ", "Wd Res"}, // Watchdog Reset
                                                         {0}
                                                       }; // end of list
 
@@ -170,7 +177,22 @@ CSpaceInvadersBaseGame::interruptCheck(
 }
 
 //
-// Test the shifter circuit.
+// Test the shifter circuit, that performs the following (from MAME):
+//
+// WRITE8_MEMBER( mb14241_device::shift_count_w )
+// {
+//   m_shift_count = ~data & 0x07;
+// }
+//
+// WRITE8_MEMBER( mb14241_device::shift_data_w )
+// {
+//   m_shift_data = (m_shift_data >> 8) | ((UINT16)data << 7);
+// }
+//
+// READ8_MEMBER( mb14241_device::shift_result_r )
+// {
+//   return m_shift_data >> m_shift_count;
+// }
 //
 PERROR
 CSpaceInvadersBaseGame::testShifter(
@@ -178,6 +200,43 @@ CSpaceInvadersBaseGame::testShifter(
 )
 {
     CSpaceInvadersBaseGame *thisGame = (CSpaceInvadersBaseGame *) context;
-    PERROR error = errorNotImplemented;
+    C8080DedicatedCpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+    UINT16 shiftData;
+    UINT16 shiftCount;
+    UINT16 shiftExpResult;
+    UINT16 shiftRecResult;
+
+    // Sliding 1's
+    for (shiftData = 1 ; shiftData != 0 ; shiftData = (shiftData << 1))
+    {
+        CHECK_CPU_WRITE_EXIT(error, cpu, s_shifterData, (shiftData >> 0));
+        CHECK_CPU_WRITE_EXIT(error, cpu, s_shifterData, (shiftData >> 8));
+
+        for (shiftCount = 0 ; shiftCount < 8 ; shiftCount++)
+        {
+            CHECK_CPU_WRITE_EXIT(error, cpu, s_shifterCount, (~shiftCount & 0x7));
+            CHECK_CPU_READ_EXIT(error, cpu, s_shifterResult, &shiftRecResult);
+
+            shiftExpResult = (shiftData >> (shiftCount + 1)) & 0xFF;
+
+            if (shiftRecResult != shiftExpResult)
+            {
+                error = errorCustom;
+                error->code = ERROR_FAILED;
+                error->description = "E:";
+                STRING_UINT16_HEX(error->description, shiftData);
+                error->description += " ";
+                error->description += shiftCount;
+                STRING_UINT8_HEX(error->description, shiftExpResult);
+                STRING_UINT8_HEX(error->description, shiftRecResult);
+                goto Exit;
+            }
+
+            CHECK_UINT8_VALUE_EXIT(error, shiftCount, shiftRecResult, shiftExpResult)
+        }
+    }
+
+Exit:
     return error;
 }
