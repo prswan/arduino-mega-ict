@@ -91,7 +91,7 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Input region is the same for all games on this board set.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                                           "012", "012345"
-                                                      {NO_BANK_SWITCH,                             0x7000L, 0x00,  " 5C", "WD Res"}, // Watchdog reset
+                                                      {NO_BANK_SWITCH,                             0x7000L, 0xFF,  " 5C", "WD Res"}, // Watchdog reset
                                                       {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8100L, 0xFF,  "s1E", "Port A"}, // CP Inputs
                                                       {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8101L, 0xFF,  "s1E", "Port B"}, // CP Inputs
                                                       {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8102L, 0xFF,  "s1E", "Port C"}, // CP Inputs

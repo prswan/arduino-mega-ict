@@ -114,7 +114,7 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
                                                       {CMoneyMoneyBaseGame::onBankSwitchSetup8255,   0x7800L, 0xFF,  " 4H", "Port A"}, // 8255 Port A - Inputs
                                                       {CMoneyMoneyBaseGame::onBankSwitchSetup8255,   0x7801L, 0xFF,  " 4H", "Port B"}, // 8255 Port B - Inputs
                                                       {CMoneyMoneyBaseGame::onBankSwitchSetup8255,   0x7802L, 0x0F,  " 4H", "Port C"}, // 8255 Port C - Inputs
-                                                      {NO_BANK_SWITCH,                               0x7C00L, 0x00,  " 5F", "WD Res"}, // Watchdog reset
+                                                      {NO_BANK_SWITCH,                               0x7C00L, 0xFF,  " 5F", "WD Res"}, // Watchdog reset
                                                       {0}
                                                     }; // end of list
 

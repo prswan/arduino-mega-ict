@@ -229,15 +229,19 @@ PERROR
 CGame::ramCheckAll(
 )
 {
-    PERROR error = errorSuccess;
+    PERROR error = errorNotImplemented;
 
-    CRamCheck ramCheck( m_cpu,
-                        m_ramRegion,
-                        m_ramRegionByteOnly,
-                        m_ramRegionWriteOnly,
-                        (void *) this );
+    // Only handle if a region was defined
+    if (m_ramRegion[0].end != 0)
+    {
+        CRamCheck ramCheck( m_cpu,
+                            m_ramRegion,
+                            m_ramRegionByteOnly,
+                            m_ramRegionWriteOnly,
+                            (void *) this );
 
-    error = ramCheck.check();
+        error = ramCheck.check();
+    }
 
     return error;
 }
@@ -247,15 +251,19 @@ PERROR
 CGame::ramCheckAllChipSelect(
 )
 {
-    PERROR error = errorSuccess;
+    PERROR error = errorNotImplemented;
 
-    CRamCheck ramCheck( m_cpu,
-                        m_ramRegion,
-                        m_ramRegionByteOnly,
-                        m_ramRegionWriteOnly,
-                        (void *) this );
+    // Only handle if a region was defined
+    if (m_ramRegion[0].end != 0)
+    {
+        CRamCheck ramCheck( m_cpu,
+                            m_ramRegion,
+                            m_ramRegionByteOnly,
+                            m_ramRegionWriteOnly,
+                            (void *) this );
 
-    error = ramCheck.checkChipSelect();
+        error = ramCheck.checkChipSelect();
+    }
 
     return error;
 }
@@ -265,15 +273,19 @@ PERROR
 CGame::ramCheckAllRandomAccess(
 )
 {
-    PERROR error = errorSuccess;
+    PERROR error = errorNotImplemented;
 
-    CRamCheck ramCheck( m_cpu,
-                        m_ramRegion,
-                        m_ramRegionByteOnly,
-                        m_ramRegionWriteOnly,
-                        (void *) this );
+    // Only handle if a region was defined
+    if (m_ramRegionByteOnly[0].end != 0)
+    {
+        CRamCheck ramCheck( m_cpu,
+                            m_ramRegion,
+                            m_ramRegionByteOnly,
+                            m_ramRegionWriteOnly,
+                            (void *) this );
 
-    error = ramCheck.checkRandomAccess();
+        error = ramCheck.checkRandomAccess();
+    }
 
     return error;
 }
@@ -424,23 +436,27 @@ CGame::ramCheck(
     int key
 )
 {
-    PERROR error = errorSuccess;
+    PERROR error = errorNotImplemented;
 
-    if (key == SELECT_KEY)
+    // Only handle if a region was defined
+    if (m_ramRegion[0].end != 0)
     {
-        const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
+        if (key == SELECT_KEY)
+        {
+            const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
 
-        CRamCheck ramCheck( m_cpu,
-                            m_ramRegion,
-                            m_ramRegionByteOnly,
-                            m_ramRegionWriteOnly,
-                            (void *) this );
+            CRamCheck ramCheck( m_cpu,
+                                m_ramRegion,
+                                m_ramRegionByteOnly,
+                                m_ramRegionWriteOnly,
+                                (void *) this );
 
-        error = ramCheck.check(region);
-    }
-    else
-    {
-        error = onRamKeyMove(key);
+            error = ramCheck.check(region);
+        }
+        else
+        {
+            error = onRamKeyMove(key);
+        }
     }
 
     return error;
@@ -452,25 +468,28 @@ CGame::ramCheckRandomAccess(
     int key
 )
 {
-    PERROR error = errorSuccess;
+    PERROR error = errorNotImplemented;
 
-    if (key == SELECT_KEY)
+    // Only handle if a region was defined
+    if (m_ramRegionByteOnly[0].end != 0)
     {
-        const RAM_REGION *region = &m_ramRegionByteOnly[m_RamWriteReadByteRegion];
+        if (key == SELECT_KEY)
+        {
+            const RAM_REGION *region = &m_ramRegionByteOnly[m_RamWriteReadByteRegion];
 
-        CRamCheck ramCheck( m_cpu,
-                            m_ramRegion,
-                            m_ramRegionByteOnly,
-                            m_ramRegionWriteOnly,
-                            (void *) this );
+            CRamCheck ramCheck( m_cpu,
+                                m_ramRegion,
+                                m_ramRegionByteOnly,
+                                m_ramRegionWriteOnly,
+                                (void *) this );
 
-        error = ramCheck.checkRandomAccess(region);
+            error = ramCheck.checkRandomAccess(region);
+        }
+        else
+        {
+            error = onRamByteKeyMove(key);
+        }
     }
-    else
-    {
-        error = onRamByteKeyMove(key);
-    }
-
     return error;
 }
 
@@ -480,23 +499,27 @@ CGame::ramWriteRead(
     int key
 )
 {
-    PERROR error = errorSuccess;
+    PERROR error = errorNotImplemented;
 
-    if (key == SELECT_KEY)
+    // Only handle if a region was defined
+    if (m_ramRegion[0].end != 0)
     {
-        const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
+        if (key == SELECT_KEY)
+        {
+            const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
 
-        CRamCheck ramCheck( m_cpu,
-                            m_ramRegion,
-                            m_ramRegionByteOnly,
-                            m_ramRegionWriteOnly,
-                            (void *) this );
+            CRamCheck ramCheck( m_cpu,
+                                m_ramRegion,
+                                m_ramRegionByteOnly,
+                                m_ramRegionWriteOnly,
+                                (void *) this );
 
-        error = ramCheck.writeReadData(region);
-    }
-    else
-    {
-        error = onRamKeyMove(key);
+            error = ramCheck.writeReadData(region);
+        }
+        else
+        {
+            error = onRamKeyMove(key);
+        }
     }
 
     return error;

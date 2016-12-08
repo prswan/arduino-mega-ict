@@ -23,6 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include <CZ80GenericGame.h>
+#include <CAsoGame.h>
 #include <CGalaxianGame.h>
 #include <CJackrabbitGame.h>
 #include <CScrambleGame.h>
@@ -33,6 +34,8 @@
 static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Generic 2716   ",  onSelectGeneric, (void*) (CZ80GenericGame::createInstance2716),  false},
                                                   {"Generic 2732   ",  onSelectGeneric, (void*) (CZ80GenericGame::createInstance2732),  false},
+                                                  {"ASO        A(1)",  onSelectGame,    (void*) (CAsoAGame::createInstanceAsoSet1),     false},
+                                                  {"Arian Mis. A(1)",  onSelectGame,    (void*) (CAsoAGame::createInstanceArianSet1),   false},
                                                   {"Galaxian   (M1)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet1),    false},
                                                   {"Galaxian   (M2)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet2),    false},
                                                   {"Jackrabbit  (1)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet1),  false},

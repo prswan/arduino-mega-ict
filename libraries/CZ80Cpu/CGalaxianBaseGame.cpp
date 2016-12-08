@@ -98,7 +98,7 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
                                                       {NO_BANK_SWITCH, 0x6800L, 0xC0,  " 9C", "DIPSW1"}, // Read DIP switches (IN1)
                                                       {NO_BANK_SWITCH, 0x6800L, 0x2F,  " 9F", "IN SW1"}, // Read Inputs (IN1)
                                                       {NO_BANK_SWITCH, 0x7000L, 0x0F,  " 9C", "DIPSW "}, // Read DIP switches (IN2)
-                                                      {NO_BANK_SWITCH, 0x7800L, 0x00,  " 8L", "WD Res"}, // Watchdog reset
+                                                      {NO_BANK_SWITCH, 0x7800L, 0xFF,  " 8L", "WD Res"}, // Watchdog reset
                                                       {0}
                                                     }; // end of list
 
