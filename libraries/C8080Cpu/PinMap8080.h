@@ -101,7 +101,7 @@ static volatile UINT8 * const g_portOutControlOut = &PORTD;
 //
 // Byte-wide state controls
 //
-static const UINT8 s_PORT_BYTE_OFF    = 0xFF;
+static const UINT8 s_PORT_BYTE_OFF    = 0x00;
 static const UINT8 s_PORT_BYTE_PULLUP = 0xFF;
 
 static const UINT8 s_DIR_BYTE_INPUT   = 0x00;

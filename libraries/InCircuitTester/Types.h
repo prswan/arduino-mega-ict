@@ -175,8 +175,7 @@ typedef struct _CONNECTION {
 //  - 0x0400 bytes (max address 0x3FF) has 10 data samples.
 //  - 0x1000 bytes (max address 0xFFF) has 12 data samples.
 //
-// NOTE: ROM Regions only support 8-bit data access. I know of no games
-//       this era that used ROMS that were 16-bit access only.
+// ROM Regions support 8-bit & 16-bit data access.
 //
 
 typedef struct _ROM_REGION {
@@ -184,7 +183,7 @@ typedef struct _ROM_REGION {
     BankSwitchCallback bankSwitch;  // NULL if no bank switch is needed.
     UINT32             start;
     UINT32             length;
-    const UINT8        *data2n;
+    const UINT16       *data2n;
     UINT32             crc;
     CHAR               location[4]; // 3 characters
 
@@ -326,6 +325,40 @@ typedef struct _INTERRUPT_DEFINITION {
             string += " " + String(value16, HEX);             \
         }                                                     \
     }                                                         \
+
+//
+// Macro to format a UINT32 24-bit hex value into a string with leading zeros.
+// The Arduino String library does not appear to have an option to do this.
+//
+
+#define STRING_UINT32_24_HEX(string, value)                  \
+    {                                                        \
+        if (value <= 0xF)                                    \
+        {                                                    \
+            string += " 00000" + String(value, HEX);         \
+        }                                                    \
+        else if (value <= 0xFF)                              \
+        {                                                    \
+            string += " 0000" + String(value, HEX);          \
+        }                                                    \
+        else if (value <= 0xFFF)                             \
+        {                                                    \
+            string += " 000" + String(value, HEX);           \
+        }                                                    \
+        else if (value <= 0xFFFF)                            \
+        {                                                    \
+            string += " 00" + String(value, HEX);            \
+        }                                                    \
+        else if (value <= 0xFFFFF)                           \
+        {                                                    \
+            string += " 0" + String(value, HEX);             \
+        }                                                    \
+        else                                                 \
+        {                                                    \
+            string += " " + String((value & 0xFFFFFF), HEX); \
+        }                                                    \
+    }                                                        \
+
 
 //
 // Macro to format a UINT32 hex value into a string with leading zeros.
@@ -562,13 +595,13 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to load a string with an 8-bit region summary.
 // 0123456789adcdef
-//  1800 0F 11D
+//  001800 0F 11D
 //
-#define STRING_REGION8_SUMMARY(error, start, mask, location)    \
+#define STRING_REGION8_SUMMARY(error, start, mask, location)   \
     {                                                          \
         error->code = ERROR_SUCCESS;                           \
         error->description = "";                               \
-        STRING_UINT16_HEX(error->description, start);          \
+        STRING_UINT32_24_HEX(error->description, start);       \
         error->description += " ";                             \
         STRING_UINT8_HEX(error->description, mask);            \
         error->description += " ";                             \
@@ -578,13 +611,13 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to load a string with an 16-bit region summary.
 // 0123456789adcdef
-//  1800 0F0F 11D
+//  001800 0F0F 11D
 //
 #define STRING_REGION16_SUMMARY(error, start, mask, location)  \
     {                                                          \
         error->code = ERROR_SUCCESS;                           \
         error->description = "";                               \
-        STRING_UINT16_HEX(error->description, start);          \
+        STRING_UINT32_24_HEX(error->description, start);       \
         error->description += " ";                             \
         STRING_UINT16_HEX(error->description, mask);           \
         error->description += " ";                             \

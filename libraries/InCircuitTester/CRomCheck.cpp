@@ -102,22 +102,11 @@ CRomCheck::checkData2n(
         error = romRegion->bankSwitch( m_bankSwitchContext );
     }
 
-    //
-    // No support for 16-bit ROM testng
-    //
     if (SUCCESS(error))
     {
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(romRegion->start);
         UINT8 dataAccessWidth = m_cpu->dataAccessWidth(romRegion->start);
 
-        if (dataAccessWidth != 1)
-        {
-            error = errorNotImplemented;
-        }
-    }
-
-    if (SUCCESS(error))
-    {
-        UINT8  dataBusWidth      = m_cpu->dataBusWidth(romRegion->start);
         UINT16 dataBusWidthShift = (dataBusWidth == 2) ? 1 : 0;
 
         for (UINT32 shift = 0 ; (1UL << shift) < romRegion->length ; shift++)
@@ -133,15 +122,17 @@ CRomCheck::checkData2n(
                 break;
             }
 
-            if (expData != recData)
+            if (dataAccessWidth == 1)
             {
-                error = errorCustom;
-                error->code = ERROR_FAILED;
-                error->description = "E:";
-                error->description += romRegion->location;
-                STRING_UINT16_HEX(error->description, address);
-                STRING_UINT8_HEX(error->description, expData);
-                STRING_UINT8_HEX(error->description, recData);
+                CHECK_VALUE_UINT8_BREAK(error, romRegion->location, address, expData, recData);
+            }
+            else if (dataAccessWidth == 2)
+            {
+                CHECK_VALUE_UINT16_BREAK(error, romRegion->location, address, expData, recData);
+            }
+            else
+            {
+                error = errorNotImplemented;
                 break;
             }
         }
@@ -172,22 +163,11 @@ CRomCheck::calculateCrc(
         error = romRegion->bankSwitch( m_bankSwitchContext );
     }
 
-    //
-    // No support for 16-bit ROM testng
-    //
     if (SUCCESS(error))
     {
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(romRegion->start);
         UINT8 dataAccessWidth = m_cpu->dataAccessWidth(romRegion->start);
 
-        if (dataAccessWidth != 1)
-        {
-            error = errorNotImplemented;
-        }
-    }
-
-    if (SUCCESS(error))
-    {
-        UINT8  dataBusWidth = m_cpu->dataBusWidth(romRegion->start);
         UINT16 data = 0;
         UINT8  data8 = 0;
         UINT32 tempCrc = 0;
@@ -203,8 +183,24 @@ CRomCheck::calculateCrc(
                 break;
             }
 
-            data8 = (UINT8) data;
-            tempCrc = crc32(tempCrc, &data8, sizeof(data8));
+            if (dataAccessWidth == 1)
+            {
+                data8 = (UINT8) data;
+                tempCrc = crc32(tempCrc, &data8, sizeof(data8));
+            }
+            else if (dataAccessWidth == 2)
+            {
+                data8 = (UINT8) (data >> 0);
+                tempCrc = crc32(tempCrc, &data8, sizeof(data8));
+
+                data8 = (UINT8) (data >> 8);
+                tempCrc = crc32(tempCrc, &data8, sizeof(data8));
+            }
+            else
+            {
+                error = errorNotImplemented;
+                break;
+            }
         }
 
         if (SUCCESS(error))
