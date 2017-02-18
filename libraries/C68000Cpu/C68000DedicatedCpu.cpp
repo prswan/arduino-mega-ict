@@ -46,6 +46,12 @@
 //
 // 2) "C:\Program Files (x86)\Arduino\hardware\tools\avr\avr\bin\objdump.exe" -S InCircuitTester68000.ino.elf >> asm.txt
 //
+// ** NOTE **
+//
+// The 68000 dedicated probe head should be used with a test shield fitted with 0-ohm links instead of
+// the current limit resistor. The timing on 68000 is too fast to work properly with these protection resistors
+// in place.
+//
 
 //
 // Control Pins
@@ -70,6 +76,12 @@ static const UINT8 s_FC_UNDEF_004   = 0x04; // Reserved/undefined
 static const UINT8 s_FC_SUPER_DATA  = 0x05; // Supervisor Data
 static const UINT8 s_FC_SUPER_PROG  = 0x06; // Supervisor Program
 static const UINT8 s_FC_CPU_SPACE   = 0x07; // CPU Space
+
+//
+// Address flag for 6800 synchronous bus mode
+//
+static const UINT32 s_vpaAddress = 0x04000000;
+
 
 //
 // Wait for CLK rising edge to be detected.
@@ -102,6 +114,25 @@ static const UINT8 s_FC_CPU_SPACE   = 0x07; // CPU Space
             r1 = *g_portInControlIn;       \
                                            \
             if (!(r1 & s_BIT_IN_DTACK))    \
+            {                              \
+                break;                     \
+            }                              \
+        }                                  \
+    }                                      \
+
+
+//
+// Wait for VPA low.
+// This loop is 2 instructions total, 125ns.
+// Note that the system will hang here if VPA is stuck.
+//
+#define WAIT_FOR_VPA(x,r1,r2)            \
+    {                                      \
+        while(1)                           \
+        {                                  \
+            r1 = *g_portInControlIn;       \
+                                           \
+            if (!(r1 & s_BIT_IN_VPA))    \
             {                              \
                 break;                     \
             }                              \
@@ -144,9 +175,20 @@ C68000DedicatedCpu::idle(
     *g_portOutControlIn   = s_PORT_BYTE_OFF;
     *g_dirControlIn       = s_DIR_BYTE_INPUT;
 
+    //
     // Control outputs are always outputs
+    // Except "E" is not Hi-Z during bus request so we must not drive it.
+    //
     *g_portOutControlOutD = s_BYTE_OUT_IDLE_D;
-    *g_dirControlOutD     = s_DIR_BYTE_OUTPUT;
+
+    if (busRequest)
+    {
+        *g_dirControlOutD = (s_DIR_BYTE_OUTPUT ^ s_BIT_OUT_E);
+    }
+    else
+    {
+        *g_dirControlOutD = s_DIR_BYTE_OUTPUT;
+    }
 
     *g_portOutControlOutL = s_BYTE_OUT_IDLE_L;
     *g_dirControlOutL     = s_DIR_BYTE_OUTPUT;
@@ -267,20 +309,17 @@ C68000DedicatedCpu::outputAddress(
     *g_portOutDataLo      = (address >> 16) & 0xFF;
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE2);
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE2); // Wait state
-    *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE2); // Wait state
     *g_portOutControlOutL = (portOutL);
 
     // Output byte LE1
     *g_portOutDataLo      = (address >>  8) & 0xFF;
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE1);
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE1); // Wait state
-    *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE1); // Wait state
     *g_portOutControlOutL = (portOutL);
 
     // Output byte LE0
     *g_portOutDataLo      = (address >>  0) & 0xFF;
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE0);
-    *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE0); // Wait state
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE0); // Wait state
     *g_portOutControlOutL = (portOutL);
 
@@ -308,7 +347,8 @@ C68000DedicatedCpu::memoryRead(
 )
 {
     PERROR error = errorSuccess;
-    bool   lo    = ((address & 1) == 1) ? true : false;
+    bool   lo    = (address & 1) ? true : false;
+    bool   vpa   = (address & s_vpaAddress) ? true : false;
 
     outputAddress(address, true);
 
@@ -316,13 +356,27 @@ C68000DedicatedCpu::memoryRead(
     {
         *g_dirDataLo = s_DIR_BYTE_INPUT;
 
-        error = readWriteLoDTACK(data);
+        if (vpa)
+        {
+            error = readWriteLoVPA(data);
+        }
+        else
+        {
+            error = readWriteLoDTACK(data);
+        }
     }
     else
     {
         *g_dirDataHi = s_DIR_BYTE_INPUT;
 
-        error = readWriteHiDTACK(data);
+        if (vpa)
+        {
+            error = readWriteHiVPA(data);
+        }
+        else
+        {
+            error = readWriteHiDTACK(data);
+        }
     }
 
     return error;
@@ -336,7 +390,8 @@ C68000DedicatedCpu::memoryWrite(
 )
 {
     PERROR error = errorSuccess;
-    bool   lo    = ((address & 1) == 1) ? true : false;
+    bool   lo    = (address & 1) ? true : false;
+    bool   vpa   = (address & s_vpaAddress) ? true : false;
     UINT16 dummyData;
 
     outputAddress(address, false);
@@ -346,7 +401,14 @@ C68000DedicatedCpu::memoryWrite(
         *g_dirDataLo = s_DIR_BYTE_OUTPUT;
         *g_portOutDataLo = data & 0xFF;
 
-        error = readWriteLoDTACK(&dummyData);
+        if (vpa)
+        {
+            error = readWriteLoVPA(&dummyData);
+        }
+        else
+        {
+            error = readWriteLoDTACK(&dummyData);
+        }
 
         *g_dirDataLo  = s_DIR_BYTE_INPUT;
     }
@@ -355,7 +417,14 @@ C68000DedicatedCpu::memoryWrite(
         *g_dirDataHi = s_DIR_BYTE_OUTPUT;
         *g_portOutDataHi = data & 0xFF;
 
-        error = readWriteHiDTACK(&dummyData);
+        if (vpa)
+        {
+            error = readWriteHiVPA(&dummyData);
+        }
+        else
+        {
+            error = readWriteHiDTACK(&dummyData);
+        }
 
         *g_dirDataHi = s_DIR_BYTE_INPUT;
     }
@@ -473,6 +542,123 @@ C68000DedicatedCpu::readWriteHiDTACK(
 
     // Wait for DTACK to be asserted
     WAIT_FOR_DTACK(x,r1,r2);
+
+    // Read in the data
+    r1 = *g_portInDataHi;
+
+    // Terminate the cycle
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D;
+
+    // Check for timeout
+    if (x == 0)
+    {
+        error = errorTimeout;
+        goto Exit;
+    }
+
+    // Populate the output data word
+    *data = r1;
+
+Exit:
+
+    interrupts();
+
+    return error;
+}
+
+
+
+PERROR
+C68000DedicatedCpu::readWriteLoVPA(
+    UINT16 *data
+)
+{
+    PERROR error = errorSuccess;
+
+    //
+    // Using separate counts saves 4 instructions because the compiler
+    // optimizes out the pre-loop test (it knows the 1st time x > 0).
+    //
+    register UINT8 x = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+
+    // Critical timing section
+    noInterrupts();
+
+    // Wait for the clock edge
+    WAIT_FOR_CLK_EDGE(x,r1,r2);
+
+    // Start the cycle by assert all the control lines
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_LDS);
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_LDS); // Wait state
+
+    // Wait for VPA to be asserted
+    WAIT_FOR_VPA(x,r1,r2);
+
+    // Assert VMA
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_LDS | s_BIT_OUT_VMA);
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_LDS | s_BIT_OUT_VMA); // Wait state
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_LDS | s_BIT_OUT_VMA); // Wait state
+
+    // Read in the data
+    r1 = *g_portInDataLo;
+
+    // Terminate the cycle
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D;
+
+    // Check for timeout
+    if (x == 0)
+    {
+        error = errorTimeout;
+        goto Exit;
+    }
+
+    // Populate the output data word
+    *data = r1;
+
+Exit:
+
+    interrupts();
+
+    return error;
+}
+
+
+PERROR
+C68000DedicatedCpu::readWriteHiVPA(
+    UINT16 *data
+)
+{
+    PERROR error = errorSuccess;
+
+    //
+    // Using separate counts saves 4 instructions because the compiler
+    // optimizes out the pre-loop test (it knows the 1st time x > 0).
+    //
+    register UINT8 x = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+
+    // Critical timing section
+    noInterrupts();
+
+    // Wait for the clock edge
+    WAIT_FOR_CLK_EDGE(x,r1,r2);
+
+    // Start the cycle by assert all the control lines
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_UDS);
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_UDS); // Wait state
+
+    // Wait for VPA to be asserted
+    WAIT_FOR_VPA(x,r1,r2);
+
+    // Assert VMA
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_UDS | s_BIT_OUT_VMA);
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_UDS | s_BIT_OUT_VMA); // Wait state
+    *g_portOutControlOutD = s_BYTE_OUT_IDLE_D ^ (s_BIT_OUT_AS | s_BIT_OUT_UDS | s_BIT_OUT_VMA); // Wait state
 
     // Read in the data
     r1 = *g_portInDataHi;

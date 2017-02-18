@@ -22,22 +22,18 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include "CKonamiGX400BaseGame.h"
+#include "CKonamiTwin16BaseGame.h"
 #include "C68000DedicatedCpu.h"
-#include "CRamCheck.h"
 
 //
 // Probe Head GND:
 //   The 68000 specific probe head must be used.
-//   The CLK rate is 6MHz (166ns per cycle)
+//   The CLK rate is likely ~9MHz (111ns per cycle)
 //
 // Watchdog Disable:
 //   Pin 3 of the custom SIL 005924 at 1D (near the audio heatsink) is grounded.
-//   It's routed to a pair of pads nearby where a 2-pin header can be fitted to allow a jumper link.
-//
-// Board Designations:
-//   'c' - CPU board.
-//   'v' - Video board.
+//   It's routed to a pair of pads near the stereo connecter jumper
+//   where a 2-pin header can be fitted to allow a jumper link.
 //
 // CPU Compatibility Notes
 //
@@ -49,7 +45,9 @@
 //   data port. The compiler has this already optimized to be the bare minimum of 3 instructions
 //   so there is no known workaround at the present time to make it reliable.
 //   ROM and Program RAM are by most reliable and thus sufficient for diagnosing most dead boards.
-//   This configuration was enough to get a dead Konami GT booting (a bad ROM that read OK in the DataIO).
+//
+//   Also note that with CPU A being probed with the tester, CPU B is still running unless it's
+//   BR is also tied off.
 //
 
 
@@ -60,18 +58,23 @@
 // xx1 = LDS
 // xx0 = UDS
 //
+// No schematics for this board so these are MAME designations.
+// This is CPU A at 4J, the one closest to the JAMMA connector.
+//
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x00040000, 0x0004ffff, 1, 0xFF, "   ", "CHARA "}, // Character RAM, B49 => CHACS
-                                                  {NO_BANK_SWITCH, 0x00040001, 0x0004ffff, 1, 0xFF, "   ", "CHARA "}, // Character RAM
-                                                  {NO_BANK_SWITCH, 0x00050001, 0x00050fff, 1, 0xFF, "22D", "VZURE "}, // Scroll RAM,    B37 => VZCS
-                                                  {NO_BANK_SWITCH, 0x00052000, 0x00053fff, 1, 0xFF, "15C", "VRAMC1"}, // Video RAM 1,   B41 => VCS1
-                                                  {NO_BANK_SWITCH, 0x00052001, 0x00053fff, 1, 0xFF, "15B", "VRAMC1"}, // Video RAM 1
-                                                  {NO_BANK_SWITCH, 0x00054001, 0x00055fff, 1, 0xFF, "15D", "VRAMC2"}, // Colour RAM 1,  B39 => VCS2
-                                                  {NO_BANK_SWITCH, 0x00056001, 0x00056fff, 1, 0xFF, "25D", "OBJRAM"}, // Sprite RAM,    B35 => OBJRAM
-                                                  {NO_BANK_SWITCH, 0x0005a000, 0x0005afff, 1, 0xFF, "15K", "COLORR"}, // Palette RAM
-                                                  {NO_BANK_SWITCH, 0x0005a001, 0x0005afff, 1, 0xFF, "14K", "COLORR"}, // Palette RAM
-                                                  {NO_BANK_SWITCH, 0x00060000, 0x00067fff, 1, 0xFF, "   ", "Prog  "}, // Program RAM
-                                                  {NO_BANK_SWITCH, 0x00060001, 0x00067fff, 1, 0xFF, "   ", "Prog  "}, // Program RAM
+                                                  {NO_BANK_SWITCH, 0x00040000, 0x00043fff, 1, 0xFF, "shr", "Share "}, // Shared RAM
+                                                  {NO_BANK_SWITCH, 0x00040001, 0x00043fff, 1, 0xFF, "shr", "Share "}, // Shared RAM
+                                                  {NO_BANK_SWITCH, 0x00060000, 0x00063fff, 1, 0xFF, "prg", "Prog  "}, // Program RAM
+                                                  {NO_BANK_SWITCH, 0x00060001, 0x00063fff, 1, 0xFF, "prg", "Prog  "}, // Program RAM
+                                                  {NO_BANK_SWITCH, 0x00080001, 0x00080fff, 1, 0xFF, "plt", "Pallet"}, // Pallete RAM
+                                                  {NO_BANK_SWITCH, 0x00100000, 0x00103fff, 1, 0xFF, "fix", "Fixed "}, // Fixed RAM
+                                                  {NO_BANK_SWITCH, 0x00100001, 0x00103fff, 1, 0xFF, "fix", "Fixed "}, // Fixed RAM
+                                                  {NO_BANK_SWITCH, 0x00120000, 0x00121fff, 1, 0xFF, "vr0", "VRAM0 "}, // Video RAM 0
+                                                  {NO_BANK_SWITCH, 0x00120001, 0x00121fff, 1, 0xFF, "vr0", "VRAM0 "}, // Video RAM 0
+                                                  {NO_BANK_SWITCH, 0x00122000, 0x00123fff, 1, 0xFF, "vr1", "VRAM1 "}, // Video RAM 1
+                                                  {NO_BANK_SWITCH, 0x00122001, 0x00123fff, 1, 0xFF, "vr1", "VRAM1 "}, // Video RAM 1
+                                                  {NO_BANK_SWITCH, 0x00140000, 0x00143fff, 1, 0xFF, "spr", "Sprite"}, // Sprite RAM
+                                                  {NO_BANK_SWITCH, 0x00140001, 0x00143fff, 1, 0xFF, "spr", "Sprite"}, // Sprite RAM
                                                   {0}
                                                 }; // end of list
 
@@ -84,11 +87,12 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Input region is the same for all games on this board set.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                  "012", "012345"
-                                                      {NO_BANK_SWITCH, 0x0005c403L, 0xFF, "   ", "DSW0  "}, // Dip switches - 0
-                                                      {NO_BANK_SWITCH, 0x0005c405L, 0xFF, "   ", "DSW1  "}, // Dip switches - 1
-                                                      {NO_BANK_SWITCH, 0x0005cc01L, 0xFF, "   ", "IN0   "}, // Inputs - 0
-                                                      {NO_BANK_SWITCH, 0x0005cc03L, 0xFF, "   ", "IN1   "}, // Inputs - 1
-                                                      {NO_BANK_SWITCH, 0x0005cc05L, 0xFF, "   ", "IN2   "}, // Inputs - 2
+                                                      {NO_BANK_SWITCH, 0x000a0003L, 0xFF, "p1 ", "P1    "}, // Inputs
+                                                      {NO_BANK_SWITCH, 0x000a0005L, 0xFF, "p2 ", "P2    "}, // Inputs
+                                                      {NO_BANK_SWITCH, 0x000a0007L, 0xFF, "p3 ", "P3    "}, // Inputs
+                                                      {NO_BANK_SWITCH, 0x000a0011L, 0xFF, "ds2", "DSW2  "}, // Dip switches
+                                                      {NO_BANK_SWITCH, 0x000a0013L, 0xFF, "ds1", "DSW1  "}, // Dip switches
+                                                      {NO_BANK_SWITCH, 0x000a0019L, 0xFF, "ds3", "DWS3  "}, // Dip switches
                                                       {0}
                                                     }; // end of list
 
@@ -96,9 +100,9 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 // Output region is the same for all versions on this board set.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                          "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x0005c001L, 0xFF, 0x0000, "   ", "Snd-FF"},
-                                                        {NO_BANK_SWITCH, 0x0005c001L, 0x55, 0x0000, "   ", "Snd-55"},
-                                                        {NO_BANK_SWITCH, 0x0005c001L, 0xAA, 0x0000, "   ", "Snd-AA"},
+                                                        {NO_BANK_SWITCH, 0x000a0009L, 0xFF, 0x0000, "   ", "Snd-FF"},
+                                                        {NO_BANK_SWITCH, 0x000a0009L, 0x55, 0x0000, "   ", "Snd-55"},
+                                                        {NO_BANK_SWITCH, 0x000a0009L, 0xAA, 0x0000, "   ", "Snd-AA"},
                                                         {0}
                                                       }; // end of list
 
@@ -109,7 +113,7 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { {NO_CUSTOM_FUNCTION}
 
 
 
-CKonamiGX400BaseGame::CKonamiGX400BaseGame(
+CKonamiTwin16BaseGame::CKonamiTwin16BaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
@@ -127,7 +131,7 @@ CKonamiGX400BaseGame::CKonamiGX400BaseGame(
 }
 
 
-CKonamiGX400BaseGame::~CKonamiGX400BaseGame(
+CKonamiTwin16BaseGame::~CKonamiTwin16BaseGame(
 )
 {
     delete m_cpu;
@@ -139,7 +143,7 @@ CKonamiGX400BaseGame::~CKonamiGX400BaseGame(
 // TBD.
 //
 PERROR
-CKonamiGX400BaseGame::interruptCheck(
+CKonamiTwin16BaseGame::interruptCheck(
 )
 {
     return errorNotImplemented;

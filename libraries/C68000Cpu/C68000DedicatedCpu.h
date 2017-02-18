@@ -61,7 +61,8 @@ class C68000DedicatedCpu : public ICpu
         // The 68000 is a Big Endian 16-bit CPU.
         //
         // 68000 Address Space:
-        // 0x00000000 -> 8-bit access, 0x*1 = Lo & 0x*0 == Hi.
+        // 0x00000000 -> 8-bit DTACK access, 0x*1 = Lo & 0x*0 == Hi.
+        // 0x04000000 -> VPA access flag.
         //
         // 16-bit access is not currently supported.
         //
@@ -109,6 +110,16 @@ class C68000DedicatedCpu : public ICpu
 
         PERROR
         readWriteHiDTACK(
+            UINT16 *data
+        );
+
+        PERROR
+        readWriteLoVPA(
+            UINT16 *data
+        );
+
+        PERROR
+        readWriteHiVPA(
             UINT16 *data
         );
 

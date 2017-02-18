@@ -22,94 +22,37 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef C68000DedicatedCpu_h
-#define C68000DedicatedCpu_h
+#ifndef CDarkAdventureGame_h
+#define CDarkAdventureGame_h
 
-#include "Arduino.h"
-#include "ICpu.h"
+#include "CKonamiTwin16BaseGame.h"
 
-
-class C68000DedicatedCpu : public ICpu
+class CDarkAdventureGame : public CKonamiTwin16BaseGame
 {
     public:
 
         //
-        // Constructor
+        // Constructors for this game.
         //
 
-        C68000DedicatedCpu(
-        );
-
-        // ICpu Interface
-        //
-
-        virtual PERROR idle(
-        );
-
-        virtual PERROR check(
-        );
-
-        virtual UINT8 dataBusWidth(
-            UINT32 address
-        );
-
-        virtual UINT8 dataAccessWidth(
-            UINT32 address
+        static IGame* createInstance(
         );
 
         //
-        // The 68000 is a Big Endian 16-bit CPU.
-        //
-        // 68000 Address Space:
-        // 0x00000000 -> 8-bit access, 0x*1 = Lo & 0x*0 == Hi.
-        // 0x01000000 -> 16-bit access flag
-        //
-
-        virtual PERROR memoryRead(
-            UINT32 address,
-            UINT16 *data
-        );
-
-        virtual PERROR memoryWrite(
-            UINT32 address,
-            UINT16 data
-        );
-
-        virtual
-        PERROR
-        waitForInterrupt(
-            Interrupt interrupt,
-            bool      active,
-            UINT32    timeoutInMs
-        );
-
-        virtual
-        PERROR
-        acknowledgeInterrupt(
-            UINT16 *response
-        );
-
-        //
-        // C68000DedicatedCpu Interface
+        // IGame Interface - wholly implemented in the Base game.
         //
 
     private:
 
-        void
-        outputAddress(
-            UINT32 address,
-            bool   read,
-            UINT8  *strobe,
-            bool   *hi,
-            bool   *lo,
-            bool   *is16Bit,
-            bool   *isVPA
+        //
+        // Different ROM sets supplied.
+        //
+        CDarkAdventureGame(
+            const ROM_REGION *romRegion
         );
-
-    private:
-
-        bool busRequest;
 
 };
 
 #endif
+
+

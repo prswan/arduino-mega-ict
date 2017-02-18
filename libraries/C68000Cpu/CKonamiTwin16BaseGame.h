@@ -22,19 +22,33 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <C68000GenericGame.h>
-#include <CKonamiGTGame.h>
-#include <CDarkAdventureGame.h>
+#ifndef CKonamiTwin16BaseGame_h
+#define CKonamiTwin16BaseGame_h
 
-//
-// The initial selector to select the game to test.
-//
-static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C68000GenericGame::createInstance2716),          false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C68000GenericGame::createInstance2732),          false},
-                                                  {"Konami GT      ",  onSelectGame,    (void*) (CKonamiGTGame::createInstance),                  false},
-                                                  {"Dark Adv.      ",  onSelectGame,    (void*) (CDarkAdventureGame::createInstance),             false},
-                                                  { 0, 0 }
-                                                 };
+#include "CGame.h"
 
+
+class CKonamiTwin16BaseGame : public CGame
+{
+    public:
+
+        //
+        // CKonamiTwin16BaseGame
+        //
+
+        virtual PERROR interruptCheck(
+        );
+
+    protected:
+
+        CKonamiTwin16BaseGame(
+            const ROM_REGION *romRegion
+        );
+
+        ~CKonamiTwin16BaseGame(
+        );
+
+};
+
+#endif
 
