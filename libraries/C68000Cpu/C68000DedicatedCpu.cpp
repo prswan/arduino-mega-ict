@@ -126,13 +126,13 @@ static const UINT32 s_vpaAddress = 0x04000000;
 // This loop is 2 instructions total, 125ns.
 // Note that the system will hang here if VPA is stuck.
 //
-#define WAIT_FOR_VPA(x,r1,r2)            \
+#define WAIT_FOR_VPA(x,r1,r2)              \
     {                                      \
         while(1)                           \
         {                                  \
             r1 = *g_portInControlIn;       \
                                            \
-            if (!(r1 & s_BIT_IN_VPA))    \
+            if (!(r1 & s_BIT_IN_VPA))      \
             {                              \
                 break;                     \
             }                              \
@@ -140,8 +140,8 @@ static const UINT32 s_vpaAddress = 0x04000000;
     }                                      \
 
 
-C68000DedicatedCpu::C68000DedicatedCpu(
-) : busRequest(true)
+C68000DedicatedCpu::C68000DedicatedCpu(bool useBusRequest
+) : busRequest(useBusRequest)
 {
 };
 
@@ -286,13 +286,16 @@ C68000DedicatedCpu::dataAccessWidth(
 }
 
 
-void
+PERROR
 C68000DedicatedCpu::outputAddress(
     UINT32 address,
     bool   read
 )
 {
+    PERROR error   = errorSuccess;
     UINT8 portOutL = s_BYTE_OUT_IDLE_L;
+    UINT8 portOutD;
+    UINT8 portInD;
 
     // We must set the RW line correctly in case there are external buffers
     portOutL = portOutL ^ (s_BIT_OUT_RW);
@@ -306,22 +309,37 @@ C68000DedicatedCpu::outputAddress(
     *g_dirDataLo          = s_DIR_BYTE_OUTPUT;
 
     // Output byte LE2
-    *g_portOutDataLo      = (address >> 16) & 0xFF;
+    portOutD = (address >> 16) & 0xFF;
+    *g_portOutDataLo      = portOutD;
+    *g_portOutDataLo      = portOutD; // Wait state
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE2);
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE2); // Wait state
-    *g_portOutControlOutL = (portOutL);
+    *g_portOutControlOutL = portOutL;
+
+    portInD = *g_portInDataLo;
+    CHECK_UINT8_VALUE_EXIT(error, "LE2", portInD, portOutD);
 
     // Output byte LE1
-    *g_portOutDataLo      = (address >>  8) & 0xFF;
+    portOutD = (address >>  8) & 0xFF;
+    *g_portOutDataLo      = portOutD;
+    *g_portOutDataLo      = portOutD; // Wait state
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE1);
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE1); // Wait state
     *g_portOutControlOutL = (portOutL);
 
+    portInD = *g_portInDataLo;
+    CHECK_UINT8_VALUE_EXIT(error, "LE1", portInD, portOutD);
+
     // Output byte LE0
-    *g_portOutDataLo      = (address >>  0) & 0xFF;
+    portOutD = (address >>  0) & 0xFF;
+    *g_portOutDataLo      = portOutD;
+    *g_portOutDataLo      = portOutD; // Wait state
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE0);
     *g_portOutControlOutL = (portOutL ^ s_BIT_OUT_LE0); // Wait state
     *g_portOutControlOutL = (portOutL);
+
+    portInD = *g_portInDataLo;
+    CHECK_UINT8_VALUE_EXIT(error, "LE0", portInD, portOutD);
 
     // Turn off the data bus
     *g_dirDataLo          = s_DIR_BYTE_INPUT;
@@ -337,6 +355,8 @@ C68000DedicatedCpu::outputAddress(
 
     *g_portOutControlOutL = portOutL;
 
+Exit:
+    return error;
 }
 
 
@@ -350,7 +370,14 @@ C68000DedicatedCpu::memoryRead(
     bool   lo    = (address & 1) ? true : false;
     bool   vpa   = (address & s_vpaAddress) ? true : false;
 
-    outputAddress(address, true);
+    // Critical timing section
+    noInterrupts();
+
+    error = outputAddress(address, true);
+    if (FAILED(error))
+    {
+        goto Exit;
+    }
 
     if (lo)
     {
@@ -379,6 +406,12 @@ C68000DedicatedCpu::memoryRead(
         }
     }
 
+    *g_portOutControlOutL =  s_BYTE_OUT_IDLE_L;
+
+Exit:
+
+    interrupts();
+
     return error;
 }
 
@@ -394,7 +427,14 @@ C68000DedicatedCpu::memoryWrite(
     bool   vpa   = (address & s_vpaAddress) ? true : false;
     UINT16 dummyData;
 
-    outputAddress(address, false);
+    // Critical timing section
+    noInterrupts();
+
+    error = outputAddress(address, false);
+    if (FAILED(error))
+    {
+        goto Exit;
+    }
 
     if (lo)
     {
@@ -428,6 +468,12 @@ C68000DedicatedCpu::memoryWrite(
 
         *g_dirDataHi = s_DIR_BYTE_INPUT;
     }
+
+    *g_portOutControlOutL =  s_BYTE_OUT_IDLE_L;
+
+Exit:
+
+    interrupts();
 
     return error;
 }
@@ -477,9 +523,6 @@ C68000DedicatedCpu::readWriteLoDTACK(
     register UINT8 r1;
     register UINT8 r2;
 
-    // Critical timing section
-    noInterrupts();
-
     // Wait for the clock edge
     WAIT_FOR_CLK_EDGE(x,r1,r2);
 
@@ -508,8 +551,6 @@ C68000DedicatedCpu::readWriteLoDTACK(
 
 Exit:
 
-    interrupts();
-
     return error;
 }
 
@@ -529,9 +570,6 @@ C68000DedicatedCpu::readWriteHiDTACK(
 
     register UINT8 r1;
     register UINT8 r2;
-
-    // Critical timing section
-    noInterrupts();
 
     // Wait for the clock edge
     WAIT_FOR_CLK_EDGE(x,r1,r2);
@@ -561,8 +599,6 @@ C68000DedicatedCpu::readWriteHiDTACK(
 
 Exit:
 
-    interrupts();
-
     return error;
 }
 
@@ -583,9 +619,6 @@ C68000DedicatedCpu::readWriteLoVPA(
 
     register UINT8 r1;
     register UINT8 r2;
-
-    // Critical timing section
-    noInterrupts();
 
     // Wait for the clock edge
     WAIT_FOR_CLK_EDGE(x,r1,r2);
@@ -620,8 +653,6 @@ C68000DedicatedCpu::readWriteLoVPA(
 
 Exit:
 
-    interrupts();
-
     return error;
 }
 
@@ -641,9 +672,6 @@ C68000DedicatedCpu::readWriteHiVPA(
 
     register UINT8 r1;
     register UINT8 r2;
-
-    // Critical timing section
-    noInterrupts();
 
     // Wait for the clock edge
     WAIT_FOR_CLK_EDGE(x,r1,r2);
@@ -677,8 +705,6 @@ C68000DedicatedCpu::readWriteHiVPA(
     *data = r1;
 
 Exit:
-
-    interrupts();
 
     return error;
 }

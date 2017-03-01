@@ -37,7 +37,7 @@ class C68000DedicatedCpu : public ICpu
         // Constructor
         //
 
-        C68000DedicatedCpu(
+        C68000DedicatedCpu(bool useBusRequest = true
         );
 
         // ICpu Interface
@@ -97,7 +97,7 @@ class C68000DedicatedCpu : public ICpu
 
     private:
 
-        void
+        PERROR
         outputAddress(
             UINT32 address,
             bool   read

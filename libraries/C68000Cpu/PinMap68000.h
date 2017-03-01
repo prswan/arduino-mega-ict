@@ -175,7 +175,7 @@ static const UINT8 s_BIT_OUT_LE0      = 0x20;
 static const UINT8 s_BIT_OUT_LE1      = 0x40;
 static const UINT8 s_BIT_OUT_LE2      = 0x80;
 
-static const UINT8 s_BYTE_OUT_IDLE_L  = s_BIT_OUT_RW  | s_BIT_OUT_FC0 | s_BIT_OUT_FC1 | s_BIT_OUT_FC2 \
-                                      | s_BIT_OUT_LOE;
+static const UINT8 s_BYTE_OUT_IDLE_L  = s_BIT_OUT_RW  | s_BIT_OUT_FC0 | s_BIT_OUT_LOE;
+
 
 #endif

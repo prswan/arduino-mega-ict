@@ -22,22 +22,40 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <C68000GenericGame.h>
-#include <CKonamiGTGame.h>
-#include <CDarkAdventureGame.h>
-#include <CGradiusIIIGame.h>
+#ifndef CGradiusIIIGame_h
+#define CGradiusIIIGame_h
 
-//
-// The initial selector to select the game to test.
-//
-static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C68000GenericGame::createInstance2716),          false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C68000GenericGame::createInstance2732),          false},
-                                                  {"Konami GT      ",  onSelectGame,    (void*) (CKonamiGTGame::createInstance),                  false},
-                                                  {"Dark Adv.      ",  onSelectGame,    (void*) (CDarkAdventureGame::createInstance),             false},
-                                                  {"Gradius 3      ",  onSelectGame,    (void*) (CGradiusIIIGame::createInstance),                false},
-                                                  {"Gradius 3-J    ",  onSelectGame,    (void*) (CGradiusIIIGame::createInstanceJ),               false},
-                                                  { 0, 0 }
-                                                 };
+#include "CKonamiGX945BaseGame.h"
+
+class CGradiusIIIGame : public CKonamiGX945BaseGame
+{
+    public:
+
+        //
+        // Constructors for this game.
+        //
+
+        static IGame* createInstance(
+        );
+
+        static IGame* createInstanceJ(
+        );
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CGradiusIIIGame(
+            const ROM_REGION *romRegion
+        );
+
+};
+
+#endif
 
 
