@@ -25,17 +25,17 @@
 #include "CGalaxiaGame.h"
 
 
-//                                        01   02   04   08   10   20   40   80  100  200
-static const UINT8 s_romData2n__8H[] = {0x00,0xEF,0x20,0x00,0x00,0x00,0x37,0x7B,0x8E,0x72};
-static const UINT8 s_romData2n_10H[] = {0x18,0xEC,0x0C,0x4C,0xCC,0xCC,0x3F,0x7C,0x7A,0x9F};
-static const UINT8 s_romData2n_11H[] = {0x0E,0x1C,0x86,0x85,0x02,0x62,0x14,0x03,0x03,0x0C};
-static const UINT8 s_romData2n_13H[] = {0x14,0xCC,0xBA,0xFB,0x0D,0xBB,0xF8,0x0D,0xC8,0x0C};
-static const UINT8 s_romData2n__8I[] = {0x15,0x0C,0x15,0x0A,0xCC,0xCE,0x17,0x8C,0x1C,0x0F};
-static const UINT8 s_romData2n_10I[] = {0x10,0xCC,0x05,0x06,0x9E,0x30,0xC8,0xC0,0xE0,0x18};
-static const UINT8 s_romData2n_11I[] = {0x63,0xC8,0x66,0xF4,0x66,0xB0,0x0F,0x3F,0x05,0xCC};
-static const UINT8 s_romData2n_13I[] = {0x04,0x01,0x1C,0x00,0xE5,0x20,0xCD,0x9C,0xAF,0x3B};
-static const UINT8 s_romData2n_11L[] = {0x1D,0x38,0x04,0x07,0x0E,0xCF,0x02,0x69,0x1E,0x00};
-static const UINT8 s_romData2n_13L[] = {0x13,0x03,0xFF,0x1F,0x17,0x1D,0x05,0x01,0x05,0xF1};
+//                                         01   02   04   08   10   20   40   80  100  200
+static const UINT16 s_romData2n__8H[] = {0x00,0xEF,0x20,0x00,0x00,0x00,0x37,0x7B,0x8E,0x72};
+static const UINT16 s_romData2n_10H[] = {0x18,0xEC,0x0C,0x4C,0xCC,0xCC,0x3F,0x7C,0x7A,0x9F};
+static const UINT16 s_romData2n_11H[] = {0x0E,0x1C,0x86,0x85,0x02,0x62,0x14,0x03,0x03,0x0C};
+static const UINT16 s_romData2n_13H[] = {0x14,0xCC,0xBA,0xFB,0x0D,0xBB,0xF8,0x0D,0xC8,0x0C};
+static const UINT16 s_romData2n__8I[] = {0x15,0x0C,0x15,0x0A,0xCC,0xCE,0x17,0x8C,0x1C,0x0F};
+static const UINT16 s_romData2n_10I[] = {0x10,0xCC,0x05,0x06,0x9E,0x30,0xC8,0xC0,0xE0,0x18};
+static const UINT16 s_romData2n_11I[] = {0x63,0xC8,0x66,0xF4,0x66,0xB0,0x0F,0x3F,0x05,0xCC};
+static const UINT16 s_romData2n_13I[] = {0x04,0x01,0x1C,0x00,0xE5,0x20,0xCD,0x9C,0xAF,0x3B};
+static const UINT16 s_romData2n_11L[] = {0x1D,0x38,0x04,0x07,0x0E,0xCF,0x02,0x69,0x1E,0x00};
+static const UINT16 s_romData2n_13L[] = {0x13,0x03,0xFF,0x1F,0x17,0x1D,0x05,0x01,0x05,0xF1};
 
 //
 // Not yet found a board that matches this set from MAME.
@@ -88,8 +88,8 @@ static const ROM_REGION s_romRegionSet3[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0
 // Found on one board, many differences in ROMs 11H, 13H, 10I, 13I & 11L.
 // "08" designation
 //
-static const UINT8 s_romData2nSet4_13H[] = {0x0B,0xB1,0x08,0xBB,0x84,0xCC,0x02,0x0C,0x1B,0x94};
-static const UINT8 s_romData2nSet4_13I[] = {0x04,0x01,0x1C,0x00,0xE5,0x20,0xCD,0x9C,0x05,0x3B};
+static const UINT16 s_romData2nSet4_13H[] = {0x0B,0xB1,0x08,0xBB,0x84,0xCC,0x02,0x0C,0x1B,0x94};
+static const UINT16 s_romData2nSet4_13I[] = {0x04,0x01,0x1C,0x00,0xE5,0x20,0xCD,0x9C,0x05,0x3B};
 
 
 static const ROM_REGION s_romRegionSet4[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0x0400, s_romData2n__8H,     0xf3b4ffde, " 8H"},
@@ -107,20 +107,34 @@ static const ROM_REGION s_romRegionSet4[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0
 //
 // RAM region is the same for all versions.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                       "012", "012345"
-                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      0x0F, "13F", "Prog. "}, // "Program RAM, 2114, 13F"
-                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      0xF0, "13G", "Prog. "}, // "Program RAM, 2114, 13G"
-                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      0x0F, " 3F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 3F"
-                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      0xF0, " 2F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 2F"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      0x0F, " 2C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      0xF0, " 1C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      0x02, " 1B", "Colour"},  // "Colour RAM, 2102, FLAG=Lo"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      0x01, " 3C", "Colour"},  // "Colour RAM, 2102, FLAG=Lo"
-                                                  {NO_BANK_SWITCH,                         0x1500+0x4E, 0x1500+0x6D, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1  8F Scratch RAM "
-                                                  {NO_BANK_SWITCH,                         0x1600+0x4E, 0x1600+0x6D, 0xFF, "10F", "2636-2"}, // "2636 PVI 2 10F Scratch RAM "
-                                                  {NO_BANK_SWITCH,                         0x1700+0x4E, 0x1700+0x6D, 0xFF, "11F", "2636-3"}, // "2636 PVI 3 11F Scratch RAM "
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                          "012", "012345"
+                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      1, 0x0F, "13F", "Prog. "}, // "Program RAM, 2114, 13F"
+                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      1, 0xF0, "13G", "Prog. "}, // "Program RAM, 2114, 13G"
+                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0x0F, " 3F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 3F"
+                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0xF0, " 2F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 2F"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0x0F, " 2C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0xF0, " 1C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      1, 0x02, " 1B", "Colour"},  // "Colour RAM, 2102, FLAG=Lo"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      1, 0x01, " 3C", "Colour"},  // "Colour RAM, 2102, FLAG=Lo"
+                                                  {NO_BANK_SWITCH,                         0x1500+0x4E, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1  8F Scratch RAM "
+                                                  {NO_BANK_SWITCH,                         0x1600+0x4E, 0x1600+0x6D, 1, 0xFF, "10F", "2636-2"}, // "2636 PVI 2 10F Scratch RAM "
+                                                  {NO_BANK_SWITCH,                         0x1700+0x4E, 0x1700+0x6D, 1, 0xFF, "11F", "2636-3"}, // "2636 PVI 3 11F Scratch RAM "
                                                   {0}
                                                 }; // end of list
+
+//
+// RAM region is the same for all versions.
+// This description is used for the byte-wide intensive random access memory test.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                          "012", "012345"
+                                                          {NO_BANK_SWITCH,                         0x1C00,      0x1FFF,      1, 0xFF, "13?", "Prog. "}, // "Program RAM, 2114, 13F/13G"
+                                                          {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0xFF, "32F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 3F/2F"
+                                                          {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0xFF, "21C", "Char. "},  // "Video Character RAM, 2114, FLAG=Hi, 2C/1C"
+                                                          {NO_BANK_SWITCH,                         0x1500+0x4E, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1  8F Scratch RAM "
+                                                          {NO_BANK_SWITCH,                         0x1600+0x4E, 0x1600+0x6D, 1, 0xFF, "10F", "2636-2"}, // "2636 PVI 2 10F Scratch RAM "
+                                                          {NO_BANK_SWITCH,                         0x1700+0x4E, 0x1700+0x6D, 1, 0xFF, "11F", "2636-3"}, // "2636 PVI 3 11F Scratch RAM "
+                                                          {0}
+                                                        }; // end of list
 
 //
 // Input region is the same for all versions.
@@ -190,6 +204,7 @@ CGalaxiaGame::CGalaxiaGame(
     const ROM_REGION *romRegion
 ) : CAstroWarsBaseGame( romRegion,
                         s_ramRegion,
+                        s_ramRegionByteOnly,
                         s_inputRegion,
                         s_outputRegion )
 {

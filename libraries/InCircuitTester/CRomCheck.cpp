@@ -104,11 +104,16 @@ CRomCheck::checkData2n(
 
     if (SUCCESS(error))
     {
-        for (UINT16 shift = 0 ; (1 << shift) < romRegion->length ; shift++)
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(romRegion->start);
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(romRegion->start);
+
+        UINT16 dataBusWidthShift = (dataBusWidth == 2) ? 1 : 0;
+
+        for (UINT32 shift = 0 ; (1UL << shift) < romRegion->length ; shift++)
         {
-            UINT32 address = romRegion->start + (1 << shift);
-            UINT8  expData = romRegion->data2n[shift];
-            UINT8  recData = 0;
+            UINT32 address = romRegion->start + (1UL << (shift + dataBusWidthShift));
+            UINT16 expData = romRegion->data2n[shift];
+            UINT16 recData = 0;
 
             error = m_cpu->memoryRead(address, &recData);
 
@@ -117,15 +122,17 @@ CRomCheck::checkData2n(
                 break;
             }
 
-            if (expData != recData)
+            if (dataAccessWidth == 1)
             {
-                error = errorCustom;
-                error->code = ERROR_FAILED;
-                error->description = "E:";
-                error->description += romRegion->location;
-                STRING_UINT16_HEX(error->description, address);
-                STRING_UINT8_HEX(error->description, expData);
-                STRING_UINT8_HEX(error->description, recData);
+                CHECK_VALUE_UINT8_BREAK(error, romRegion->location, address, expData, recData);
+            }
+            else if (dataAccessWidth == 2)
+            {
+                CHECK_VALUE_UINT16_BREAK(error, romRegion->location, address, expData, recData);
+            }
+            else
+            {
+                error = errorNotImplemented;
                 break;
             }
         }
@@ -136,11 +143,12 @@ CRomCheck::checkData2n(
 
 
 //
-// Perform the full CRC ROM check for the supplied region.
+// Calculate the CRC for the supplied ROM region.
 //
 PERROR
-CRomCheck::checkCrc(
-    const ROM_REGION *romRegion
+CRomCheck::calculateCrc(
+    const ROM_REGION *romRegion,
+    UINT32 *crc
 )
 {
     PERROR error = errorSuccess;
@@ -157,10 +165,16 @@ CRomCheck::checkCrc(
 
     if (SUCCESS(error))
     {
-        UINT8 data = 0;
-        UINT32 crc = 0;
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(romRegion->start);
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(romRegion->start);
 
-        for (UINT32 address = romRegion->start ; address < (romRegion->start + romRegion->length) ; address++)
+        UINT16 data = 0;
+        UINT8  data8 = 0;
+        UINT32 tempCrc = 0;
+
+        for (UINT32 address = romRegion->start ;
+             address < (romRegion->start + (romRegion->length * dataBusWidth));
+             address += dataBusWidth)
         {
             error = m_cpu->memoryRead(address, &data);
 
@@ -169,22 +183,133 @@ CRomCheck::checkCrc(
                 break;
             }
 
-            crc = crc32(crc, &data, sizeof(data));
+            if (dataAccessWidth == 1)
+            {
+                data8 = (UINT8) data;
+                tempCrc = crc32(tempCrc, &data8, sizeof(data8));
+            }
+            else if (dataAccessWidth == 2)
+            {
+                data8 = (UINT8) (data >> 0);
+                tempCrc = crc32(tempCrc, &data8, sizeof(data8));
+
+                data8 = (UINT8) (data >> 8);
+                tempCrc = crc32(tempCrc, &data8, sizeof(data8));
+            }
+            else
+            {
+                error = errorNotImplemented;
+                break;
+            }
         }
 
         if (SUCCESS(error))
         {
-            if (crc != romRegion->crc)
-            {
-                error = errorCustom;
-
-                error->code = ERROR_FAILED;
-                error->description = "E:";
-                error->description += romRegion->location;
-                STRING_UINT32_HEX(error->description, crc);
-            }
+            *crc = tempCrc;
         }
     }
+    return error;
+}
+
+
+//
+// Read the first few data bytes and print them into the error string.
+//
+PERROR
+CRomCheck::readData(
+    const ROM_REGION *romRegion
+)
+{
+    PERROR error = errorSuccess;
+    UINT16 data[4] = {0};
+
+    errorCustom->description = "OK:";
+
+    //
+    // Check if we need to perform a bank switch for this region.
+    // and do that now for all the testing to be done upon it.
+    //
+    if (romRegion->bankSwitch != NO_BANK_SWITCH)
+    {
+        error = romRegion->bankSwitch( m_bankSwitchContext );
+    }
+
+    //
+    // Read the first 4 bytes, maximum.
+    //
+    if (SUCCESS(error))
+    {
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(romRegion->start);
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(romRegion->start);
+
+        if (dataAccessWidth == 1)
+        {
+            for (UINT32 index = 0 ; index < 4 ; index++)
+            {
+                error = m_cpu->memoryRead( (index * dataBusWidth) + romRegion->start,
+                                           &data[index] );
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+
+                STRING_UINT8_HEX(errorCustom->description, data[index]);
+                error = errorCustom;
+            }
+        }
+        else if (dataAccessWidth = 2)
+        {
+            for (UINT32 index = 0 ; index < 2 ; index++)
+            {
+                error = m_cpu->memoryRead( (index * dataBusWidth) + romRegion->start,
+                                           &data[index] );
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+
+                STRING_UINT16_HEX(errorCustom->description, data[index]);
+                error = errorCustom;
+            }
+        }
+        else
+        {
+            error = errorNotImplemented;
+        }
+    }
+
+    return error;
+}
+
+
+//
+// Perform the full CRC ROM check for the supplied region.
+//
+PERROR
+CRomCheck::checkCrc(
+    const ROM_REGION *romRegion
+)
+{
+    PERROR error = errorSuccess;
+    UINT32 crc = 0;
+
+    error = calculateCrc(romRegion, &crc);
+
+    if (SUCCESS(error))
+    {
+        if (crc != romRegion->crc)
+        {
+            error = errorCustom;
+
+            error->code = ERROR_FAILED;
+            error->description = "E:";
+            error->description += romRegion->location;
+            STRING_UINT32_HEX(error->description, crc);
+        }
+    }
+
     return error;
 }
 
@@ -211,9 +336,13 @@ CRomCheck::read(
 
     if (SUCCESS(error))
     {
-        for (UINT32 address = romRegion->start ; address < (romRegion->start + romRegion->length) ; address++)
+        UINT8 dataBusWidth = m_cpu->dataBusWidth(romRegion->start);
+
+        for (UINT32 address = romRegion->start ;
+             address < (romRegion->start + (romRegion->length * dataBusWidth)) ;
+             address += dataBusWidth)
         {
-            UINT8 recData = 0;
+            UINT16 recData = 0;
 
             error = m_cpu->memoryRead(address, &recData);
 

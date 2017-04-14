@@ -54,22 +54,33 @@
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                     "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 0x0F, " 1K", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 0xF0, " 1G", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 0x0F, " 1J", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 0xF0, " 1H", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x5000, 0x50FF, 0x0F, " 3L", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
-                                                  {NO_BANK_SWITCH, 0x5000, 0x50FF, 0xF0, " 3M", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0x0F, " 1K", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0xF0, " 1G", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 1, 0x0F, " 1J", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 1, 0xF0, " 1H", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x5000, 0x50FF, 1, 0x0F, " 3L", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
+                                                  {NO_BANK_SWITCH, 0x5000, 0x50FF, 1, 0xF0, " 3M", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
                                                   //
                                                   // See note above about access restrictions w.r.t HBLANK & WAIT.
                                                   // These regions are access with special support in the CZ80Cpu triggered via address 0x10xxxx.
                                                   //
-                                                  //                                         "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 0x0F, " 3K", "BkVRam"}, // "Background VRAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 0xF0, " 3J", "BkVRam"}, // "Background VRAM, 2114"
+                                                  //                                            "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0x0F, " 3K", "BkVRam"}, // "Background VRAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0xF0, " 3J", "BkVRam"}, // "Background VRAM, 2114"
                                                   {0}
                                                 }; // end of list
+
+//
+// RAM region is the same for all games on this board set.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                            "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x4000,   0x43FF,   1, 0xFF, "1KG", "Prog. "}, // "Program RAM, 2114, 1K/1G"
+                                                          {NO_BANK_SWITCH, 0x4400,   0x47FF,   1, 0xFF, "1JH", "Prog. "}, // "Program RAM, 2114, 1J/1H"
+                                                          {NO_BANK_SWITCH, 0x5000,   0x50FF,   1, 0xFF, "3LM", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used, 3L/3M"
+                                                          {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0xFF, "3KJ", "BkVRam"}, // "Background VRAM, 2114, 3K/3J"
+                                                          {0}
+                                                        }; // end of list
 
 //
 // No write-only RAM on this platform. Yay!
@@ -80,7 +91,7 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 // Input region is the same for all games on this board set.
 //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                                           "012", "012345"
-                                                      {NO_BANK_SWITCH,                             0x7000L, 0x00,  " 5C", "WD Res"}, // Watchdog reset
+                                                      {NO_BANK_SWITCH,                             0x7000L, 0xFF,  " 5C", "WD Res"}, // Watchdog reset
                                                       {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8100L, 0xFF,  "s1E", "Port A"}, // CP Inputs
                                                       {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8101L, 0xFF,  "s1E", "Port B"}, // CP Inputs
                                                       {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8102L, 0xFF,  "s1E", "Port C"}, // CP Inputs
@@ -116,6 +127,7 @@ CScrambleBaseGame::CScrambleBaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,
@@ -158,6 +170,7 @@ CScrambleBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x6801L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         1000);
         if (FAILED(error))
         {
@@ -168,6 +181,7 @@ CScrambleBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x6801L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {
@@ -183,6 +197,7 @@ CScrambleBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x6801L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {
@@ -198,6 +213,7 @@ CScrambleBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x6801L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         1000);
         if (SUCCESS(error))
         {

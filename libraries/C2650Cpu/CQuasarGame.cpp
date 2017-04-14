@@ -35,22 +35,22 @@
 //   the images and recalculate the individual CRC's of the two halves. HxD can be used to do this.
 //
 
-//                                           01   02   04   08   10   20   40   80  100  200
-static const UINT8 s_romData2n__7B_Lo[] = {0x08,0x94,0x44,0x62,0x9a,0x85,0x03,0x98,0xc8,0x1f};//
-static const UINT8 s_romData2n__6B_Lo[] = {0x31,0x44,0x0d,0x01,0xf5,0x1c,0x0d,0xc8,0x03,0x03};//
-static const UINT8 s_romData2n__5B_Lo[] = {0x1c,0x02,0x10,0x98,0xad,0xd4,0x1b,0x87,0x1d,0x57};//
-static const UINT8 s_romData2n__3B_Lo[] = {0x0f,0x7c,0x1c,0x01,0xd4,0x01,0x17,0x7c,0x11,0xa4};//
-static const UINT8 s_romData2n__2B_Lo[] = {0x18,0x14,0x01,0x98,0x4b,0x10,0x0b,0x7c,0x18,0x11};//
-static const UINT8 s_romData2n__7C[]    = {0x10,0xcc,0x23,0x24,0x9e,0x0c,0x1f,0x84,0x0c,0xf4};//
-static const UINT8 s_romData2n__6C[]    = {0x29,0x08,0xcf,0xe7,0x1c,0xff,0xfe,0x0d,0x44,0x10};//
-static const UINT8 s_romData2n__5C[]    = {0x00,0x00,0x00,0x80,0x1e,0x00,0x00,0xf8,0x00,0xdc};//
-static const UINT8 s_romData2n__3C[]    = {0xf0,0x03,0x0b,0x00,0x08,0x08,0x10,0x8f,0xf9,0x96};//
-static const UINT8 s_romData2n__2C[]    = {0xc2,0x0d,0xe5,0x86,0x9c,0x0e,0x7a,0x40,0x26,0xf4};//
-static const UINT8 s_romData2n__7B_Hi[] = {0x40,0x17,0x16,0xd4,0x1f,0xf4,0x80,0x8d,0x05,0xcd};//
-static const UINT8 s_romData2n__6B_Hi[] = {0x8e,0x1e,0xca,0x1f,0x05,0x85,0xf4,0x5e,0x1f,0x02};//
-static const UINT8 s_romData2n__5B_Hi[] = {0x21,0x00,0x00,0xff,0x18,0x1b,0x48,0xff,0x49,0x16};//
-static const UINT8 s_romData2n__3B_Hi[] = {0xcd,0xce,0x3e,0xd6,0xcc,0xc7,0xc8,0x32,0xc8,0x01};//
-static const UINT8 s_romData2n__2B_Hi[] = {0xe7,0x04,0xc8,0xcc,0xc8,0x1a,0xc7,0xc0,0x08,0x13};//
+//                                            01   02   04   08   10   20   40   80  100  200
+static const UINT16 s_romData2n__7B_Lo[] = {0x08,0x94,0x44,0x62,0x9a,0x85,0x03,0x98,0xc8,0x1f};//
+static const UINT16 s_romData2n__6B_Lo[] = {0x31,0x44,0x0d,0x01,0xf5,0x1c,0x0d,0xc8,0x03,0x03};//
+static const UINT16 s_romData2n__5B_Lo[] = {0x1c,0x02,0x10,0x98,0xad,0xd4,0x1b,0x87,0x1d,0x57};//
+static const UINT16 s_romData2n__3B_Lo[] = {0x0f,0x7c,0x1c,0x01,0xd4,0x01,0x17,0x7c,0x11,0xa4};//
+static const UINT16 s_romData2n__2B_Lo[] = {0x18,0x14,0x01,0x98,0x4b,0x10,0x0b,0x7c,0x18,0x11};//
+static const UINT16 s_romData2n__7C[]    = {0x10,0xcc,0x23,0x24,0x9e,0x0c,0x1f,0x84,0x0c,0xf4};//
+static const UINT16 s_romData2n__6C[]    = {0x29,0x08,0xcf,0xe7,0x1c,0xff,0xfe,0x0d,0x44,0x10};//
+static const UINT16 s_romData2n__5C[]    = {0x00,0x00,0x00,0x80,0x1e,0x00,0x00,0xf8,0x00,0xdc};//
+static const UINT16 s_romData2n__3C[]    = {0xf0,0x03,0x0b,0x00,0x08,0x08,0x10,0x8f,0xf9,0x96};//
+static const UINT16 s_romData2n__2C[]    = {0xc2,0x0d,0xe5,0x86,0x9c,0x0e,0x7a,0x40,0x26,0xf4};//
+static const UINT16 s_romData2n__7B_Hi[] = {0x40,0x17,0x16,0xd4,0x1f,0xf4,0x80,0x8d,0x05,0xcd};//
+static const UINT16 s_romData2n__6B_Hi[] = {0x8e,0x1e,0xca,0x1f,0x05,0x85,0xf4,0x5e,0x1f,0x02};//
+static const UINT16 s_romData2n__5B_Hi[] = {0x21,0x00,0x00,0xff,0x18,0x1b,0x48,0xff,0x49,0x16};//
+static const UINT16 s_romData2n__3B_Hi[] = {0xcd,0xce,0x3e,0xd6,0xcc,0xc7,0xc8,0x32,0xc8,0x01};//
+static const UINT16 s_romData2n__2B_Hi[] = {0xe7,0x04,0xc8,0xcc,0xc8,0x1a,0xc7,0xc0,0x08,0x13};//
 
 //
 // Set 1 from MAME
@@ -93,28 +93,43 @@ static const ROM_REGION s_romRegionSet2[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0
                                                       {0} }; // end of list
 
 
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                          "012", "012345"
-                                                  {NO_BANK_SWITCH,                            0x1C00,      0x1FFF,      0x0F, " 7E", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH,                            0x1C00,      0x1FFF,      0xF0, " 6E", "Prog. "}, // "Program RAM, 2114"
-                                                  {CQuasarBaseGame::onBankSwitchCharacterRam, 0x1800,      0x1BFF,      0x0F, "12F", "Char. "}, // "Video Character RAM, 2114"
-                                                  {CQuasarBaseGame::onBankSwitchCharacterRam, 0x1800,      0x1BFF,      0xF0, "11F", "Char. "}, // "Video Character RAM, 2114"
-                                                  {CQuasarBaseGame::onBankSwitchColourRam,    0x1800,      0x1BFF,      0x01, "11H", "Colour"}, // "Colour RAM, 2102"
-                                                  {CQuasarBaseGame::onBankSwitchColourRam,    0x1800,      0x1BFF,      0x02, "12H", "Colour"}, // "Colour RAM, 2102"
-                                                  {CQuasarBaseGame::onBankSwitchColourRam,    0x1800,      0x1BFF,      0x04, "13H", "Colour"}, // "Colour RAM, 2102"
-                                                  {CQuasarBaseGame::onBankSwitchEffectRam,    0x1800,      0x1BFF,      0x0F, "  9", "Effect"}, // "Video Effect RAM, 2114" - Note the flipped Dbus
-                                                  {CQuasarBaseGame::onBankSwitchEffectRam,    0x1800,      0x1BFF,      0xF0, "  8", "Effect"}, // "Video Effect RAM, 2114" - Note the flipped DBus
-                                                  {NO_BANK_SWITCH,                            0x1500+0x00, 0x1500+0x2D, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                  {NO_BANK_SWITCH,                            0x1500+0x40, 0x1500+0x6D, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                  {NO_BANK_SWITCH,                            0x1500+0x80, 0x1500+0xAD, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                  {NO_BANK_SWITCH,                            0x1600+0x00, 0x1600+0x2D, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
-                                                  {NO_BANK_SWITCH,                            0x1600+0x40, 0x1600+0x6D, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
-                                                  {NO_BANK_SWITCH,                            0x1600+0x80, 0x1600+0xAD, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
-                                                  {NO_BANK_SWITCH,                            0x1700+0x00, 0x1700+0x2D, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
-                                                  {NO_BANK_SWITCH,                            0x1700+0x40, 0x1700+0x6D, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
-                                                  {NO_BANK_SWITCH,                            0x1700+0x80, 0x1700+0xAD, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                             "012", "012345"
+                                                  {NO_BANK_SWITCH,                            0x1C00,      0x1FFF,      1, 0x0F, " 7E", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH,                            0x1C00,      0x1FFF,      1, 0xF0, " 6E", "Prog. "}, // "Program RAM, 2114"
+                                                  {CQuasarBaseGame::onBankSwitchCharacterRam, 0x1800,      0x1BFF,      1, 0x0F, "12F", "Char. "}, // "Video Character RAM, 2114"
+                                                  {CQuasarBaseGame::onBankSwitchCharacterRam, 0x1800,      0x1BFF,      1, 0xF0, "11F", "Char. "}, // "Video Character RAM, 2114"
+                                                  {CQuasarBaseGame::onBankSwitchColourRam,    0x1800,      0x1BFF,      1, 0x01, "11H", "Colour"}, // "Colour RAM, 2102"
+                                                  {CQuasarBaseGame::onBankSwitchColourRam,    0x1800,      0x1BFF,      1, 0x02, "12H", "Colour"}, // "Colour RAM, 2102"
+                                                  {CQuasarBaseGame::onBankSwitchColourRam,    0x1800,      0x1BFF,      1, 0x04, "13H", "Colour"}, // "Colour RAM, 2102"
+                                                  {CQuasarBaseGame::onBankSwitchEffectRam,    0x1800,      0x1BFF,      1, 0x0F, "  9", "Effect"}, // "Video Effect RAM, 2114" - Note the flipped Dbus
+                                                  {CQuasarBaseGame::onBankSwitchEffectRam,    0x1800,      0x1BFF,      1, 0xF0, "  8", "Effect"}, // "Video Effect RAM, 2114" - Note the flipped DBus
+                                                  {NO_BANK_SWITCH,                            0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                            0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                            0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                            0x1600+0x00, 0x1600+0x2D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                  {NO_BANK_SWITCH,                            0x1600+0x40, 0x1600+0x6D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                  {NO_BANK_SWITCH,                            0x1600+0x80, 0x1600+0xAD, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                  {NO_BANK_SWITCH,                            0x1700+0x00, 0x1700+0x2D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+                                                  {NO_BANK_SWITCH,                            0x1700+0x40, 0x1700+0x6D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+                                                  {NO_BANK_SWITCH,                            0x1700+0x80, 0x1700+0xAD, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
                                                   {0}
                                                 }; // end of list
 
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                             "012", "012345"
+                                                          {NO_BANK_SWITCH,                            0x1C00,      0x1FFF,      1, 0xFF, "76E", "Prog. "}, // "Program RAM, 2114, 7E/6E"
+                                                          {CQuasarBaseGame::onBankSwitchCharacterRam, 0x1800,      0x1BFF,      1, 0xFF, "1?F", "Char. "}, // "Video Character RAM, 2114, 12F/11F"
+                                                          {CQuasarBaseGame::onBankSwitchEffectRam,    0x1800,      0x1BFF,      1, 0xFF, " 98", "Effect"}, // "Video Effect RAM, 2114, 9/8" - Note the flipped Dbus
+                                                          {NO_BANK_SWITCH,                            0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                            0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                            0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                            0x1600+0x00, 0x1600+0x2D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                            0x1600+0x40, 0x1600+0x6D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                            0x1600+0x80, 0x1600+0xAD, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                            0x1700+0x00, 0x1700+0x2D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+                                                          {NO_BANK_SWITCH,                            0x1700+0x40, 0x1700+0x6D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+                                                          {NO_BANK_SWITCH,                            0x1700+0x80, 0x1700+0xAD, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+                                                          {0}
+                                                        }; // end of list
 
 //
 // This region allows the bullet RAM & PVI's to be initialized.
@@ -122,12 +137,12 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 // other graphics can be seen.
 //
 
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                      "012", "012345"
-                                                           {NO_BANK_SWITCH,  0x1400, 0x14FF, 0x0F, "15G", "Shell "}, // "Bullet (SHELL) RAM, 2112"
-                                                           {NO_BANK_SWITCH,  0x1400, 0x14FF, 0xF0, "14G", "Shell "}, // "Bullet (SHELL) RAM, 2112"
-                                                           {NO_BANK_SWITCH,  0x1500, 0x15FF, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                           {NO_BANK_SWITCH,  0x1600, 0x16FF, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
-                                                           {NO_BANK_SWITCH,  0x1700, 0x17FF, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                         "012", "012345"
+                                                           {NO_BANK_SWITCH,  0x1400, 0x14FF, 1, 0x0F, "15G", "Shell "}, // "Bullet (SHELL) RAM, 2112"
+                                                           {NO_BANK_SWITCH,  0x1400, 0x14FF, 1, 0xF0, "14G", "Shell "}, // "Bullet (SHELL) RAM, 2112"
+                                                           {NO_BANK_SWITCH,  0x1500, 0x15FF, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
+                                                           {NO_BANK_SWITCH,  0x1600, 0x16FF, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                           {NO_BANK_SWITCH,  0x1700, 0x17FF, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
                                                            {0}
                                                          }; // end of list
 
@@ -190,6 +205,7 @@ CQuasarGame::CQuasarGame(
     const ROM_REGION *romRegion
 ) : CQuasarBaseGame( romRegion,
                      s_ramRegion,
+                     s_ramRegionByteOnly,
                      s_ramRegionWriteOnly,
                      s_inputRegion,
                      s_outputRegion )

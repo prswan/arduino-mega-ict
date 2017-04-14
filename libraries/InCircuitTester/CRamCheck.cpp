@@ -25,17 +25,19 @@
 #include "CRamCheck.h"
 #include "zutil.h"
 
-static const int s_randomSeed[] = {7, 144};
-static const int s_randomSize = 0x100;
+static const long s_randomSeed[] = {7, 144};
+static const long s_randomSize = 0x10000;
 
 
 CRamCheck::CRamCheck(
     ICpu *cpu,
     const RAM_REGION ramRegion[],
+    const RAM_REGION ramRegionByteOnly[],
     const RAM_REGION ramRegionWriteOnly[],
     void *bankSwitchContext
 ) : m_cpu(cpu),
     m_ramRegion(ramRegion),
+    m_ramRegionByteOnly(ramRegionByteOnly),
     m_ramRegionWriteOnly(ramRegionWriteOnly),
     m_bankSwitchContext(bankSwitchContext)
 {
@@ -71,6 +73,8 @@ CRamCheck::check(
 // of all regions followed by the verifying read of all regions. It's aim is to
 // detect chip select problems where two memorys respond to the same address.
 //
+// NOTE: The seed cannot be "0".
+//
 PERROR
 CRamCheck::checkChipSelect(
 )
@@ -79,14 +83,12 @@ CRamCheck::checkChipSelect(
 
     //
     // Step 1 - Write all the regions
-    // We used the pattern that matches the last normal RAM test,
-    // the second seed with invert data.
     //
 
     for (int i = 0 ; m_ramRegion[i].end != 0 ; i++)
     {
         error = writeRandom( &m_ramRegion[i],
-                             s_randomSeed[1],
+                             (m_ramRegion[i].start & 0xFFFE) + 1,
                              true );
 
         if (FAILED(error))
@@ -95,12 +97,16 @@ CRamCheck::checkChipSelect(
         }
     }
 
+    //
+    // Step 2 - Read & verify all the regions
+    //
+
     if (SUCCESS(error))
     {
         for (int i = 0 ; m_ramRegion[i].end != 0 ; i++)
         {
             error = readVerifyRandom( &m_ramRegion[i],
-                                      s_randomSeed[1],
+                                      (m_ramRegion[i].start & 0xFFFE) + 1,
                                       true );
 
             if (FAILED(error))
@@ -109,6 +115,29 @@ CRamCheck::checkChipSelect(
             }
         }
     }
+    return error;
+}
+
+
+//
+// Performs all the RAM checks on all the regions supplied to the object.
+//
+PERROR
+CRamCheck::checkRandomAccess(
+)
+{
+    PERROR error = errorSuccess;
+
+    for (int i = 0 ; m_ramRegionByteOnly[i].end != 0 ; i++)
+    {
+        error = checkRandomAccess( &m_ramRegionByteOnly[i] );
+
+        if (FAILED(error))
+        {
+            break;
+        }
+    }
+
     return error;
 }
 
@@ -253,6 +282,111 @@ CRamCheck::checkRandom(
     return error;
 }
 
+//
+// Write & read the first few data bytes and print them into the error string.
+//
+PERROR
+CRamCheck::writeReadData(
+    const RAM_REGION *ramRegion
+)
+{
+    PERROR error = errorSuccess;
+    UINT16 expData4[4] = {0x1111, 0x2222, 0x4444, 0x8888};
+    UINT16 expData1[4] = {0x5555, 0xAAAA, 0x5555, 0xAAAA};
+    UINT16 *expData = (UINT16*) NULL;;
+    UINT16 recData[4] = {0};
+
+    UINT8 dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
+    UINT8 dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
+
+    //
+    // This is more complicated than this simple test
+    // as it needs the bit shift done to be correct.
+    //
+    if ((ramRegion->mask < 4) ||
+        (dataAccessWidth > 1))
+    {
+        expData = expData1;
+    }
+    else
+    {
+        expData = expData4;
+    }
+
+    errorCustom->description = "OK:";
+
+    //
+    // Check if we need to perform a bank switch for this region.
+    // and do that now for all the testing to be done upon it.
+    //
+    if (ramRegion->bankSwitch != NO_BANK_SWITCH)
+    {
+        error = ramRegion->bankSwitch( m_bankSwitchContext );
+    }
+
+    //
+    // Write the first 4 bytes, maximum.
+    //
+    if (SUCCESS(error))
+    {
+        for (UINT32 index = 0 ; index < (4 / dataAccessWidth) ; index++)
+        {
+            error = m_cpu->memoryWrite( (index * (dataBusWidth * ramRegion->step)) + ramRegion->start,
+                                        expData[index] );
+
+            if (FAILED(error))
+            {
+                break;
+            }
+        }
+    }
+
+    //
+    // Read the first 4 bytes, maximum.
+    //
+    if (SUCCESS(error))
+    {
+        if (dataAccessWidth == 1)
+        {
+            for (UINT32 index = 0 ; index < 4 ; index++)
+            {
+                error = m_cpu->memoryRead( (index * (dataBusWidth * ramRegion->step)) + ramRegion->start,
+                                           &recData[index] );
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+
+                STRING_UINT8_HEX(errorCustom->description, (recData[index] & ramRegion->mask) );
+                error = errorCustom;
+            }
+        }
+        else if (dataAccessWidth == 2)
+        {
+            for (UINT32 index = 0 ; index < 2 ; index++)
+            {
+                error = m_cpu->memoryRead( (index * (dataBusWidth * ramRegion->step)) + ramRegion->start,
+                                           &recData[index] );
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+
+                STRING_UINT16_HEX(errorCustom->description, (recData[index] & ramRegion->mask) );
+                error = errorCustom;
+            }
+        }
+        else
+        {
+            error = errorNotImplemented;
+        }
+    }
+
+    return error;
+}
+
 
 //
 // Perform a simple write of all of the supplied region in order.
@@ -277,7 +411,9 @@ CRamCheck::write(
 
     if (SUCCESS(error))
     {
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
+
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
             //
             // The write is a simple data = address.
@@ -320,7 +456,9 @@ CRamCheck::write(
 
     if (SUCCESS(error))
     {
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
+
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
             error = m_cpu->memoryWrite(address, value);
 
@@ -356,9 +494,11 @@ CRamCheck::read(
 
     if (SUCCESS(error))
     {
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        UINT8 dataBusWidth = m_cpu->dataBusWidth(ramRegion->start);
+
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
-            UINT8 recData = 0;
+            UINT16 recData = 0;
 
             error = m_cpu->memoryRead(address, &recData);
 
@@ -399,6 +539,220 @@ CRamCheck::check(
 
 
 //
+// Performs all the RAM checks on the region supplied to the object.
+//
+PERROR
+CRamCheck::checkRandomAccess(
+    const RAM_REGION *ramRegion
+)
+{
+    PERROR error = errorSuccess;
+
+    UINT8  dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
+    UINT8  dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
+
+    UINT32 regionLength    = (ramRegion->end - ramRegion->start) / ramRegion->step;
+    UINT32 countLength     = (regionLength * 3) / (dataBusWidth * ramRegion->step);
+
+    //
+    // This function only works with at least byte-wide memory.
+    // Use a duplicate entry in the RAM_REGION for the byte-wide representation.
+    //
+    if ((ramRegion->mask != 0x00FF) &&
+        (ramRegion->mask != 0xFF00) &&
+        (ramRegion->mask != 0xFFFF))
+    {
+        return errorNotImplemented;
+    }
+
+    //
+    // Clear the region first to all 0.
+    // This will also perform any bank switch.
+    //
+    error = write(ramRegion, 0);
+
+    if (FAILED(error))
+    {
+        return error;
+    }
+
+    //
+    // Outer loop to periodically reset the region back to 0 to restart
+    // with different seeds for the address & data values.
+    //
+    for (UINT8 cycle = 0 ; (cycle < 8) && SUCCESS(error) ; cycle++)
+    {
+        //
+        // Pass 1 - write/read/verify, random access
+        //
+
+        randomSeed(ramRegion->start + ramRegion->step + ramRegion->mask + cycle);
+
+        //
+        // The length & step are used for the iteration count as a means to equalize the random access
+        // density no matter what the size of the RAM.
+        //
+        for (UINT32 count = 0 ; count < countLength ; count++ )
+        {
+            UINT32 address = (((UINT32) random(regionLength)) * (dataBusWidth * ramRegion->step)) + ramRegion->start;
+            UINT16 expData = (((address + cycle) * 3) ^ ((address + cycle) / 5));
+            UINT16 recData = 0;
+
+            // For 16-bit we just use the same value for hi & lo.
+            expData = (expData & 0xFF) | (expData << 8);
+
+            //
+            // Pause to make sure the data is actually held valid.
+            // This is done to help detect DRAM refresh failure.
+            //
+            if ((count % (countLength / 4)) == 0)
+            {
+                delay(cycle * 200);
+            }
+
+            //
+            // Add in some blind writes to let the writes accumulate
+            // a bit more agressively to fill in the memory with data.
+            //
+            if (count & 2)
+            {
+                error = m_cpu->memoryWrite(address, expData);
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+
+                continue;
+            }
+
+            // Read what's there.
+            error = m_cpu->memoryRead(address, &recData);
+
+            if (FAILED(error))
+            {
+                break;
+            }
+
+            expData &= ramRegion->mask;
+            recData &= ramRegion->mask;
+
+            // If we a read a 0 then write out a value.
+            if (recData == 0)
+            {
+                error = m_cpu->memoryWrite(address, expData);
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+
+                continue;
+            }
+
+            if (dataAccessWidth == 1)
+            {
+                CHECK_VALUE_UINT8_BREAK(error, ramRegion->location, address, expData, recData);
+            }
+            else if (dataAccessWidth == 2)
+            {
+                CHECK_VALUE_UINT16_BREAK(error, ramRegion->location, address, expData, recData);
+            }
+            else
+            {
+                error = errorNotImplemented;
+                break;
+            }
+
+            //
+            // Add in an optional clear after verify.
+            // This is less agressive than the blind one to that
+            // on average data accumulates in the RAM
+            //
+            if (count & 4)
+            {
+                error = m_cpu->memoryWrite(address, 0);
+
+                if (FAILED(error))
+                {
+                    break;
+                }
+            }
+        }
+
+        //
+        // Add in a variable delay between cycles.
+        // This is to detect a very specific failure mode encountered on TMS4060
+        // DRAM used on Space Invaders where the RAM fails a few seconds after the
+        // data is written.
+        //
+        delay(cycle * 300);
+
+        //
+        // Pass 2 - verify/clear entire contents, random access
+        //
+
+        randomSeed(ramRegion->start + ramRegion->step + ramRegion->mask + cycle);
+
+        //
+        // The length & step are used for the iteration count as a means to equalize the random access
+        // density no matter what the size of the RAM.
+        //
+        for (UINT32 count = 0 ; count < countLength ; count++ )
+        {
+            UINT32 address = (((UINT32) random(regionLength)) * (dataBusWidth * ramRegion->step)) + ramRegion->start;
+            UINT16 expData = (((address + cycle) * 3) ^ ((address + cycle) / 5));
+            UINT16 recData = 0;
+
+            // For 16-bit we just use the same value for hi & lo.
+            expData = (expData & 0xFF) | (expData << 8);
+
+            // Read what's there.
+            error = m_cpu->memoryRead(address, &recData);
+
+            if (FAILED(error))
+            {
+                break;
+            }
+
+            expData &= ramRegion->mask;
+            recData &= ramRegion->mask;
+
+            // Nothing to verify if 0
+            if (recData == 0)
+            {
+                continue;
+            }
+
+            if (dataAccessWidth == 1)
+            {
+                CHECK_VALUE_UINT8_BREAK(error, ramRegion->location, address, expData, recData);
+            }
+            else if (dataAccessWidth == 2)
+            {
+                CHECK_VALUE_UINT16_BREAK(error, ramRegion->location, address, expData, recData);
+            }
+            else
+            {
+                error = errorNotImplemented;
+                break;
+            }
+
+            error = m_cpu->memoryWrite(address, 0);
+
+            if (FAILED(error))
+            {
+                break;
+            }
+        }
+
+    }
+
+    return error;
+}
+
+
+//
 // Perform the simple random number write RAM check for the supplied region.
 //
 PERROR
@@ -422,11 +776,27 @@ CRamCheck::writeRandom(
 
     if (SUCCESS(error))
     {
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
+
         randomSeed(seed);
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
-            UINT8 data = (UINT8) random(s_randomSize);
+            UINT16 data = (UINT16) random(s_randomSize);
             data = (invert) ? ~data : data;
+
+            //
+            // In order to make the Hi byte match the 16-bit word write
+            // we use the Hi byte of the random data. This is needed
+            // to ensure the same region marked as both 8-bit and 16-bit
+            // in the ChipSelect test has the same data.
+            //
+            if ((dataBusWidth == 2)    &&
+                (dataAccessWidth == 1) &&
+                (address & 1)) {
+
+                data = data >> 8;
+            }
 
             error = m_cpu->memoryWrite(address, data);
 
@@ -464,12 +834,28 @@ CRamCheck::readVerifyRandom(
 
     if (SUCCESS(error))
     {
+        UINT8 dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
+        UINT8 dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
+
         randomSeed(seed);
-        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address++)
+        for (UINT32 address = ramRegion->start ; address <= ramRegion->end ; address += (dataBusWidth * ramRegion->step))
         {
-            UINT8 expData = (UINT8) random(s_randomSize);
+            UINT16 expData = (UINT16) random(s_randomSize);
             expData = (invert) ? ~expData : expData;
-            UINT8 recData = 0;
+            UINT16 recData = 0;
+
+            //
+            // In order to make the Hi byte match the 16-bit word write
+            // we use the Hi byte of the random data. This is needed
+            // to ensure the same region marked as both 8-bit and 16-bit
+            // in the ChipSelect test has the same data.
+            //
+            if ((dataBusWidth == 2)    &&
+                (dataAccessWidth == 1) &&
+                (address & 1)) {
+
+                expData = expData >> 8;
+            }
 
             error = m_cpu->memoryRead(address, &recData);
 
@@ -481,7 +867,19 @@ CRamCheck::readVerifyRandom(
             expData &= ramRegion->mask;
             recData &= ramRegion->mask;
 
-            CHECK_VALUE_UINT8_BREAK(error, ramRegion->location, address, expData, recData);
+            if (dataAccessWidth == 1)
+            {
+                CHECK_VALUE_UINT8_BREAK(error, ramRegion->location, address, expData, recData);
+            }
+            else if (dataAccessWidth == 2)
+            {
+                CHECK_VALUE_UINT16_BREAK(error, ramRegion->location, address, expData, recData);
+            }
+            else
+            {
+                error = errorNotImplemented;
+                break;
+            }
         }
     }
     return error;

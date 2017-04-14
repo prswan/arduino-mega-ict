@@ -95,7 +95,9 @@ static const CONNECTION s_D_iot[] = { {31, "D0" },
                                       {24, "D7" } }; // 8 bits.
 
 C6809ECpu::C6809ECpu(
-) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
+    UINT8 QLoToDInClockPulses
+) : m_QLoToDInClockPulses(QLoToDInClockPulses),
+    m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinRW(g_pinMap40DIL, &s_RW_o),
     m_pinE(g_pinMap40DIL, &s_E_i),
@@ -171,16 +173,16 @@ C6809ECpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_VCC_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_VCC_i, HIGH);
 
     // The halt pin should be high (running).
-    CHECK_VALUE_EXIT(error, s__HALT_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__HALT_i, HIGH);
 
     // In everything we'll be testing, TSC is pulled low.
-    CHECK_VALUE_EXIT(error, s_TSC_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_TSC_i, LOW);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
@@ -208,7 +210,7 @@ C6809ECpu::check(
             m_pinClock.digitalWriteLOW();
         }
     }
-    CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__RESET_i, HIGH);
 
     // Loop to detect E & Q by sampling and detecting both high and lows.
     {
@@ -252,19 +254,41 @@ Exit:
     return error;
 }
 
+
+UINT8
+C6809ECpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+C6809ECpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
 PERROR
 C6809ECpu::memoryReadWrite(
     UINT32 address,
-    UINT8  *data,
+    UINT16 *data,
     int    readWrite
 )
 {
     PERROR error = errorSuccess;
+    bool interruptsDisabled = false;
     int valueE;
     int valueQ;
 
     //
-    // Step 1 - Wait for E-Lo, Q-Lo (E-falling)
+    // Phase 0 - Initial State
+    // - Wait for E-Lo, Q-Lo
+    // - E-falling
     //
     for (int x = 0 ; x < 100 ; x++)
     {
@@ -284,20 +308,33 @@ C6809ECpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, LOW);
 
     //
-    // Step 2 - Drive RW, A, BA, BS onto the bus.
-    // Set the databus input.
+    // Phase 0 Actions
+    // - Drive RW, A, BA, BS onto the bus.
     //
-    if (readWrite == LOW)
-    {
-        m_pinRW.digitalWriteLOW();
-    }
-
     m_busA.pinMode(OUTPUT);
     m_busA.digitalWrite(address);
 
     //
-    // Step 3 - Wait for E-Lo, Q-Hi (Q rising edge).
-    // E should stay low.
+    // Driving D on write is due in Phase 1 however
+    // many systems treat Q high time as the active
+    // access time so taking care of D here reduces
+    // the effective cycle time.
+    //
+    if (readWrite == LOW)
+    {
+        m_pinRW.digitalWriteLOW();
+        m_busD.pinMode(OUTPUT);
+        m_busD.digitalWrite(*data);
+    }
+
+    // Critical timing section
+    noInterrupts();
+    interruptsDisabled = true;
+
+    //
+    // Phase 1
+    // - Wait for E-Lo, Q-Hi
+    // - Q-rising
     //
     for (int x = 0 ; x < 100 ; x++)
     {
@@ -315,18 +352,14 @@ C6809ECpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, HIGH);
 
     //
-    // Step 4 - Drive BUSY, LIC, AVMA, D-write
-    // Only handle D-write for now.
+    // Phase 1 Actions
+    // - On write, drive D (see note above)
     //
-    if (readWrite == LOW)
-    {
-        m_busD.pinMode(OUTPUT);
-        m_busD.digitalWrite(*data);
-    }
 
     //
-    // Step 5 - Wait for E-Hi, Q-Hi (E-rising)
-    // Nothing to do.
+    // Phase 2
+    // - Wait for E-Hi, Q-Hi
+    // - E-rising
     //
     for (int x = 0 ; x < 100 ; x++)
     {
@@ -344,7 +377,14 @@ C6809ECpu::memoryReadWrite(
     CHECK_PIN_VALUE_EXIT(error, m_pinQ, s_Q_i, HIGH);
 
     //
-    // Step 5 - Wait for E-Hi, Q-Lo (Q-falling)
+    // Phase 2 Actions
+    // - None, currently.
+    //
+
+    //
+    // Phase 3
+    // - Wait for E-Hi, Q-Lo
+    // - Q-falling
     //
     for (int x = 0 ; x < 100 ; x++)
     {
@@ -362,19 +402,38 @@ C6809ECpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, LOW);
 
     //
-    // Step 6 - D-Read.
+    // Wait for data based on master clock
+    //
+    // If this is incorrect (too long) such that E returns
+    // low then we flag this as a bus error.
+    //
+    for (int x = 0 ; x < m_QLoToDInClockPulses ; x++)
+    {
+        valueE = m_pinE.digitalRead();
+
+        if (valueE == LOW)
+        {
+            break;
+        }
+
+        m_pinClock.digitalWriteHIGH();
+        m_pinClock.digitalWriteLOW();
+    }
+    CHECK_LITERAL_VALUE_EXIT(error, s_E_i, valueE, HIGH);
+
+    //
+    // Phase 3 Actions
+    // - D read
     //
     if (readWrite == HIGH)
     {
-        UINT16 data16;
-
-        m_busD.digitalRead(&data16);
-        *data = (UINT8) data16;
+        m_busD.digitalRead(data);
     }
 
     //
-    // Step 7 - Wait for E-Lo, Q-Lo (E-falling)
-    // Back to initial state.
+    // Phase 0 (Initial State)
+    // - Wait for E-Lo, Q-Lo
+    // - E-falling
     //
     for (int x = 0 ; x < 100 ; x++)
     {
@@ -391,6 +450,11 @@ C6809ECpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_E_i, valueE, LOW);
     CHECK_PIN_VALUE_EXIT(error, m_pinQ, s_Q_i, LOW);
 
+    //
+    // Phase 0 Actions
+    // - On writes, tri-state D
+    //
+
     if (readWrite == LOW)
     {
         m_busD.pinMode(INPUT);
@@ -398,13 +462,18 @@ C6809ECpu::memoryReadWrite(
     }
 
 Exit:
+    if (interruptsDisabled)
+    {
+        interrupts();
+    }
+
     return error;
 }
 
 PERROR
 C6809ECpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     return memoryReadWrite(address, data, HIGH);
@@ -413,7 +482,7 @@ C6809ECpu::memoryRead(
 PERROR
 C6809ECpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     return memoryReadWrite(address, &data, LOW);
@@ -423,7 +492,8 @@ C6809ECpu::memoryWrite(
 PERROR
 C6809ECpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16 timeoutInMs
+    bool      active,
+    UINT32    timeoutInClockPulses
 )
 {
     return errorNotImplemented;
@@ -432,7 +502,7 @@ C6809ECpu::waitForInterrupt(
 
 PERROR
 C6809ECpu::acknowledgeInterrupt(
-    UINT8     *response
+    UINT16 *response
 )
 {
     return errorNotImplemented;

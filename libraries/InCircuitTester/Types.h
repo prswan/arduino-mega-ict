@@ -94,6 +94,17 @@ typedef PERROR (*BankSwitchCallback)(void *context);
 #define NO_BANK_SWITCH ((BankSwitchCallback) (NULL))
 
 //
+// This is used as the callback for address remapping.
+// The remapped address is returned based on the supplied address.
+//
+typedef PERROR (*AddressRemapCallback)(void *context, UINT32 addressIn, UINT32 *addressOut);
+
+//
+// Setting for the address remap callback that none is required.
+//
+#define NO_ADDRESS_REMAP ((AddressRemapCallback) (NULL))
+
+//
 // This is used as the callback for external interrupt setup/enable.
 //
 typedef PERROR (*ExternalIntSetupCallback)(void *context);
@@ -163,6 +174,8 @@ typedef struct _CONNECTION {
 // For example a ROM length of:-
 //  - 0x0400 bytes (max address 0x3FF) has 10 data samples.
 //  - 0x1000 bytes (max address 0xFFF) has 12 data samples.
+//
+// ROM Regions support 8-bit & 16-bit data access.
 //
 
 typedef struct _ROM_REGION {
@@ -170,7 +183,7 @@ typedef struct _ROM_REGION {
     BankSwitchCallback bankSwitch;  // NULL if no bank switch is needed.
     UINT32             start;
     UINT32             length;
-    const UINT8        *data2n;
+    const UINT16       *data2n;
     UINT32             crc;
     CHAR               location[4]; // 3 characters
 
@@ -180,13 +193,23 @@ typedef struct _ROM_REGION {
 //
 // RAM region definition for one device (maskable)
 //
+// step
+//   Step use to support interleaved memory arrangements e.g.
+//    - 8-bit access to 8-bit memories on an 8-bit bus then step == 1
+//    - 2 x 8-bit RAMS configured as a 16-bit word on an 8-bit bus then step == 2
+//    - 4 x 8-bit RAMS configured as a 32-bit word on an 8-bit bus then step == 4
+//
+//    - 16-bit access to 16-bit memories on an 16-bit bus then step == 1
+//    - 2 x 16-bit RAMS configured as a 32-bit word on an 16-bit bus then step == 2
+//
 
 typedef struct _RAM_REGION {
 
     BankSwitchCallback bankSwitch;     // NULL if no bank switch is needed.
     UINT32             start;
     UINT32             end;
-    UINT8              mask;
+    UINT8              step;           // See note above
+    UINT16             mask;
     CHAR               location[4];    // 3 characters
     CHAR               description[7]; // 6 characters
 
@@ -202,7 +225,7 @@ typedef struct _INPUT_REGION {
 
     BankSwitchCallback bankSwitch;     // NULL if no bank switch is needed.
     UINT32             address;
-    UINT8              mask;
+    UINT16             mask;
     CHAR               location[4];    // 3 characters
     CHAR               description[7]; // 6 characters
 
@@ -222,8 +245,8 @@ typedef struct _OUTPUT_REGION {
 
     BankSwitchCallback bankSwitch;     // NULL if no bank switch is needed.
     UINT32             address;
-    UINT8              activeMask;     // Bitwise: 0 - Inactive   1 - Active
-    UINT8              invertMask;     // Bitwise: 0 - Active hi, 1 - Active lo
+    UINT16             activeMask;     // Bitwise: 0 - Inactive   1 - Active
+    UINT16             invertMask;     // Bitwise: 0 - Active hi, 1 - Active lo
     CHAR               location[4];    // 3 characters
     CHAR               description[7]; // 6 characters
 
@@ -249,7 +272,7 @@ typedef struct _INTERRUPT_DEFINITION {
 
     ExternalIntSetupCallback externalIntSetup; // NULL if no external interrupt setup is needed.
     ExternalIntAckCallback   externalIntAck;   // NULL if no external interrupt acknowledge is needed.
-    UINT8                    type;             // 0 - NMI, 1 - INT, 2 - INTx, ICpu specific.
+    UINT8                    type;             // ICpu::Interrupt
     UINT8                    response;         // The vector, 0 if there is no external hardware vector.
     CHAR                     location[4];      // 3 characters
     CHAR                     description[7];   // 6 characters
@@ -264,13 +287,15 @@ typedef struct _INTERRUPT_DEFINITION {
 
 #define STRING_UINT8_HEX(string, value)                     \
     {                                                       \
-        if (value <= 0xF)                                   \
+        UINT8 value8 = (UINT8) value;                       \
+                                                            \
+        if (value8 <= 0xF)                                  \
         {                                                   \
-            string += " 0" + String(value, HEX);            \
+            string += " 0" + String(value8, HEX);           \
         }                                                   \
         else                                                \
         {                                                   \
-            string += " "  + String((value & 0xFF), HEX);   \
+            string += " "  + String(value8, HEX);           \
         }                                                   \
     }                                                       \
 
@@ -281,23 +306,59 @@ typedef struct _INTERRUPT_DEFINITION {
 
 #define STRING_UINT16_HEX(string, value)                      \
     {                                                         \
-        if (value <= 0xF)                                     \
+        UINT16 value16 = (UINT16) value;                      \
+                                                              \
+        if (value16 <= 0xF)                                   \
         {                                                     \
-            string += " 000" + String(value, HEX);            \
+            string += " 000" + String(value16, HEX);          \
         }                                                     \
-        else if (value <= 0xFF)                               \
+        else if (value16 <= 0xFF)                             \
         {                                                     \
-            string += " 00" + String(value, HEX);             \
+            string += " 00" + String(value16, HEX);           \
         }                                                     \
-        else if (value <= 0xFFF)                              \
+        else if (value16 <= 0xFFF)                            \
         {                                                     \
-            string += " 0" + String(value, HEX);              \
+            string += " 0" + String(value16, HEX);            \
         }                                                     \
         else                                                  \
         {                                                     \
-            string += " " + String((value & 0xFFFF), HEX);    \
+            string += " " + String(value16, HEX);             \
         }                                                     \
     }                                                         \
+
+//
+// Macro to format a UINT32 24-bit hex value into a string with leading zeros.
+// The Arduino String library does not appear to have an option to do this.
+//
+
+#define STRING_UINT32_24_HEX(string, value)                  \
+    {                                                        \
+        if (value <= 0xF)                                    \
+        {                                                    \
+            string += " 00000" + String(value, HEX);         \
+        }                                                    \
+        else if (value <= 0xFF)                              \
+        {                                                    \
+            string += " 0000" + String(value, HEX);          \
+        }                                                    \
+        else if (value <= 0xFFF)                             \
+        {                                                    \
+            string += " 000" + String(value, HEX);           \
+        }                                                    \
+        else if (value <= 0xFFFF)                            \
+        {                                                    \
+            string += " 00" + String(value, HEX);            \
+        }                                                    \
+        else if (value <= 0xFFFFF)                           \
+        {                                                    \
+            string += " 0" + String(value, HEX);             \
+        }                                                    \
+        else                                                 \
+        {                                                    \
+            string += " " + String((value & 0xFFFFFF), HEX); \
+        }                                                    \
+    }                                                        \
+
 
 //
 // Macro to format a UINT32 hex value into a string with leading zeros.
@@ -365,6 +426,40 @@ typedef struct _INTERRUPT_DEFINITION {
     }                                                                       \
 
 //
+// Macro to check a boolean value and exit with an error if it's wrong.
+//
+#define CHECK_BOOL_VALUE_EXIT(error, message, recValue, expValue)               \
+        {                                                                       \
+            if (recValue != expValue)                                           \
+            {                                                                   \
+                error = errorCustom;                                            \
+                error->code = ERROR_FAILED;                                     \
+                error->description = "E:";                                      \
+                error->description += message;                                  \
+                error->description += (expValue) ? " Hi" : " Lo";               \
+                error->description += (recValue) ? " Hi" : " Lo";               \
+                goto Exit;                                                      \
+            }                                                                   \
+        }                                                                       \
+
+//
+// Macro to check an 8-bit value and exit with an error if it's wrong.
+//
+#define CHECK_UINT8_VALUE_EXIT(error, message, recValue, expValue)              \
+        {                                                                       \
+            if (recValue != expValue)                                           \
+            {                                                                   \
+                error = errorCustom;                                            \
+                error->code = ERROR_FAILED;                                     \
+                error->description = "E:";                                      \
+                error->description += message;                                  \
+                STRING_UINT8_HEX(error->description, expValue);                 \
+                STRING_UINT8_HEX(error->description, recValue);                 \
+                goto Exit;                                                      \
+            }                                                                   \
+        }                                                                       \
+
+//
 // Macro to check a 16-bit value and exit with an error if it's wrong.
 //
 #define CHECK_UINT16_VALUE_EXIT(error, message, recValue, expValue)         \
@@ -402,9 +497,9 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to check a single pin value and exit with an error if it's wrong.
 //
-#define CHECK_VALUE_EXIT(error, connection, expValue)                       \
+#define CHECK_VALUE_EXIT(error, pinMap, connection, expValue)               \
     {                                                                       \
-        int recValue = digitalRead(g_pinMap40DIL[connection.pin]);          \
+        int recValue = digitalRead(pinMap[connection.pin]);                 \
         CHECK_LITERAL_VALUE_EXIT(error, connection, recValue, expValue);    \
     }                                                                       \
 
@@ -412,9 +507,9 @@ typedef struct _INTERRUPT_DEFINITION {
 // Macro to check a single pin value and exit with an error if it's wrong.
 // CFastPin version.
 //
-#define CHECK_PIN_VALUE_EXIT(error, pin, connection, expValue)         \
+#define CHECK_PIN_VALUE_EXIT(error, pin, connection, expValue)              \
     {                                                                       \
-        int recValue = pin.digitalRead();      \
+        int recValue = pin.digitalRead();                                   \
         CHECK_LITERAL_VALUE_EXIT(error, connection, recValue, expValue);    \
     }                                                                       \
 
@@ -431,6 +526,7 @@ typedef struct _INTERRUPT_DEFINITION {
             error->code = ERROR_FAILED;                                  \
             error->description  = "E:";                                  \
             error->description += connection[0].name;                    \
+            STRING_UINT8_HEX(error->description, expValue);              \
             STRING_UINT8_HEX(error->description, value);                 \
             goto Exit;                                                   \
         }                                                                \
@@ -458,9 +554,12 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to check an 8-bit bus value and exit with an error if it's wrong.
 //
+// 0123456789abcdef
+// E:r22 1234 55 AA
+//
 #define CHECK_VALUE_UINT8_BREAK(error, string, address, expValue, recValue)  \
     {                                                                        \
-        if (expValue != recValue)                                            \
+        if ((UINT8) expValue != (UINT8) recValue)                            \
         {                                                                    \
             error = errorCustom;                                             \
             error->code = ERROR_FAILED;                                      \
@@ -474,15 +573,35 @@ typedef struct _INTERRUPT_DEFINITION {
     }                                                                        \
 
 //
-// Macro to load a string with a region summary.
-// 0123456789adcdef
-//  1800 0F 11D
+// Macro to check an 16-bit bus value and exit with an error if it's wrong.
 //
-#define STRING_REGION_SUMMARY(error, start, mask, location)    \
+// 0123456789abcdef
+// E:r22 5555 AAAA
+//
+#define CHECK_VALUE_UINT16_BREAK(error, string, address, expValue, recValue)  \
+    {                                                                        \
+        if ((UINT16) expValue != (UINT16) recValue)                            \
+        {                                                                    \
+            error = errorCustom;                                             \
+            error->code = ERROR_FAILED;                                      \
+            error->description = "E:";                                       \
+            error->description += string;                                    \
+            STRING_UINT16_HEX(error->description, expValue);                 \
+            STRING_UINT16_HEX(error->description, recValue);                 \
+            break;                                                           \
+        }                                                                    \
+    }                                                                        \
+
+//
+// Macro to load a string with an 8-bit region summary.
+// 0123456789adcdef
+//  001800 0F 11D
+//
+#define STRING_REGION8_SUMMARY(error, start, mask, location)   \
     {                                                          \
         error->code = ERROR_SUCCESS;                           \
         error->description = "";                               \
-        STRING_UINT16_HEX(error->description, start);          \
+        STRING_UINT32_24_HEX(error->description, start);       \
         error->description += " ";                             \
         STRING_UINT8_HEX(error->description, mask);            \
         error->description += " ";                             \
@@ -490,17 +609,49 @@ typedef struct _INTERRUPT_DEFINITION {
     }                                                          \
 
 //
-// Macro to load a string with an IO summary.
+// Macro to load a string with an 16-bit region summary.
+// 0123456789adcdef
+//  001800 0F0F 11D
+//
+#define STRING_REGION16_SUMMARY(error, start, mask, location)  \
+    {                                                          \
+        error->code = ERROR_SUCCESS;                           \
+        error->description = "";                               \
+        STRING_UINT32_24_HEX(error->description, start);       \
+        error->description += " ";                             \
+        STRING_UINT16_HEX(error->description, mask);           \
+        error->description += " ";                             \
+        error->description += location;                        \
+    }                                                          \
+
+//
+// Macro to load a string with an IO summary (8-bit)
 // 0123456789adcdef
 //  13F 0F 012345
 //
-#define STRING_IO_SUMMARY(error, location, mask, regionDescription)  \
+#define STRING_IO8_SUMMARY(error, location, mask, regionDescription)  \
     {                                                                \
         error->code = ERROR_SUCCESS;                                 \
         error->description = "";                                     \
         error->description += " ";                                   \
         error->description += location;                              \
         STRING_UINT8_HEX(error->description, mask);                  \
+        error->description += " ";                                   \
+        error->description += regionDescription;                     \
+    }                                                                \
+
+//
+// Macro to load a string with an IO summary (16-bit)
+// 0123456789adcdef
+//  13F 0F0F 012345
+//
+#define STRING_IO16_SUMMARY(error, location, mask, regionDescription)  \
+    {                                                                \
+        error->code = ERROR_SUCCESS;                                 \
+        error->description = "";                                     \
+        error->description += " ";                                   \
+        error->description += location;                              \
+        STRING_UINT16_HEX(error->description, mask);                 \
         error->description += " ";                                   \
         error->description += regionDescription;                     \
     }                                                                \

@@ -170,19 +170,19 @@ CZ80Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // The reset pin should be high (no reset).
-    CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__RESET_i, HIGH);
 
     // Nothing should be driving wait states.
-    CHECK_VALUE_EXIT(error, s__WAIT_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__WAIT_i, HIGH);
 
     // The tester doesn't support bus sharing.
-    CHECK_VALUE_EXIT(error, s__BUSREQ_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__BUSREQ_i, HIGH);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
@@ -211,17 +211,36 @@ CZ80Cpu::check(
 
         if (loCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_CLK_i, LOW);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK_i, LOW);
         }
         else if (hiCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_CLK_i, HIGH);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK_i, HIGH);
         }
     }
 
 Exit:
     return error;
 }
+
+
+UINT8
+CZ80Cpu::dataBusWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
+
+UINT8
+CZ80Cpu::dataAccessWidth(
+    UINT32 address
+)
+{
+    return 1;
+}
+
 
 //
 // Convert the supplied virtual address into a physical address.
@@ -247,12 +266,11 @@ CZ80Cpu::selectAddressSpace(
 PERROR
 CZ80Cpu::memoryRead(
     UINT32 address,
-    UINT8  *data
+    UINT16 *data
 )
 {
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
-    UINT16 data16 = 0;
 
     // Enable the address bus and set the value (the lower 16 bits only)
     m_busA.pinMode(OUTPUT);
@@ -313,7 +331,7 @@ CZ80Cpu::memoryRead(
             if (waitValue == HIGH)
             {
                 // Read the data presented on the bus as soon as we see no WAIT set then clear _RD
-                m_busD.digitalReadThenDigitalWriteHIGH(&data16, m_pin_RD);
+                m_busD.digitalReadThenDigitalWriteHIGH(data, m_pin_RD);
 
                 break;
             }
@@ -333,9 +351,6 @@ Exit:
     {
         interrupts();
     }
-
-    *data = (UINT8) data16;
-
     return error;
 }
 
@@ -343,7 +358,7 @@ Exit:
 PERROR
 CZ80Cpu::memoryWrite(
     UINT32 address,
-    UINT8  data
+    UINT16 data
 )
 {
     PERROR error = errorSuccess;
@@ -355,7 +370,7 @@ CZ80Cpu::memoryWrite(
 
     // Set the databus to output and set a value.
     m_busD.pinMode(OUTPUT);
-    m_busD.digitalWrite((UINT16) data);
+    m_busD.digitalWrite(data);
 
     // Select the address space based on the supplied address
     selectAddressSpace(address);
@@ -436,12 +451,14 @@ Exit:
 PERROR
 CZ80Cpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
     PERROR error = errorSuccess;
     unsigned long startTime = millis();
     unsigned long endTime = startTime + timeoutInMs;
+    int sense = (active ? LOW : HIGH);
     int value = 0;
 
     UINT8 intPin = ((interrupt == NMI) ? (g_pinMap40DIL[s__NMI_i.pin]) :
@@ -451,14 +468,14 @@ CZ80Cpu::waitForInterrupt(
     {
         value = ::digitalRead(intPin);
 
-        if (value == LOW)
+        if (value == sense)
         {
             break;
         }
     }
     while (millis() < endTime);
 
-    if (value != LOW)
+    if (value != sense)
     {
         error = errorTimeout;
     }
@@ -473,7 +490,7 @@ Exit:
 //
 PERROR
 CZ80Cpu::acknowledgeInterrupt(
-    UINT8 *response
+    UINT16 *response
 )
 {
     PERROR error = errorSuccess;

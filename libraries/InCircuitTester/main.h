@@ -49,10 +49,20 @@ onSelectConfig(
 
 //
 // Handler for the game select callback that will switch the current
-// game to the one supplied.
+// selector to the one supplied.
 //
 PERROR
 onSelectGame(
+    void *context,
+    int  key
+);
+
+//
+// Handler for the generic select callback that will switch the current
+// selector to the one supplied.
+//
+PERROR
+onSelectGeneric(
     void *context,
     int  key
 );

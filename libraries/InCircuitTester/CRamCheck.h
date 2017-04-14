@@ -37,6 +37,7 @@ class CRamCheck
         CRamCheck(
             ICpu *cpu,
             const RAM_REGION ramRegion[],
+            const RAM_REGION ramRegionByteOnly[],
             const RAM_REGION ramRegionWriteOnly[],
             void *bankSwitchContext
         );
@@ -47,6 +48,10 @@ class CRamCheck
 
         PERROR
         checkChipSelect(
+        );
+
+        PERROR
+        checkRandomAccess(
         );
 
         PERROR
@@ -69,6 +74,11 @@ class CRamCheck
         );
 
         PERROR
+        writeReadData(
+            const RAM_REGION *ramRegion
+        );
+
+        PERROR
         write(
             const RAM_REGION *ramRegion
         );
@@ -90,6 +100,11 @@ class CRamCheck
         );
 
         PERROR
+        checkRandomAccess(
+            const RAM_REGION *ramRegion
+        );
+
+        PERROR
         writeRandom(
             const RAM_REGION *ramRegion,
             int   seed,
@@ -107,6 +122,7 @@ class CRamCheck
 
         ICpu             *m_cpu;
         const RAM_REGION *m_ramRegion;
+        const RAM_REGION *m_ramRegionByteOnly;
         const RAM_REGION *m_ramRegionWriteOnly;
         void             *m_bankSwitchContext;
 };

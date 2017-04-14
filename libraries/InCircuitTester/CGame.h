@@ -51,10 +51,17 @@ class CGame : public IGame
         virtual PERROR ramCheckAllChipSelect(
         );
 
+        virtual PERROR ramCheckAllRandomAccess(
+        );
+
         virtual PERROR interruptCheck(
         );
 
         virtual PERROR romCheck(
+            int key
+        );
+
+        virtual PERROR romCrc(
             int key
         );
 
@@ -63,6 +70,10 @@ class CGame : public IGame
         );
 
         virtual PERROR ramCheck(
+            int key
+        );
+
+        virtual PERROR ramCheckRandomAccess(
             int key
         );
 
@@ -110,6 +121,10 @@ class CGame : public IGame
             int key
         );
 
+        virtual PERROR onRamByteKeyMove(
+            int key
+        );
+
         virtual PERROR onCustomKeyMove(
             int key
         );
@@ -125,6 +140,7 @@ class CGame : public IGame
         CGame(
             const ROM_REGION      *romRegion,
             const RAM_REGION      *ramRegion,
+            const RAM_REGION      *ramRegionByteOnly,
             const RAM_REGION      *ramRegionWriteOnly,
             const INPUT_REGION    *inputRegion,
             const OUTPUT_REGION   *outputRegion,
@@ -140,6 +156,7 @@ class CGame : public IGame
 
         ROM_REGION      *m_romRegion;
         RAM_REGION      *m_ramRegion;
+        RAM_REGION      *m_ramRegionByteOnly;
         RAM_REGION      *m_ramRegionWriteOnly;
         INPUT_REGION    *m_inputRegion;
         OUTPUT_REGION   *m_outputRegion;
@@ -171,6 +188,7 @@ class CGame : public IGame
         //
         int  m_RomReadRegion;
         int  m_RamWriteReadRegion;
+        int  m_RamWriteReadByteRegion;
         int  m_inputReadRegion;
         int  m_outputWriteRegion;
         bool m_outputWriteRegionOn;

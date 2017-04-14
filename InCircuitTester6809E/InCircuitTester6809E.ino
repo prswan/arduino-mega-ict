@@ -23,23 +23,12 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include <LiquidCrystal.h>
-#include <main.h>
 #include <DFR_Key.h>
 #include <zutil.h>
 
-#include <C6809ECpu.h>
-#include <CStarWarsGame.h>
+#include <main.h>
 
-//
-// The initial selector to select the game to test.
-//
-static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),               false},
-                                    {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),                 false},
-                                    {"Star Wars      ",  onSelectGame,   (void*) (CStarWarsGame::createInstance),        false},
-                                    {"Star Wars (O)  ",  onSelectGame,   (void*) (CStarWarsGame::createInstanceSetO),    false},
-                                    { 0, 0 }
-                                   };
+#include <6809EGameSelector.h>
 
 void setup()
 {

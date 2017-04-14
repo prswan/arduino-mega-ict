@@ -4,12 +4,36 @@
 static int DEFAULT_KEY_PIN = 0; 
 static int DEFAULT_THRESHOLD = 5;
 
-static int UPKEY_ARV = 144; //that's read "analogue read value"
-static int DOWNKEY_ARV = 329;
-static int LEFTKEY_ARV = 505;
-static int RIGHTKEY_ARV = 0;
-static int SELKEY_ARV = 742;
-static int NOKEY_ARV = 1023;
+/*
+	To use any alternate set of values you will need to enable it by a define.
+	The define should NOT be done in code or it will impact all users. Visual 
+	Studio users can set 'DF_ROBOT_V1' in the Preprocessor definitions of the
+	project, or add '-DDF_ROBOT_V1' under advanced options.
+
+	Users of the standard Arduino IDE should create the file 'platform.local.txt'
+	under <arduino_install>/hardware.arduino/avr and add the following line but
+	be aware that when you upgrade your IDE this file may need to be re-created:
+
+	compiler.cpp.extra_flags=-DDF_ROBOT_V1
+	
+	If further values are added in the future then of course adjust the name
+	of the define that you specify accordingly.
+*/
+#ifdef DF_ROBOT_V1
+	static int RIGHTKEY_ARV = 0;	//that's read "analogue read value"
+	static int UPKEY_ARV	= 98;  
+	static int DOWNKEY_ARV	= 254;
+	static int LEFTKEY_ARV	= 407;
+	static int SELKEY_ARV	= 638;
+	static int NOKEY_ARV	= 1023;
+#else
+	static int RIGHTKEY_ARV = 0;
+	static int UPKEY_ARV	= 144;
+	static int DOWNKEY_ARV	= 329;
+	static int LEFTKEY_ARV	= 505;
+	static int SELKEY_ARV	= 742;
+	static int NOKEY_ARV	= 1023;
+#endif
 
 DFR_Key::DFR_Key()
 {	

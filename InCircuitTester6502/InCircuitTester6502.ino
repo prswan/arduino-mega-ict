@@ -1,4 +1,4 @@
-//
+  //
 // Copyright (c) 2015, Paul R. Swan
 // All rights reserved.
 //
@@ -23,21 +23,12 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include <LiquidCrystal.h>
-#include <main.h>
 #include <DFR_Key.h>
 #include <zutil.h>
 
-#include <C6502Cpu.h>
-#include <CTomahawk777Game.h>
+#include <main.h>
 
-//
-// The initial selector to select the game to test.
-//
-static SELECTOR s_gameSelector[] = {//0123456789abcde
-                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),               false},
-                                    {"Tomahawk777 (5)",  onSelectGame,   (void*) (CTomahawk777Game::createInstanceSet5), false},
-                                    { 0, 0 }
-                                   };
+#include <6502GameSelector.h>
 
 void setup()
 {

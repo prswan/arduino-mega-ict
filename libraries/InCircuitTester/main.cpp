@@ -53,7 +53,7 @@ static const SELECTOR *s_currentSelector;
 //
 // This is the game selector.
 //
-static const SELECTOR *s_gameSelector;
+static SELECTOR *s_gameSelector;
 
 //
 // This is the current selection.
@@ -70,6 +70,15 @@ int s_repeatSelectTimeInS;
 // When true causes the repeat to ignore any reported error and continue the repeat
 //
 bool s_repeatIgnoreError;
+
+//
+// The selector used for the general tester configuration options.
+//
+static const SELECTOR s_configSelector[] PROGMEM = {//0123456789abcde
+                                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),   false},
+                                                    {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),     false},
+                                                    { 0, 0 }
+                                                   };
 
 //
 // Handler for the configuration callback to set options.
@@ -126,9 +135,10 @@ onSelectConfig(
 // game to the one supplied.
 //
 PERROR
-onSelectGame(
+onSelectGameCallback(
     void *context,
-    int  key
+    int  key,
+    const SELECTOR *selector
 )
 {
     PERROR error = errorSuccess;
@@ -146,12 +156,41 @@ onSelectGame(
 
     CGameCallback::game = (IGame *) gameConstructor();
 
-    s_currentSelector  = CGameCallback::selector;
+    s_currentSelector  = selector;
     s_currentSelection = 0;
 
     return error;
 }
 
+//
+// Handler for the game select callback that will switch the current
+// selector to the one supplied.
+//
+PERROR
+onSelectGame(
+    void *context,
+    int  key
+)
+{
+    return onSelectGameCallback(context,
+                                key,
+                                CGameCallback::selectorGame);
+}
+
+//
+// Handler for the generic select callback that will switch the current
+// selector to the one supplied.
+//
+PERROR
+onSelectGeneric(
+    void *context,
+    int  key
+)
+{
+    return onSelectGameCallback(context,
+                                key,
+                                CGameCallback::selectorGeneric);
+}
 
 void mainSetup(
     const SELECTOR *gameSelector
@@ -168,7 +207,27 @@ void mainSetup(
 
     keypad.setRate(10);
 
-    s_gameSelector = gameSelector;
+    // Copy the PROGMEM based selectors into a single local SRAM selector
+    {
+        UINT16 uConfigRegionSize = 0;
+        UINT16 uConfigIndexCount = 0;
+
+        UINT16 uGameRegionSize   = 0;
+        UINT16 uGameIndexCount   = 0;
+
+        for ( ; pgm_read_word_near(&s_configSelector[uConfigIndexCount].function) != 0 ; uConfigIndexCount++) {}
+
+        for ( ; pgm_read_word_near(&gameSelector[uGameIndexCount].function) != 0 ; uGameIndexCount++) {}
+
+        uConfigRegionSize += sizeof(s_configSelector[0]) * uConfigIndexCount;
+        uGameRegionSize += sizeof(gameSelector[0]) * (uGameIndexCount+1); // +1 to include the null terminator.
+
+        s_gameSelector = (PSELECTOR) malloc( uConfigRegionSize + uGameRegionSize );
+
+        memcpy_P( &s_gameSelector[0], s_configSelector, uConfigRegionSize );
+        memcpy_P( &s_gameSelector[uConfigIndexCount], gameSelector, uGameRegionSize );
+    }
+
     s_currentSelector = s_gameSelector;
 }
 

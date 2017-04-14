@@ -40,9 +40,14 @@ class CGameCallback
     public:
 
         //
-        // This is the selector object array for the UI.
+        // This is the selector object array for the UI for games use..
         //
-        static const SELECTOR *selector;
+        static const SELECTOR *selectorGame;
+
+        //
+        // This is the selector object array for the UI for generic use.
+        //
+        static const SELECTOR *selectorGeneric;
 
         //
         // The game object to use.
@@ -73,6 +78,11 @@ class CGameCallback
             int  key
         );
 
+        static PERROR onSelectRamCheckAllRA(
+            void *iGame,
+            int  key
+        );
+
         static PERROR onSelectRamCheckAllCS(
             void *iGame,
             int  key
@@ -88,12 +98,22 @@ class CGameCallback
             int  key
         );
 
+        static PERROR onSelectRomCrc(
+            void *iGame,
+            int  key
+        );
+
         static PERROR onSelectRomRead(
             void *iGame,
             int  key
         );
 
         static PERROR onSelectRamCheck(
+            void *iGame,
+            int  key
+        );
+
+        static PERROR onSelectRamCheckRA(
             void *iGame,
             int  key
         );

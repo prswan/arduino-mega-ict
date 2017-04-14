@@ -33,11 +33,23 @@ class ICpu
     public:
 
         //
-        // Interrupt definitions. Most CPU's have an Non Maskable & normal interrupt
+        // Interrupt definitions. Most CPU's have an non-maskable & normal interrupt.
+        // Additional less common interrupt sources are CPU specific with a general
+        // convention that the numerical designations match the CPU, for example on
+        // 8085 RST5==IRQ5 and on T11 CP1==IRQ1.
         //
         typedef enum {
+            RESET,
+            HALT,
             NMI,
-            INT
+            IRQ0,
+            IRQ1,
+            IRQ2,
+            IRQ3,
+            IRQ4,
+            IRQ5,
+            IRQ6,
+            IRQ7
         } Interrupt;
 
         //
@@ -58,39 +70,75 @@ class ICpu
         ) = 0;
 
         //
-        // Read one "data" byte from a memory "address" and return it in "byte".
+        // Returns the data bus width (in bytes) for the specified address:
+        // 1 = 1 Byte  =  8-Bit CPU
+        // 2 = 2 Bytes = 16-Bit CPU
         //
-        // 16-Bit CPU:
-        //   0x00000 -> 0x0FFFF is memory space
-        //   0x10000 -> 0x1FFFF is IO space
+        // This parameter is used to indicate indicate that the
+        // address map of the CPU looks like this in the 2-byte case:
+        //
+        //   CPU address 0000 == Lower 8 physical address 0000
+        //   CPU address 0001 == Upper 8 physical address 0000
+        //   CPU address 0002 == Lower 8 physical address 0001
+        //   CPU address 0003 == Upper 8 physical address 0001
+        //
+        // It provides a means for the caller to know how to access a specific
+        // 8-bit component on a 16-bit bus (e.g. loops require address += 2).
+        //
+        virtual
+        UINT8
+        dataBusWidth(
+            UINT32 address
+        ) = 0;
+
+        //
+        // Returns the data access bus width (in bytes) for the specified address:
+        // 1 = 1 Byte  (upper & lower always returned in the lower 8 bits)
+        // 2 = 2 Bytes
+        //
+        // Therefore, for 16-bit access "dataBusWidth" == 2 and "dataAccessWidth" == 2.
+        //
+        virtual
+        UINT8
+        dataAccessWidth(
+            UINT32 address
+        ) = 0;
+
+        //
+        // Read one "data" byte from a memory "address" and return it in "byte".
+        // 8-bit access is always in the lower 8 bits.
         //
         virtual
         PERROR
         memoryRead(
             UINT32 address,
-            UINT8  *data
+            UINT16  *data
         ) = 0;
 
         //
         // Write one "data" byte to a memory "address".
-        // See "memoryRead" for address space information.
+        // 8-bit access is always in the lower 8 bits.
         //
         virtual
         PERROR
         memoryWrite(
             UINT32 address,
-            UINT8  data
+            UINT16 data
         ) = 0;
 
         //
-        // Wait for the CPU interrupt to be asserted. If a timeout occurs then a timeout error is returned.
+        // Wait for a CPU interrupt to be asserted (active) or de-asserted (inactive).
+        // If a timeout occurs then a timeout error is returned.
+        //  - For standard asynchronous CPU's the timeout is measured in milliseconds.
+        //  - For clock master CPU's the timeout is measured in clock pulses.
         // In most cases this will need to be called, acked, and then waited for the next interrupt.
         //
         virtual
         PERROR
         waitForInterrupt(
             Interrupt interrupt,
-            UINT16    timeoutInMs
+            bool      active,
+            UINT32    timeoutInMsOrClockPulses
         ) = 0;
 
         //
@@ -100,7 +148,7 @@ class ICpu
         virtual
         PERROR
         acknowledgeInterrupt(
-            UINT8 *response
+            UINT16 *response
         ) = 0;
 
 

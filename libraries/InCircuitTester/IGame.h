@@ -59,6 +59,12 @@ class IGame
         ) = 0;
 
         // Performs a check of all the accessible RAM
+        // Based on the read/write random access pattern
+        //
+        virtual PERROR ramCheckAllRandomAccess(
+        ) = 0;
+
+        // Performs a check of all the accessible RAM
         // Based on the write-all & read-all pattern.
         //
         virtual PERROR ramCheckAllChipSelect(
@@ -78,6 +84,13 @@ class IGame
         ) = 0;
 
         //
+        // Calculates the CRC of the specified rom
+        //
+        virtual PERROR romCrc(
+            int key
+        ) = 0;
+
+        //
         // Basic test function to read the ROM space.
         //
         virtual PERROR romRead(
@@ -88,6 +101,13 @@ class IGame
         // Performs a check of the specified ram
         //
         virtual PERROR ramCheck(
+            int key
+        ) = 0;
+
+        //
+        // Performs a check of the specified ram
+        //
+        virtual PERROR ramCheckRandomAccess(
             int key
         ) = 0;
 
