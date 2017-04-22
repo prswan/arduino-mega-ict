@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Paul R. Swan
+// Copyright (c) 2017, Phillip Riscombe-Burton
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,20 +22,40 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <C6809EGenericGame.h>
-#include <CStarWarsGame.h>
-#include <CPaclandGame.h>
+#ifndef CPaclandGame_h
+#define CPaclandGame_h
 
-//
-// The initial selector to select the game to test.
-//
-static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2716),    false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2732),    false},
-                                                  {"Star Wars      ",  onSelectGame,    (void*) (CStarWarsGame::createInstance),            false},
-                                                  {"Star Wars (O)  ",  onSelectGame,    (void*) (CStarWarsGame::createInstanceSetO),        false},
-                                                  {"Pacland        ",  onSelectGame,    (void*) (CPaclandGame::createInstance),             false},
-                                                  { 0, 0 }
-                                                 };
+#include "CPaclandBaseGame.h"
+
+class CPaclandGame : public CPaclandBaseGame
+{
+    public:
+
+        //
+        // Constructors for this game.
+        //
+
+        static IGame* createInstance(
+        );
+
+        /*static IGame* createInstanceSetO(
+        );*/
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CPaclandGame(
+            /*const ROM_REGION *romRegion*/
+        );
+
+};
+
+#endif
 
 
