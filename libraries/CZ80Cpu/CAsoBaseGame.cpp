@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CAsoBaseGame.h"
-#include "CZ80Cpu.h"
+#include "CZ80ACpu.h"
 #include <DFR_Key.h>
 
 //
@@ -31,43 +31,35 @@
 //   Z80 GND Pin 29
 //
 // Watchdog Disable:
-//   TBD
+//   There doesn't appear to be a watchdog.
 //
 // Board Designations:
 //   c - CPU board
 //   v - Video board
 //
 // Z80 Compatibility Notes
-//   CPU A - This one doesn't use WAIT for VRAM access synchronization. A clock based method is suspected.
-//           As a result none of the RAM is readable with the tester though writes appear to work OK.
+//   Neither CPU uses WAIT for VRAM access synchronization. A clock synchronous based method is utilized.
+//   The Z80A CPU implementation is able to hit this timing and is tuned for it.
+//
+//   CPU A - This one doesn't use WAIT at all (tied to Vcc).
 //   CPU B - This one uses WAIT synchronization to wait for CPU A accesses to complete.
 //
 
 //
 // RAM region is the same for all games on this board set.
-// See the comaptbility note above on why the RAM cannot be read with the tester.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { // "012", "012345"
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                            "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x00D800, 0x00DFFF, 1, 0xFF, "PR ", "Prog. "}, // "Program RAM"
+                                                  {NO_BANK_SWITCH, 0x00E000, 0x00E7FF, 1, 0xFF, "SP ", "SP RAM"}, // "Sprite RAM"
+                                                  {NO_BANK_SWITCH, 0x00E800, 0x00F7FF, 1, 0xFF, "BG ", "BG RAM"}, // "Background RAM"
+                                                  {NO_BANK_SWITCH, 0x00F800, 0x00FFFF, 1, 0xFF, "TX ", "TX RAM"}, // "TX RAM"
                                                   {0}
                                                 }; // end of list
 
 //
 // RAM region is the same for all games on this board set.
-// See the comaptbility note above on why the RAM cannot be read with the tester.
 //
-static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { // "012", "012345"
-                                                          {0}
-                                                        }; // end of list
-
-//
-// RAM region is the same for all games on this board set.
-// See the comaptbility note above on why the RAM cannot be read with the tester.
-//
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                            "012", "012345"
-                                                           {NO_BANK_SWITCH, 0x00D800, 0x00DFFF, 1, 0xFF, "PR ", "Prog. "}, // "Program RAM"
-                                                           {NO_BANK_SWITCH, 0x00E000, 0x00E7FF, 1, 0xFF, "SP ", "SP RAM"}, // "Sprite RAM"
-                                                           {NO_BANK_SWITCH, 0x00E800, 0x00F7FF, 1, 0xFF, "BG ", "BG RAM"}, // "Background RAM"
-                                                           {NO_BANK_SWITCH, 0x00F800, 0x00FFFF, 1, 0xFF, "TX ", "TX RAM"}, // "TX RAM"
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { // "012", "012345"
                                                            {0}
                                                          }; // end of list
 
@@ -108,13 +100,13 @@ CAsoABaseGame::CAsoABaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
-           s_ramRegionByteOnly,
+           s_ramRegion, //ByteOnly,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,
            s_customFunction)
 {
-    m_cpu = new CZ80Cpu();
+    m_cpu = new CZ80ACpu();
     m_cpu->idle();
 
     // The VBLANK interrupt is on the IRQ pin.
