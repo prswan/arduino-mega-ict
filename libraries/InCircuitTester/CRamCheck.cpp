@@ -753,6 +753,81 @@ CRamCheck::checkRandomAccess(
 
 
 //
+// Performs a binary 2n incremental RAM test on the region to more easily detect stuck address bits.
+//
+PERROR
+CRamCheck::checkAddress(
+    const RAM_REGION *ramRegion
+)
+{
+    PERROR error = errorSuccess;
+
+    UINT8  dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
+    UINT8  dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
+
+    UINT32 regionLength      = (ramRegion->end - ramRegion->start) + 1;
+
+    UINT16 dataBusWidthShift = (dataBusWidth    == 2) ? 1 : 0;
+    UINT16 stepShift         = (ramRegion->step >= 2) ? 2 : 1;
+
+    UINT16 dataBusWidthAndStepShift = dataBusWidthShift + stepShift;
+
+    //
+    // Clear the region first to all 0.
+    // This will also perform any bank switch.
+    //
+    error = write(ramRegion, 0);
+
+    if (FAILED(error))
+    {
+        return error;
+    }
+
+    //
+    // e.g.
+    // shift == 4, end == (0x10 - 1) == 0x0F, success
+    // shift == 5, end == (0x20 - 1) == 0x1F, failed
+    //
+    // error === (shift (5-1)) == 0x10;
+    //
+
+    for (UINT32 shift = 0 ; (1UL << (shift + dataBusWidthAndStepShift)) < regionLength ; shift++)
+    {
+        RAM_REGION subRamRegion = *ramRegion;
+
+        subRamRegion.end = ramRegion->start + ((1UL << (shift + dataBusWidthAndStepShift)) - 1);
+
+        // Consistency check that I got the math right
+        if (subRamRegion.end > ramRegion->end)
+        {
+            error = errorUnexpected;
+            break;
+        }
+
+        error = checkRandom(&subRamRegion, 1);
+
+        if (FAILED(error))
+        {
+            // Overide the error with address information rather than data verify info.
+            if (shift > 0)
+            {
+                error = errorCustom;
+                error->code = ERROR_FAILED;
+                error->description = "E:";
+                error->description += ramRegion->location;
+                STRING_UINT16_HEX(error->description, ramRegion->start);
+                STRING_UINT16_HEX(error->description, (1UL << ((shift - 1) + dataBusWidthAndStepShift)));
+            }
+
+            break;
+        }
+    }
+
+    return error;
+}
+
+
+//
 // Perform the simple random number write RAM check for the supplied region.
 //
 PERROR

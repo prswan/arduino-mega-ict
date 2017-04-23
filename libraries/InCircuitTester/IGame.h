@@ -112,6 +112,13 @@ class IGame
         ) = 0;
 
         //
+        // Performs a stuck address check of the specified ram
+        //
+        virtual PERROR ramCheckAddress(
+            int key
+        ) = 0;
+
+        //
         // Basic test function to write & read the RAM space.
         //
         virtual PERROR ramWriteRead(

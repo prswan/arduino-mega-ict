@@ -495,6 +495,38 @@ CGame::ramCheckRandomAccess(
 
 
 PERROR
+CGame::ramCheckAddress(
+    int key
+)
+{
+    PERROR error = errorNotImplemented;
+
+    // Only handle if a region was defined
+    if (m_ramRegion[0].end != 0)
+    {
+        if (key == SELECT_KEY)
+        {
+            const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
+
+            CRamCheck ramCheck( m_cpu,
+                                m_ramRegion,
+                                m_ramRegionByteOnly,
+                                m_ramRegionWriteOnly,
+                                (void *) this );
+
+            error = ramCheck.checkAddress(region);
+        }
+        else
+        {
+            error = onRamKeyMove(key);
+        }
+    }
+
+    return error;
+}
+
+
+PERROR
 CGame::ramWriteRead(
     int key
 )

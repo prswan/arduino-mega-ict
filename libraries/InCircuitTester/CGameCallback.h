@@ -118,6 +118,11 @@ class CGameCallback
             int  key
         );
 
+        static PERROR onSelectRamCheckAd(
+            void *iGame,
+            int  key
+        );
+
         static PERROR onSelectRamWriteRead(
             void *iGame,
             int  key

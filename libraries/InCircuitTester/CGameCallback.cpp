@@ -40,6 +40,7 @@ static const SELECTOR s_selectorGame[] = { //"0123456789abcdef"
                                             {"ROM Read",        CGameCallback::onSelectRomRead,        (void*) &CGameCallback::game, true},
                                             {"RAM Check",       CGameCallback::onSelectRamCheck,       (void*) &CGameCallback::game, true},
                                             {"RAM Check RA",    CGameCallback::onSelectRamCheckRA,     (void*) &CGameCallback::game, true},
+                                            {"RAM Check Ad",    CGameCallback::onSelectRamCheckAd,     (void*) &CGameCallback::game, true},
                                             {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
                                             {"ROM Read All",    CGameCallback::onSelectRomReadAll,     (void*) &CGameCallback::game, false},
                                             {"RAM Write All AD",CGameCallback::onSelectRamWriteAllAD,  (void*) &CGameCallback::game, false},
@@ -59,6 +60,7 @@ static const SELECTOR s_selectorGeneric[] = { //"0123456789abcdef"
                                                {"ROM Read",        CGameCallback::onSelectRomRead,        (void*) &CGameCallback::game, true},
                                                {"RAM Check",       CGameCallback::onSelectRamCheck,       (void*) &CGameCallback::game, true},
                                                {"RAM Check RA",    CGameCallback::onSelectRamCheckRA,     (void*) &CGameCallback::game, true},
+                                               {"RAM Check Ad",    CGameCallback::onSelectRamCheckAd,     (void*) &CGameCallback::game, true},
                                                {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
                                                { 0, 0 }
                                             };
@@ -221,6 +223,17 @@ CGameCallback::onSelectRamCheckRA(
     IGame *game = *((IGame **) iGame);
 
     return game->ramCheckRandomAccess( key );
+}
+
+PERROR
+CGameCallback::onSelectRamCheckAd(
+    void *iGame,
+    int  key
+)
+{
+    IGame *game = *((IGame **) iGame);
+
+    return game->ramCheckAddress( key );
 }
 
 PERROR

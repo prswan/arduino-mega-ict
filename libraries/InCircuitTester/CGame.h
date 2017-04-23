@@ -77,6 +77,10 @@ class CGame : public IGame
             int key
         );
 
+        virtual PERROR ramCheckAddress(
+            int key
+        );
+
         virtual PERROR ramWriteRead(
             int key
         );

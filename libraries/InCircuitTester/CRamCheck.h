@@ -105,6 +105,11 @@ class CRamCheck
         );
 
         PERROR
+        checkAddress(
+            const RAM_REGION *ramRegion
+        );
+
+        PERROR
         writeRandom(
             const RAM_REGION *ramRegion,
             int   seed,
