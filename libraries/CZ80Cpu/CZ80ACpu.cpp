@@ -39,6 +39,10 @@
 // o - output
 // t - tri-state
 //
+// NOTE: This implementation was tested using a shield without protection resistors.
+//       It has not been tested with a "standard" shield with protection resistors.
+//
+
 
 /*
 WARNING: Ports E, G & H are used by the LCD/Keypad shield and thus cannot be directly used!
@@ -536,8 +540,8 @@ CZ80ACpu::MREQread(
     WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
 
     // Start the cycle by assert the control lines
-    *g_portOutB = ~(s_B3_BIT_OUT_MREQ);
     *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD);
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
 
     // Wait for WAIT to be deasserted.
     // Port L requires an "lds" to access so no wait state needed from above.

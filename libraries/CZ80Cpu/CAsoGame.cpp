@@ -60,6 +60,21 @@ static const ROM_REGION s_romRegionArianASet1[] PROGMEM = { //
                                                            {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nArianASet1_cD5, 0x4d8db650, "cD5"}, // P3
                                                            {0} }; // end of list
 
+//
+// Set 1 from MAME.
+//                                                      01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
+static const UINT16 s_romData2nArianBSet1_cD3[]    = {0x31,0xc0,0xc3,0xc3,0xc3,0xc3,0xff,0x48,0xc3,0xc1,0xb7,0xfd,0x22,0x00};
+static const UINT16 s_romData2nArianBSet1_cD2[]    = {0xff,0xfd,0xff,0xff,0xff,0xff,0x0f,0x0e,0xa0,0x9b,0xbd,0x8f,0xff,0xfc};
+static const UINT16 s_romData2nArianBSet1_cD1[]    = {0x76,0x68,0x31,0x3a,0x73,0x6b,0x99,0xff,0xff,0xff,0xfd,0xfb,0xfc,0x5d};
+
+//
+// Set 1 from MAME.
+//
+static const ROM_REGION s_romRegionArianBSet1[] PROGMEM = { //
+                                                           {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nArianBSet1_cD3, 0x47baf1db, "cD3"}, // P4
+                                                           {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nArianBSet1_cD2, 0x9879e506, "cD2"}, // P5
+                                                           {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nArianBSet1_cD1, 0xc0bfdf1f, "cD1"}, // P6
+                                                           {0} }; // end of list
 
 IGame*
 CAsoAGame::createInstanceAsoSet1(
@@ -83,4 +98,18 @@ CAsoAGame::CAsoAGame(
 {
 }
 
+
+IGame*
+CAsoBGame::createInstanceArianSet1(
+)
+{
+    return (new CAsoBGame(s_romRegionArianBSet1));
+}
+
+
+CAsoBGame::CAsoBGame(
+    const ROM_REGION *romRegion
+) : CAsoBBaseGame( romRegion )
+{
+}
 

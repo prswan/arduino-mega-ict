@@ -56,6 +56,33 @@ class CAsoAGame : public CAsoABaseGame
 
 };
 
+
+class CAsoBGame : public CAsoBBaseGame
+{
+    public:
+
+        //
+        // Constructors for this game.
+        //
+
+        static IGame* createInstanceArianSet1(
+        );
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CAsoBGame(
+            const ROM_REGION *romRegion
+        );
+
+};
+
 #endif
 
 

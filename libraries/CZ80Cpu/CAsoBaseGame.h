@@ -49,5 +49,27 @@ class CAsoABaseGame : public CGame
         );
 };
 
+
+class CAsoBBaseGame : public CGame
+{
+    public:
+
+        //
+        // CAsoBBaseGame
+        //
+
+        virtual PERROR interruptCheck(
+        );
+
+    protected:
+
+        CAsoBBaseGame(
+            const ROM_REGION *romRegion
+        );
+
+        ~CAsoBBaseGame(
+        );
+};
+
 #endif
 
