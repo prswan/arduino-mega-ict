@@ -408,6 +408,13 @@ C6809ECpu::memoryReadWrite(
     //
     for (int x = 0 ; x < 100 ; x++)
     {
+        valueE = m_pinE.digitalRead();
+
+        if (valueE == LOW)
+        {
+            break;
+        }
+
         //
         // Since data-in is latched on the falling edge of E we
         // read in the data before every clock pulse so we have
@@ -416,13 +423,6 @@ C6809ECpu::memoryReadWrite(
         if (readWrite == HIGH)
         {
             m_busD.digitalRead(data);
-        }
-
-        valueE = m_pinE.digitalRead();
-
-        if (valueE == LOW)
-        {
-            break;
         }
 
         m_pinClock.digitalWriteHIGH();
