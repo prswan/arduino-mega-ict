@@ -122,7 +122,9 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
                                                   {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0x0F, " 2C", "Char. "}, // "Video Character RAM, 2114, FLAG=Hi"
                                                   {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0xF0, " 1C", "Char. "}, // "Video Character RAM, 2114, FLAG=Hi"
                                                   {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      1, 0x0F, " 3C", "Colour"}, // "Colour RAM, 2114, FLAG=Lo"
-                                                  {NO_BANK_SWITCH,                         0x1500+0x4E, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1  8F Scratch RAM "
+                                                  {NO_BANK_SWITCH,                         0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                         0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                         0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
                                                   {0}
                                                 }; // end of list
 
@@ -130,9 +132,22 @@ static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                    
                                                           {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0xFF, "13?", "Prog. "}, // "Program RAM, 2112, 13F/13G"
                                                           {NO_BANK_SWITCH,                         0x1C00,      0x1CFF,      1, 0xFF, "23F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 2F/3F"
                                                           {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0xFF, "12C", "Char. "}, // "Video Character RAM, 2114, FLAG=Hi, 2C/1C"
-                                                          {NO_BANK_SWITCH,                         0x1500+0x4E, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1  8F Scratch RAM "
+                                                          {NO_BANK_SWITCH,                         0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                         0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                         0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
                                                           {0}
                                                         }; // end of list
+
+//
+// This region allows the PVI to be initialized.
+// If the PVI is not initialized, the screen ends up all white such that no
+// other graphics can be seen.
+//
+
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                         "012", "012345"
+                                                           {NO_BANK_SWITCH,  0x1500, 0x15FF, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                           {0}
+                                                         }; // end of list
 
 //
 // Input region is the same for all versions.
@@ -199,6 +214,7 @@ CAstroWarsGame::CAstroWarsGame(
 ) : CAstroWarsBaseGame( romRegion,
                         s_ramRegion,
                         s_ramRegionByteOnly,
+                        s_ramRegionWriteOnly,
                         s_inputRegion,
                         s_outputRegion )
 {

@@ -50,6 +50,7 @@ class CAstroWarsBaseGame : public CGame
             const ROM_REGION    *romRegion,
             const RAM_REGION    *ramRegion,
             const RAM_REGION    *ramRegionByteOnly,
+            const RAM_REGION    *ramRegionWriteOnly,
             const INPUT_REGION  *inputRegion,
             const OUTPUT_REGION *outputRegion
         );

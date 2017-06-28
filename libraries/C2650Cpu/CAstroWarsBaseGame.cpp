@@ -26,10 +26,6 @@
 #include "C2650Cpu.h"
 #include <DFR_Key.h>
 
-//
-// No write-only RAM on this platform. Yay!
-//
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 
 //
 // Custom functions implemented for this game.
@@ -41,12 +37,13 @@ CAstroWarsBaseGame::CAstroWarsBaseGame(
     const ROM_REGION    *romRegion,
     const RAM_REGION    *ramRegion,
     const RAM_REGION    *ramRegionByteOnly,
+    const RAM_REGION    *ramRegionWriteOnly,
     const INPUT_REGION  *inputRegion,
     const OUTPUT_REGION *outputRegion
 ) : CGame( romRegion,
            ramRegion,
            ramRegionByteOnly,
-           s_ramRegionWriteOnly,
+           ramRegionWriteOnly,
            inputRegion,
            outputRegion,
            s_customFunction )
