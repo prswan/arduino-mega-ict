@@ -785,13 +785,17 @@ CRamCheck::checkAddress(
 
     //
     // e.g.
-    // shift == 4, end == (0x10 - 1) == 0x0F, success
-    // shift == 5, end == (0x20 - 1) == 0x1F, failed
+    //  start=0x1400, end=0x14FF, regionLength=0x0100
+    //  max subRamRegion.end = 0x1400 + (0x0100 - 1)
     //
-    // error === (shift (5-1)) == 0x10;
+    // error e.g.
+    //  shift == 4, end == (0x10 - 1) == 0x0F, success
+    //  shift == 5, end == (0x20 - 1) == 0x1F, failed
+    //
+    //  error === (shift (5-1)) == 0x10;
     //
 
-    for (UINT32 shift = 0 ; (1UL << (shift + dataBusWidthAndStepShift)) < regionLength ; shift++)
+    for (UINT32 shift = 0 ; (1UL << (shift + dataBusWidthAndStepShift)) <= regionLength ; shift++)
     {
         RAM_REGION subRamRegion = *ramRegion;
 
