@@ -69,8 +69,9 @@ class CZ80ACpu : public ICpu
         );
 
         // Z80A Address Space:
-        // 0x00000 -> 0x0FFFF - Memory Mapped Data
-        // 0x10000 -> 0x1FFFF - Input/Output Ports
+        // 0x000000 -> 0x00FFFF - Memory Mapped Data
+        // 0x010000 -> 0x01FFFF - Input/Output Ports
+        // 0x1xxxxx             - WAIT pre-synchronized space
 
         virtual PERROR memoryRead(
             UINT32 address,

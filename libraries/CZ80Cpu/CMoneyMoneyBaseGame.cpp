@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CMoneyMoneyBaseGame.h"
-#include "CZ80Cpu.h"
+#include "CZ80ACpu.h"
 #include <DFR_Key.h>
 
 //
@@ -89,7 +89,7 @@ static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                    
                                                           {NO_BANK_SWITCH, 0x7000,   0x73FF,   1, 0xFF, "2AB", "Prog. "}, // "Program RAM, 2114, 2A/2B"
                                                           {NO_BANK_SWITCH, 0x7400,   0x77FF,   1, 0xFF, "2CD", "Prog. "}, // "Program RAM, 2114, 2C/2D"
                                                           {NO_BANK_SWITCH, 0x6800,   0x68FF,   1, 0xFF, "1LM", "Obj.  "}, // "Object RAM, 2114, 256 Bytes used, 1L/1M"
-                                                          {NO_BANK_SWITCH, 0x106000, 0x1063FF, 1, 0x0F, "2CB", "Bkg.  "}, // "Background RAM, 2114, 2C/2B"
+                                                          {NO_BANK_SWITCH, 0x106000, 0x1063FF, 1, 0xFF, "2CB", "Bkg.  "}, // "Background RAM, 2114, 2C/2B"
                                                           {0}
                                                         }; // end of list
 
@@ -155,7 +155,7 @@ CMoneyMoneyBaseGame::CMoneyMoneyBaseGame(
            s_outputRegion,
            s_customFunction)
 {
-    m_cpu = new CZ80Cpu();
+    m_cpu = new CZ80ACpu();
     m_cpu->idle();
 
     // The VBLANK interrupt is on the NMI pin.
@@ -189,7 +189,7 @@ CMoneyMoneyBaseGame::interruptCheck(
     for (int i = 0 ; i < 4 ; i++)
     {
         // Unmask the interrupt.
-        m_cpu->memoryWrite(0x6C06L, 0x01);
+        m_cpu->memoryWrite(0x6C07L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
                                         true,
@@ -200,7 +200,7 @@ CMoneyMoneyBaseGame::interruptCheck(
         }
 
         // Mask the interrupt (also resets the latch)
-        m_cpu->memoryWrite(0x6C06L, 0x00);
+        m_cpu->memoryWrite(0x6C07L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
                                         true,
@@ -216,7 +216,7 @@ CMoneyMoneyBaseGame::interruptCheck(
         }
 
         // Unmask the interrupt. Irq should have been cleared.
-        m_cpu->memoryWrite(0x6C06L, 0x01);
+        m_cpu->memoryWrite(0x6C07L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
                                         true,
@@ -232,7 +232,7 @@ CMoneyMoneyBaseGame::interruptCheck(
         }
 
         // Mask the interrupt (also resets the latch)
-        m_cpu->memoryWrite(0x6C06L, 0x00);
+        m_cpu->memoryWrite(0x6C07L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
                                         true,

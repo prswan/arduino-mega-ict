@@ -182,7 +182,7 @@ static const UINT8 s_D7_BIT_D7        = 0x80;
 // This loop is 2 instructions total, 125ns.
 // Note that the system will hang here if WAIT is stuck.
 //
-#define WAIT_FOR_WAIT(x,r1,r2)             \
+#define WAIT_FOR_WAIT_HI(x,r1,r2)          \
     {                                      \
         while(1)                           \
         {                                  \
@@ -196,7 +196,26 @@ static const UINT8 s_D7_BIT_D7        = 0x80;
     }                                      \
 
 
-#define IS_IO_SPACE(ad) ((ad >= (UINT32) 0x10000) && (ad <= (UINT32) 0x1FFFF))
+//
+// Wait for WAIT low.
+// This loop is 2 instructions total, 125ns.
+// Note that the system will hang here if WAIT is stuck.
+//
+#define WAIT_FOR_WAIT_LO(x,r1,r2)          \
+    {                                      \
+        while(1)                           \
+        {                                  \
+            r1 = *g_portInL;               \
+                                           \
+            if (!(r1 & s_L2_BIT_IN_WAIT))  \
+            {                              \
+                break;                     \
+            }                              \
+        }                                  \
+    }                                      \
+
+#define IS_IO_SPACE(ad)   ((ad & (UINT32) 0x010000) != 0)
+#define IS_WAIT_SPACE(ad) ((ad & (UINT32) 0x100000) != 0)
 
 
 //
@@ -416,6 +435,30 @@ CZ80ACpu::memoryRead(
     // Set the databus to input.
     m_busD.pinMode(INPUT);
 
+    // Critical timing section
+    noInterrupts();
+
+    // Check for video RAM access that requires synchronization
+    // with HBLANK using the WAIT input for pre-synchronization.
+
+    if (IS_WAIT_SPACE(address))
+    {
+        register UINT8 x = 255;
+
+        register UINT8 r1;
+        register UINT8 r2;
+
+        *g_portOutB = ~(s_B3_BIT_OUT_MREQ);
+
+        // Wait for wait to become active (leaving HBLANK)
+        WAIT_FOR_WAIT_LO(x,r1,r2);
+
+        // Wait for wait to become inactive (start of HBLANK)
+        WAIT_FOR_WAIT_HI(x,r1,r2);
+
+        *g_portOutB = ~(0);
+    }
+
     // Select the address space based on the supplied address
     if (IS_IO_SPACE(address))
     {
@@ -425,6 +468,8 @@ CZ80ACpu::memoryRead(
     {
         error = MREQread(data);
     }
+
+    interrupts();
 
     return error;
 }
@@ -446,6 +491,30 @@ CZ80ACpu::memoryWrite(
     m_busD.pinMode(OUTPUT);
     m_busD.digitalWrite(data);
 
+    // Critical timing section
+    noInterrupts();
+
+    // Check for video RAM access that requires synchronization
+    // with HBLANK using the WAIT input for pre-synchronization.
+
+    if (IS_WAIT_SPACE(address))
+    {
+        register UINT8 x = 255;
+
+        register UINT8 r1;
+        register UINT8 r2;
+
+        *g_portOutB = ~(s_B3_BIT_OUT_MREQ);
+
+        // Wait for wait to become active (leaving HBLANK)
+        WAIT_FOR_WAIT_LO(x,r1,r2);
+
+        // Wait for wait to become inactive (start of HBLANK)
+        WAIT_FOR_WAIT_HI(x,r1,r2);
+
+        *g_portOutB = ~(0);
+    }
+
     // Select the address space based on the supplied address
     if (IS_IO_SPACE(address))
     {
@@ -455,6 +524,8 @@ CZ80ACpu::memoryWrite(
     {
         error = MREQwrite(data);
     }
+
+    interrupts();
 
     return error;
 }
@@ -533,9 +604,6 @@ CZ80ACpu::MREQread(
     register UINT8 r4;
     register UINT8 r5;
 
-    // Critical timing section
-    noInterrupts();
-
     // Wait for the clock edge
     WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
 
@@ -545,7 +613,7 @@ CZ80ACpu::MREQread(
 
     // Wait for WAIT to be deasserted.
     // Port L requires an "lds" to access so no wait state needed from above.
-    WAIT_FOR_WAIT(x,r1,r2);
+    WAIT_FOR_WAIT_HI(x,r1,r2);
 
     *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state
 
@@ -578,8 +646,6 @@ CZ80ACpu::MREQread(
 
 Exit:
 
-    interrupts();
-
     return error;
 }
 
@@ -603,9 +669,6 @@ CZ80ACpu::MREQwrite(
     register UINT8 r4;
     register UINT8 r5;
 
-    // Critical timing section
-    noInterrupts();
-
     // Wait for the clock edge
     WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
 
@@ -615,7 +678,7 @@ CZ80ACpu::MREQwrite(
 
     // Wait for WAIT to be deasserted.
     // Port L requires an "lds" to access so no wait state needed from above.
-    WAIT_FOR_WAIT(x,r1,r2);
+    WAIT_FOR_WAIT_HI(x,r1,r2);
 
     *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR);
 
@@ -637,8 +700,6 @@ CZ80ACpu::MREQwrite(
     }
 
 Exit:
-
-    interrupts();
 
     return error;
 }
