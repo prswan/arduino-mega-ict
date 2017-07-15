@@ -155,7 +155,8 @@ CMoneyMoneyBaseGame::CMoneyMoneyBaseGame(
            s_outputRegion,
            s_customFunction)
 {
-    m_cpu = new CZ80ACpu();
+    // Enable the VRAM WAIT bus check on this platform for the background RAM.
+    m_cpu = new CZ80ACpu(0x106000);
     m_cpu->idle();
 
     // The VBLANK interrupt is on the NMI pin.

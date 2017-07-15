@@ -270,13 +270,15 @@ static const CONNECTION s_D_iot[] = { {14, "D0" },
 
 
 CZ80ACpu::CZ80ACpu(
+    UINT32 vramAddress
 ) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pin_RD(g_pinMap40DIL, &s__RD_ot),
     m_pin_WR(g_pinMap40DIL, &s__WR_ot),
     m_pin_WAIT(g_pinMap40DIL, &s__WAIT_i),
     m_pin_IORQ(g_pinMap40DIL, &s__IORQ_ot),
-    m_pin_MREQ(g_pinMap40DIL, &s__MREQ_ot)
+    m_pin_MREQ(g_pinMap40DIL, &s__MREQ_ot),
+    m_vramAddress(vramAddress)
 {
 };
 
@@ -395,6 +397,50 @@ CZ80ACpu::check(
         {
             CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK_i, HIGH);
         }
+    }
+
+    //
+    // Check if a none-zero VRAM address was supplied, indicating that the
+    // WAIT toggling should be active for that access. This is checked here
+    // because there is no timeout in the bus cycles thus they hang if the
+    // VRAM WAIT hold off isn't working.
+    //
+
+    if (m_vramAddress != 0)
+    {
+        UINT16 hiCount = 0;
+        UINT16 loCount = 0;
+
+        m_busA.pinMode(OUTPUT);
+        m_busA.digitalWrite(m_vramAddress);
+        m_pin_MREQ.digitalWriteLOW();
+
+        for (int i = 0 ; i < 1000 ; i++)
+        {
+            int value = m_pin_WAIT.digitalRead();
+
+            if (value == LOW)
+            {
+                loCount++;
+            }
+            else
+            {
+                hiCount++;
+            }
+        }
+
+        if (loCount == 0)
+        {
+            CHECK_PIN_VALUE_EXIT(error, m_pin_WAIT, s__WAIT_i, LOW);
+        }
+        else if (hiCount == 0)
+        {
+            CHECK_PIN_VALUE_EXIT(error, m_pin_WAIT, s__WAIT_i, HIGH);
+        }
+
+        m_pin_MREQ.digitalWriteHIGH();
+        m_busA.digitalWrite(~0);
+        m_busA.pinMode(INPUT);
     }
 
 Exit:

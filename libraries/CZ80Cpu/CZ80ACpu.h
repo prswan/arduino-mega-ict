@@ -45,6 +45,7 @@ class CZ80ACpu : public ICpu
         //
 
         CZ80ACpu(
+            UINT32 vramAddress = 0
         );
 
         // ICpu Interface
@@ -134,6 +135,8 @@ class CZ80ACpu : public ICpu
 
         CFastPin      m_pin_IORQ;
         CFastPin      m_pin_MREQ;
+
+        UINT32        m_vramAddress;
 
 };
 
