@@ -68,6 +68,16 @@ onSelectGeneric(
 );
 
 //
+// Handler for the soak test select callback that will run the soak test
+// for the current game forever (if no error occurs).
+//
+PERROR
+onSelectSoakTest(
+    void *context,
+    int  key
+);
+
+//
 // This is the main entry point for the Arduino script files into the normal C++ domain.
 //
 

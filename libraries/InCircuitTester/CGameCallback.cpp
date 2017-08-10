@@ -67,6 +67,20 @@ static const SELECTOR s_selectorGeneric[] = { //"0123456789abcdef"
 
 const SELECTOR *CGameCallback::selectorGeneric = s_selectorGeneric;
 
+static const SELECTOR s_selectorSoakTest[] = { //"0123456789abcdef"
+                                                {"ROM Check All",   CGameCallback::onSelectRomCheckAll,    (void*) &CGameCallback::game, false},
+                                                {"RAM Check All",   CGameCallback::onSelectRamCheckAll,    (void*) &CGameCallback::game, false},
+                                                {"RAM Check All RA",CGameCallback::onSelectRamCheckAllRA,  (void*) &CGameCallback::game, false},
+                                                {"RAM Check All CS",CGameCallback::onSelectRamCheckAllCS,  (void*) &CGameCallback::game, false},
+                                                {"Interupt Check",  CGameCallback::onSelectInterruptCheck, (void*) &CGameCallback::game, false},
+                                                {"RAM Write All AD",CGameCallback::onSelectRamWriteAllAD,  (void*) &CGameCallback::game, false},
+                                                {"RAM Write All Lo",CGameCallback::onSelectRamWriteAllLo,  (void*) &CGameCallback::game, false},
+                                                {"RAM Write All Hi",CGameCallback::onSelectRamWriteAllHi,  (void*) &CGameCallback::game, false},
+                                                { 0, 0 }
+                                             };
+
+const SELECTOR *CGameCallback::selectorSoakTest = s_selectorSoakTest;
+
 IGame *CGameCallback::game;
 
 
