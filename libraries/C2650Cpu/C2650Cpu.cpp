@@ -39,6 +39,179 @@
 // o - output
 // t - tri-state
 //
+// NOTE: This implementation was tested using a shield without protection resistors.
+//       It has not been tested with a "standard" shield with protection resistors.
+//
+
+
+/*
+WARNING: Ports E, G & H are used by the LCD/Keypad shield and thus cannot be directly used!
+
+14,   // PJ1 -  1
+16,   // PH1 -  2
+18,   // PD3 -  3
+20,   // PD1 -  4
+22,   // PA0 -  5
+24,   // PA2 -  6
+26,   // PA4 -  7
+28,   // PA6 -  8
+30,   // PC7 -  9
+32,   // PC5 - 10
+34,   // PC3 - 11
+36,   // PC1 - 12
+38,   // PD7 - 13
+40,   // PG1 - 14
+42,   // PL7 - 15
+44,   // PL5 - 16
+46,   // PL3 - 17
+48,   // PL1 - 18
+50,   // PB3 - 19
+52,   // PB1 - 20
+53,   // PB0 - 21
+51,   // PB2 - 22 - WRP
+49,   // PL0 - 23
+47,   // PL2 - 24 - OPREQ
+45,   // PL4 - 25
+43,   // PL6 - 26 - D7
+41,   // PG0 - 27 - D6
+39,   // PG2 - 28 - D5
+37,   // PC0 - 29 - D4
+35,   // PC2 - 30 - D3
+33,   // PC4 - 31 - D2
+31,   // PC6 - 32 - D1
+29,   // PA7 - 33 - D0
+27,   // PA5 - 34
+25,   // PA3 - 35
+23,   // PA1 - 36 - OPACK
+21,   // PD0 - 37
+19,   // PD2 - 38 - CLK
+17,   // PH0 - 39
+15    // PJ0 - 40
+*/
+
+
+//
+// Byte-wide port registers
+//
+static volatile UINT8 * const g_portInA       = &PINA;
+static volatile UINT8 * const g_portOutA      = &PORTA;
+
+static volatile UINT8 * const g_portInB       = &PINB;
+static volatile UINT8 * const g_portOutB      = &PORTB;
+
+static volatile UINT8 * const g_portInC       = &PINC;
+static volatile UINT8 * const g_portOutC      = &PORTC;
+
+static volatile UINT8 * const g_portInD       = &PIND;
+static volatile UINT8 * const g_portOutD      = &PORTD;
+
+static volatile UINT8 * const g_portInG       = &PING;
+static volatile UINT8 * const g_portOutG      = &PORTG;
+
+static volatile UINT8 * const g_portInL       = &PINL;
+static volatile UINT8 * const g_portOutL      = &PORTL;
+
+//
+// Input definitions.
+//
+static const UINT8 s_D2_BIT_IN_CLK     = (1 << 2);
+static const UINT8 s_A1_BIT_IN_OPACK   = (1 << 1);
+
+//
+// Output definitions.
+//
+static const UINT8 s_B2_BIT_OUT_WRP    = (1 << 2);
+static const UINT8 s_L2_BIT_OUT_OPREQ  = (1 << 2);
+
+
+//
+// Data Bus definition
+//
+static const UINT8 s_A7_BIT_D0        = (1 << 7);
+static const UINT8 s_C6_BIT_D1        = (1 << 6);
+static const UINT8 s_C4_BIT_D2        = (1 << 4);
+static const UINT8 s_C2_BIT_D3        = (1 << 2);
+static const UINT8 s_C0_BIT_D4        = (1 << 0);
+static const UINT8 s_G2_BIT_D5        = (1 << 2);
+static const UINT8 s_G0_BIT_D6        = (1 << 0);
+static const UINT8 s_L6_BIT_D7        = (1 << 6);
+
+
+//
+// Wait for CLK rising edge to be detected.
+// This loop is 8 instructions total, 500ns.
+// Note that the system will hang here if CLK is stuck.
+//
+#define WAIT_FOR_CLK_RISING_EDGE(r1,r2)    \
+    {                                      \
+        while(1)                           \
+        {                                  \
+            r1 = *g_portInD;               \
+            r2 = *g_portInD;               \
+                                           \
+            if (!(r1 & s_D2_BIT_IN_CLK) && \
+                 (r2 & s_D2_BIT_IN_CLK))   \
+            {                              \
+                break;                     \
+            }                              \
+        }                                  \
+    }                                      \
+
+
+//
+// Wait for CLK low.
+// This loop is 2 instructions total, 125ns.
+// Note that the system will hang here if CLK is stuck.
+//
+#define WAIT_FOR_CLK_LO(r1)                \
+    {                                      \
+        while(1)                           \
+        {                                  \
+            r1 = *g_portInD;               \
+                                           \
+            if (!(r1 & s_D2_BIT_IN_CLK))   \
+            {                              \
+                break;                     \
+            }                              \
+        }                                  \
+    }                                      \
+
+//
+// Wait for CLK High.
+// This loop is 2 instructions total, 125ns.
+// Note that the system will hang here if CLK is stuck.
+//
+#define WAIT_FOR_CLK_HI(r1)                \
+    {                                      \
+        while(1)                           \
+        {                                  \
+            r1 = *g_portInD;               \
+                                           \
+            if ((r1 & s_D2_BIT_IN_CLK))    \
+            {                              \
+                break;                     \
+            }                              \
+        }                                  \
+    }                                      \
+
+//
+// Wait for OPACK low.
+// This loop is 2 instructions total, 125ns.
+// Note that the system will hang here if OPACK is stuck.
+//
+#define WAIT_FOR_OPACK_LO(r1)              \
+    {                                      \
+        while(1)                           \
+        {                                  \
+            r1 = *g_portInA;               \
+                                           \
+            if (!(r1 & s_A1_BIT_IN_OPACK)) \
+            {                              \
+                break;                     \
+            }                              \
+        }                                  \
+    }                                      \
+
 
 //
 // Control Pins
@@ -324,45 +497,108 @@ C2650Cpu::read(
 
     // Timing Note
     // -----------
-    // A note about timing. The Mega is a 16MHz device with mostly 1
-    // clock per instruction so one would expect this to be fast enough
-    // to pin drive a 2MHz bus. That said, from the scope trace even a
-    // simple Hi/Lo on OPREQ looks to be taking >1 2MHz cycle, at least
-    // 8 clocks or so. Therefore, there is no point in doing clock edge
-    // synchronization.
+    // The critical timing on Zaccaria boards is the 2636.
+    // Assmbly extract for the critical timing section:
     //
-    // The "write" OPREQ length shows about 3x longer than the 2650 cycle.
-    // The "read" OPREQ length shows longer than the scope screen, 6x plus
-    // at least. Likely this is due to the 8 pin reads to read the data bus.
-    // This length exceeds the 2636 hold time and thus the 2636 reads can be
-    // unreliable.
+    // 6f6e:	f8 94       	cli
+    // 6f70:	60 91 0b 01 	lds	r22, 0x010B	; 0x80010b <__data_load_end+0x7f4fe9>
+    // 6f74:	85 b1       	in	r24, 0x05	; 5
+    // 6f76:	3e 81       	ldd	r19, Y+6	; 0x06
+    // 6f78:	2d 81       	ldd	r18, Y+5	; 0x05
+    // 6f7a:	49 b1       	in	r20, 0x09	; 9
+    // 6f7c:	99 b1       	in	r25, 0x09	; 9
+    // 6f7e:	42 fd       	sbrc	r20, 2
+    // 6f80:	fc cf       	rjmp	.-8      	; 0x6f7a <_ZN8C2650Cpu4readEmPt+0x88>
+    // 6f82:	92 ff       	sbrs	r25, 2
+    // 6f84:	fa cf       	rjmp	.-12     	; 0x6f7a <_ZN8C2650Cpu4readEmPt+0x88>
+    // 6f86:	96 2f       	mov	r25, r22
+    // 6f88:	94 60       	ori	r25, 0x04	; 4
+    // 6f8a:	90 93 0b 01 	sts	0x010B, r25	; 0x80010b <__data_load_end+0x7f4fe9>
+    // 6f8e:	85 b9       	out	0x05, r24	; 5
+    // 6f90:	90 b1       	in	r25, 0x00	; 0
+    // 6f92:	90 b1       	in	r25, 0x00	; 0
+    // 6f94:	90 b1       	in	r25, 0x00	; 0
+    // 6f96:	90 b1       	in	r25, 0x00	; 0
+    // 6f98:	90 b1       	in	r25, 0x00	; 0
+    // 6f9a:	01 99       	sbic	0x00, 1	; 0
+    // 6f9c:	fe cf       	rjmp	.-4      	; 0x6f9a <_ZN8C2650Cpu4readEmPt+0xa8>
+    // 6f9e:	85 b9       	out	0x05, r24	; 5
+    // 6fa0:	80 b1       	in	r24, 0x00	; 0
+    // 6fa2:	80 b1       	in	r24, 0x00	; 0
+    // 6fa4:	80 b1       	in	r24, 0x00	; 0
+    // 6fa6:	80 b1       	in	r24, 0x00	; 0
+    // 6fa8:	80 b1       	in	r24, 0x00	; 0
+    // 6faa:	80 b1       	in	r24, 0x00	; 0
+    // 6fac:	80 b1       	in	r24, 0x00	; 0
+    // 6fae:	80 b1       	in	r24, 0x00	; 0
+    // 6fb0:	40 91 09 01 	lds	r20, 0x0109	; 0x800109 <__data_load_end+0x7f4fe7>
+    // 6fb4:	82 b3       	in	r24, 0x12	; 18
+    // 6fb6:	96 b1       	in	r25, 0x06	; 6
+    // 6fb8:	50 b1       	in	r21, 0x00	; 0
+    // 6fba:	60 93 0b 01 	sts	0x010B, r22	; 0x80010b <__data_load_end+0x7f4fe9>
     //
-    // In retrospect, it makes sense to layout the ICT shield to group the
-    // data bus into a single port so a single port read can read the data.
-    // This would, however, make the shield itself 2650 specific.
-    //
-
-    // Start the cycle by asserting OPREQ.
-    m_pinOPREQ.digitalWriteHIGH();
-
-    // Poll OPACK for cycle completion
     {
-        int opackValue;
+        register UINT8 portOutL;
+        register UINT8 portOutB;
+        register UINT8 r1;
+        register UINT8 r2;
+        register UINT8 r3;
+        register UINT8 r4;
 
-        for (int i = 0 ; i < 64 ; i++)
-        {
-            opackValue = m_pin_OPACK.digitalRead();
+        // Cache the current value of the port.
+        portOutL = *g_portOutL;
+        portOutB = *g_portOutB;
 
-            if (opackValue == LOW)
-            {
-                // Read the data presented on the bus as soon as we see OPACK set then clear OPREQ.
-                m_busDBUS.digitalReadThenDigitalWriteLOW(data, m_pinOPREQ);
+        // Wait for the clock edge
+        WAIT_FOR_CLK_RISING_EDGE(r1,r2);
 
-                break;
-            }
-        }
+        // Start the cycle by assert the control lines
+        *g_portOutL = portOutL | s_L2_BIT_OUT_OPREQ;
+        *g_portOutB = portOutB; // Wait state, ~60ns
 
-        CHECK_LITERAL_VALUE_EXIT(error, s__OPACK_i, opackValue, LOW);
+        // 600ns *maximum* for peripherals to assert OPACK
+        *g_portInA; // Wait state, ~120ns
+        *g_portInA; // Wait state, ~180ns
+        *g_portInA; // Wait state, ~240ns
+        *g_portInA; // Wait state, ~300ns
+        *g_portInA; // Wait state, ~360ns
+
+        // Wait for OPACK to be asserted.
+        WAIT_FOR_OPACK_LO(r1);
+
+        //
+        // The 2636 requires 450ns to assert data on the bus after OPACK
+        // is asserted.
+        //
+        *g_portOutB = portOutB;//  ~ 60ns
+        *g_portInA; // Wait state, ~120ns
+        *g_portInA; // Wait state, ~180ns
+        *g_portInA; // Wait state, ~240ns
+        *g_portInA; // Wait state, ~300ns
+        *g_portInA; // Wait state, ~360ns
+        *g_portInA; // Wait state, ~420ns
+        *g_portInA; // Wait state, ~480ns
+        *g_portInA; // Wait state, ~540ns
+
+        // Read in reverse order - port L is a slower access.
+        r1 = *g_portInL;
+        r2 = *g_portInG;
+        r3 = *g_portInC;
+        r4 = *g_portInA;
+
+        // Terminate the cycle
+        *g_portOutL = portOutL;
+
+        // Populate the output data word
+        *data = (((r4 & s_A7_BIT_D0) >> 7) << 0) |
+                (((r3 & s_C6_BIT_D1) >> 6) << 1) |
+                (((r3 & s_C4_BIT_D2) >> 4) << 2) |
+                (((r3 & s_C2_BIT_D3) >> 2) << 3) |
+                (((r3 & s_C0_BIT_D4) >> 0) << 4) |
+                (((r2 & s_G2_BIT_D5) >> 2) << 5) |
+                (((r2 & s_G0_BIT_D6) >> 0) << 6) |
+                (((r1 & s_L6_BIT_D7) >> 6) << 7);
+
     }
 
 Exit:
@@ -407,39 +643,97 @@ C2650Cpu::write(
 
     // Timing Note
     // -----------
-    // See "read".
-
-    // Clear WRP
-    m_pinWRP.digitalWriteLOW();
-
-    // Start the cycle by asserting OPREQ.
-    m_pinOPREQ.digitalWriteHIGH();
-
-    // Set WRP
-    m_pinWRP.digitalWriteHIGH();
-
-    // Poll OPACK for cycle completion
+    // The critical timing on Zaccaria boards is the 2636.
+    // Assmbly extract for the critical timing section:
+    //
+    // 717c:	f8 94       	cli
+    // 717e:	80 91 0b 01 	lds	r24, 0x010B	; 0x80010b <__data_load_end+0x7f4fe9>
+    // 7182:	95 b1       	in	r25, 0x05	; 5
+    // 7184:	39 b1       	in	r19, 0x09	; 9
+    // 7186:	29 b1       	in	r18, 0x09	; 9
+    // 7188:	32 fd       	sbrc	r19, 2
+    // 718a:	fc cf       	rjmp	.-8      	; 0x7184 <_ZN8C2650Cpu11memoryWriteEmt+0xb6>
+    // 718c:	22 ff       	sbrs	r18, 2
+    // 718e:	fa cf       	rjmp	.-12     	; 0x7184 <_ZN8C2650Cpu11memoryWriteEmt+0xb6>
+    // 7190:	28 2f       	mov	r18, r24
+    // 7192:	24 60       	ori	r18, 0x04	; 4
+    // 7194:	20 93 0b 01 	sts	0x010B, r18	; 0x80010b <__data_load_end+0x7f4fe9>
+    // 7198:	29 2f       	mov	r18, r25
+    // 719a:	2b 7f       	andi	r18, 0xFB	; 251
+    // 719c:	25 b9       	out	0x05, r18	; 5
+    // 719e:	20 b1       	in	r18, 0x00	; 0
+    // 71a0:	20 b1       	in	r18, 0x00	; 0
+    // 71a2:	20 b1       	in	r18, 0x00	; 0
+    // 71a4:	20 b1       	in	r18, 0x00	; 0
+    // 71a6:	20 b1       	in	r18, 0x00	; 0
+    // 71a8:	01 99       	sbic	0x00, 1	; 0
+    // 71aa:	fe cf       	rjmp	.-4      	; 0x71a8 <_ZN8C2650Cpu11memoryWriteEmt+0xda>
+    // 71ac:	95 b9       	out	0x05, r25	; 5
+    // 71ae:	90 b1       	in	r25, 0x00	; 0
+    // 71b0:	90 b1       	in	r25, 0x00	; 0
+    // 71b2:	90 b1       	in	r25, 0x00	; 0
+    // 71b4:	90 b1       	in	r25, 0x00	; 0
+    // 71b6:	90 b1       	in	r25, 0x00	; 0
+    // 71b8:	90 b1       	in	r25, 0x00	; 0
+    // 71ba:	90 b1       	in	r25, 0x00	; 0
+    // 71bc:	90 b1       	in	r25, 0x00	; 0
+    // 71be:	90 91 09 01 	lds	r25, 0x0109	; 0x800109 <__data_load_end+0x7f4fe7>
+    // 71c2:	92 b3       	in	r25, 0x12	; 18
+    // 71c4:	96 b1       	in	r25, 0x06	; 6
+    // 71c6:	90 b1       	in	r25, 0x00	; 0
+    // 71c8:	80 93 0b 01 	sts	0x010B, r24	; 0x80010b <__data_load_end+0x7f4fe9>
+    //
     {
-        int opackValue;
+        register UINT8 portOutL;
+        register UINT8 portOutB;
+        register UINT8 r1;
+        register UINT8 r2;
+        register UINT8 r3;
+        register UINT8 r4;
 
-        for (int i = 0 ; i < 64 ; i++)
-        {
-            opackValue = m_pin_OPACK.digitalRead();
+        // Cache the current value of the port.
+        portOutL = *g_portOutL;
+        portOutB = *g_portOutB;
 
-            if (opackValue == LOW)
-            {
-                // Clear WRP
-                m_pinWRP.digitalWriteLOW();
+        // Wait for the clock edge
+        WAIT_FOR_CLK_RISING_EDGE(r1,r2);
 
-                // End the cycle by clearing OPREQ.
-                m_pinOPREQ.digitalWriteLOW();
+        // Start the cycle by assert the control lines
+        *g_portOutL = portOutL | s_L2_BIT_OUT_OPREQ;
+        *g_portOutB = portOutB & ~s_B2_BIT_OUT_WRP; // ~60ns
 
-                // Set WRP
-                m_pinWRP.digitalWriteHIGH();
-                break;
-            }
-        }
-        CHECK_LITERAL_VALUE_EXIT(error, s__OPACK_i, opackValue, LOW);
+        // 600ns *maximum* for peripherals to assert OPACK
+        *g_portInA; // Wait state, ~120ns
+        *g_portInA; // Wait state, ~180ns
+        *g_portInA; // Wait state, ~240ns
+        *g_portInA; // Wait state, ~300ns
+        *g_portInA; // Wait state, ~360ns
+
+        // Wait for OPACK to be asserted.
+        WAIT_FOR_OPACK_LO(r1);
+
+        //
+        // The 2636 requires 450ns to assert data on the bus after OPACK
+        // is asserted.
+        //
+        *g_portOutB = portOutB;//  ~ 60ns
+        *g_portInA; // Wait state, ~120ns
+        *g_portInA; // Wait state, ~180ns
+        *g_portInA; // Wait state, ~240ns
+        *g_portInA; // Wait state, ~300ns
+        *g_portInA; // Wait state, ~360ns
+        *g_portInA; // Wait state, ~420ns
+        *g_portInA; // Wait state, ~480ns
+        *g_portInA; // Wait state, ~540ns
+
+        // This is a write but we keep these here to match the read cycle timing.
+        r1 = *g_portInL;
+        r2 = *g_portInG;
+        r3 = *g_portInC;
+        r4 = *g_portInA;
+
+        // Terminate the cycle
+        *g_portOutL = portOutL;
     }
 
 Exit:
