@@ -55,22 +55,22 @@ static const UINT16 s_romData2n__2B_Hi[] = {0xe7,0x04,0xc8,0xcc,0xc8,0x1a,0xc7,0
 //
 // Set 1 from MAME
 //
-static const ROM_REGION s_romRegion[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0x0400, s_romData2n__7B_Lo, 0x40462B57, " 7B"},//
-                                                  {NO_BANK_SWITCH, 0x0400, 0x0400, s_romData2n__6B_Lo, 0x0A91EF0D, " 6B"},//
-                                                  {NO_BANK_SWITCH, 0x0800, 0x0400, s_romData2n__5B_Lo, 0x853F1358, " 5B"},//
-                                                  {NO_BANK_SWITCH, 0x0c00, 0x0400, s_romData2n__3B_Lo, 0x56558572, " 3B"},//
-                                                  {NO_BANK_SWITCH, 0x1000, 0x0400, s_romData2n__2B_Lo, 0x5E59ACBB, " 2B"},//
-                                                  {NO_BANK_SWITCH, 0x2000, 0x0400, s_romData2n__7C,    0xF7F1267D, " 7C"},//
-                                                  {NO_BANK_SWITCH, 0x2400, 0x0400, s_romData2n__6C,    0x772004EB, " 6C"},//
-                                                  {NO_BANK_SWITCH, 0x2800, 0x0400, s_romData2n__5C,    0x7A87B6F3, " 5C"},//
-                                                  {NO_BANK_SWITCH, 0x2C00, 0x0400, s_romData2n__3C,    0xEF87C2CB, " 3C"},//
-                                                  {NO_BANK_SWITCH, 0x3000, 0x0400, s_romData2n__2C,    0xBE6C4F84, " 2C"},//
-                                                  {NO_BANK_SWITCH, 0x4000, 0x0400, s_romData2n__7B_Hi, 0xA27523CC, " 7B"},//
-                                                  {NO_BANK_SWITCH, 0x4400, 0x0400, s_romData2n__6B_Hi, 0x798B3434, " 6B"},//
-                                                  {NO_BANK_SWITCH, 0x4800, 0x0400, s_romData2n__5B_Hi, 0x133F54BB, " 5B"},//
-                                                  {NO_BANK_SWITCH, 0x4C00, 0x0400, s_romData2n__3B_Hi, 0x0F1C6BFA, " 3B"},//
-                                                  {NO_BANK_SWITCH, 0x5000, 0x0400, s_romData2n__2B_Hi, 0x2AFB576A, " 2B"},//
-                                                  {0} }; // end of list
+static const ROM_REGION s_romRegionSet1[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0x0400, s_romData2n__7B_Lo, 0x40462B57, " 7B"},//
+                                                      {NO_BANK_SWITCH, 0x0400, 0x0400, s_romData2n__6B_Lo, 0x0A91EF0D, " 6B"},//
+                                                      {NO_BANK_SWITCH, 0x0800, 0x0400, s_romData2n__5B_Lo, 0x853F1358, " 5B"},//
+                                                      {NO_BANK_SWITCH, 0x0c00, 0x0400, s_romData2n__3B_Lo, 0x56558572, " 3B"},//
+                                                      {NO_BANK_SWITCH, 0x1000, 0x0400, s_romData2n__2B_Lo, 0x5E59ACBB, " 2B"},//
+                                                      {NO_BANK_SWITCH, 0x2000, 0x0400, s_romData2n__7C,    0xF7F1267D, " 7C"},//
+                                                      {NO_BANK_SWITCH, 0x2400, 0x0400, s_romData2n__6C,    0x772004EB, " 6C"},//
+                                                      {NO_BANK_SWITCH, 0x2800, 0x0400, s_romData2n__5C,    0x7A87B6F3, " 5C"},//
+                                                      {NO_BANK_SWITCH, 0x2C00, 0x0400, s_romData2n__3C,    0xEF87C2CB, " 3C"},//
+                                                      {NO_BANK_SWITCH, 0x3000, 0x0400, s_romData2n__2C,    0xBE6C4F84, " 2C"},//
+                                                      {NO_BANK_SWITCH, 0x4000, 0x0400, s_romData2n__7B_Hi, 0xA27523CC, " 7B"},//
+                                                      {NO_BANK_SWITCH, 0x4400, 0x0400, s_romData2n__6B_Hi, 0x798B3434, " 6B"},//
+                                                      {NO_BANK_SWITCH, 0x4800, 0x0400, s_romData2n__5B_Hi, 0x133F54BB, " 5B"},//
+                                                      {NO_BANK_SWITCH, 0x4C00, 0x0400, s_romData2n__3B_Hi, 0x0F1C6BFA, " 3B"},//
+                                                      {NO_BANK_SWITCH, 0x5000, 0x0400, s_romData2n__2B_Hi, 0x2AFB576A, " 2B"},//
+                                                      {0} }; // end of list
 
 //
 // Set 2 from MAME
@@ -86,6 +86,29 @@ static const ROM_REGION s_romRegionSet2[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0
                                                       {NO_BANK_SWITCH, 0x2C00, 0x0400, s_romData2n__3C,    0xEF87C2CB, " 3C"},//
                                                       {NO_BANK_SWITCH, 0x3000, 0x0400, s_romData2n__2C,    0xA31C0435, " 2C"},// Diff.
                                                       {NO_BANK_SWITCH, 0x4000, 0x0400, s_romData2n__7B_Hi, 0xA27523CC, " 7B"},//
+                                                      {NO_BANK_SWITCH, 0x4400, 0x0400, s_romData2n__6B_Hi, 0x798B3434, " 6B"},//
+                                                      {NO_BANK_SWITCH, 0x4800, 0x0400, s_romData2n__5B_Hi, 0x133F54BB, " 5B"},//
+                                                      {NO_BANK_SWITCH, 0x4C00, 0x0400, s_romData2n__3B_Hi, 0x0F1C6BFA, " 3B"},//
+                                                      {NO_BANK_SWITCH, 0x5000, 0x0400, s_romData2n__2B_Hi, 0x2AFB576A, " 2B"},//
+                                                      {0} }; // end of list
+
+//
+// Set 3, found on a Quasar PCB (from the Quasar upright with Moon Crest marque).
+// The set is the same as Set 1 from MAME except that it has differences around offset 0x5B0.
+// I suspect this Set 3 is older than Set 1 because it appears that Set 1 has a patch applied
+// that makes some changes and NO-OP patches out something that is in this Set 3.
+//
+static const ROM_REGION s_romRegionSet3[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0x0400, s_romData2n__7B_Lo, 0x40462B57, " 7B"},//
+                                                      {NO_BANK_SWITCH, 0x0400, 0x0400, s_romData2n__6B_Lo, 0x0A91EF0D, " 6B"},//
+                                                      {NO_BANK_SWITCH, 0x0800, 0x0400, s_romData2n__5B_Lo, 0x853F1358, " 5B"},//
+                                                      {NO_BANK_SWITCH, 0x0c00, 0x0400, s_romData2n__3B_Lo, 0x56558572, " 3B"},//
+                                                      {NO_BANK_SWITCH, 0x1000, 0x0400, s_romData2n__2B_Lo, 0x5E59ACBB, " 2B"},//
+                                                      {NO_BANK_SWITCH, 0x2000, 0x0400, s_romData2n__7C,    0xF7F1267D, " 7C"},//
+                                                      {NO_BANK_SWITCH, 0x2400, 0x0400, s_romData2n__6C,    0x772004EB, " 6C"},//
+                                                      {NO_BANK_SWITCH, 0x2800, 0x0400, s_romData2n__5C,    0x7A87B6F3, " 5C"},//
+                                                      {NO_BANK_SWITCH, 0x2C00, 0x0400, s_romData2n__3C,    0xEF87C2CB, " 3C"},//
+                                                      {NO_BANK_SWITCH, 0x3000, 0x0400, s_romData2n__2C,    0xBE6C4F84, " 2C"},//
+                                                      {NO_BANK_SWITCH, 0x4000, 0x0400, s_romData2n__7B_Hi, 0x9DED7808, " 7B"},// Diff.
                                                       {NO_BANK_SWITCH, 0x4400, 0x0400, s_romData2n__6B_Hi, 0x798B3434, " 6B"},//
                                                       {NO_BANK_SWITCH, 0x4800, 0x0400, s_romData2n__5B_Hi, 0x133F54BB, " 5B"},//
                                                       {NO_BANK_SWITCH, 0x4C00, 0x0400, s_romData2n__3B_Hi, 0x0F1C6BFA, " 3B"},//
@@ -167,7 +190,7 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 // Output region is the same for all versions.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                                               "012", "012345"
-                                                        {CQuasarBaseGame::onBankSwitchEffectBlank, 0x001800, 0x30, 0x00, " 12", "E.Blnk"}, // "Video Effect Blanking"
+                                                        {CQuasarBaseGame::onBankSwitchEffectBlank, 0x01800L, 0x30, 0x00, " 12", "E.Blnk"}, // "Video Effect Blanking"
                                                         {NO_BANK_SWITCH,                           0x14000L, 0x01, 0x00, "8L ", "Snd  1"}, // DATA
                                                         {NO_BANK_SWITCH,                           0x14000L, 0x02, 0x00, "8L ", "Snd  2"}, // DATA
                                                         {NO_BANK_SWITCH,                           0x14000L, 0x04, 0x00, "8L ", "Snd  3"}, // DATA
@@ -188,10 +211,10 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
                                                       }; // end of list
 
 IGame*
-CQuasarGame::createInstance(
+CQuasarGame::createInstanceSet1(
 )
 {
-    return (new CQuasarGame(s_romRegion));
+    return (new CQuasarGame(s_romRegionSet1));
 }
 
 IGame*
@@ -199,6 +222,13 @@ CQuasarGame::createInstanceSet2(
 )
 {
     return (new CQuasarGame(s_romRegionSet2));
+}
+
+IGame*
+CQuasarGame::createInstanceSet3(
+)
+{
+    return (new CQuasarGame(s_romRegionSet3));
 }
 
 CQuasarGame::CQuasarGame(

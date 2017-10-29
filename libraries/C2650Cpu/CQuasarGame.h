@@ -35,10 +35,13 @@ class CQuasarGame : public CQuasarBaseGame
         // Constructor for this game.
         //
 
-        static IGame* createInstance(
+        static IGame* createInstanceSet1(
         );
 
         static IGame* createInstanceSet2(
+        );
+
+        static IGame* createInstanceSet3(
         );
 
         //
