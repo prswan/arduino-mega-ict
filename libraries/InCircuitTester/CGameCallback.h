@@ -50,6 +50,11 @@ class CGameCallback
         static const SELECTOR *selectorGeneric;
 
         //
+        // This is the selector object array for the UI for soak test use.
+        //
+        static const SELECTOR *selectorSoakTest;
+
+        //
         // The game object to use.
         //
         static IGame *game;
