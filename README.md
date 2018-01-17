@@ -10,3 +10,6 @@ This software is licensed under the BSD-2 license except for the following:
 
 2. "crc32" source code is licensed under the ZLib license.
 
+# Tool Chain
+Arduino IDE 1.8.5
+
