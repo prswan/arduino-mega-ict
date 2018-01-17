@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CScrambleSoundBaseGame.h"
-#include "CZ80ACpu.h"
+#include "CZ80Cpu.h"
 #include <DFR_Key.h>
 
 //
@@ -96,24 +96,24 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 //
 // Output region is the same for all versions on this board set.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                               "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x10010L, 0x0F, " 3C", "AY1 Ad"},
-                                                        {NO_BANK_SWITCH, 0x10020L, 0xFF, " 3C", "AY1 Wr"},
-                                                        {NO_BANK_SWITCH, 0x10040L, 0x0F, " 3D", "AY0 Ad"},
-                                                        {NO_BANK_SWITCH, 0x10080L, 0xFF, " 3D", "AY0 Wr"},
-                                                        {NO_BANK_SWITCH, 0x09000L, 0xFF, " 6E", "F Clr "}, // Clear filter latches
-                                                        {NO_BANK_SWITCH, 0x09001L, 0xFF, " 6E", "F AV0 "},
-                                                        {NO_BANK_SWITCH, 0x09002L, 0xFF, " 6E", "F AV1 "},
-                                                        {NO_BANK_SWITCH, 0x09004L, 0xFF, " 7E", "F AV2 "},
-                                                        {NO_BANK_SWITCH, 0x09008L, 0xFF, " 7E", "F AV3 "},
-                                                        {NO_BANK_SWITCH, 0x09010L, 0xFF, " 6F", "F AV4 "},
-                                                        {NO_BANK_SWITCH, 0x09020L, 0xFF, " 6F", "F AV5 "},
-                                                        {NO_BANK_SWITCH, 0x09040L, 0xFF, " 7F", "F AV6 "},
-                                                        {NO_BANK_SWITCH, 0x09080L, 0xFF, " 7F", "F AV7 "},
-                                                        {NO_BANK_SWITCH, 0x09100L, 0xFF, " 6G", "F AV8 "},
-                                                        {NO_BANK_SWITCH, 0x09200L, 0xFF, " 6G", "F AV9 "},
-                                                        {NO_BANK_SWITCH, 0x09400L, 0xFF, " 6H", "F AV10"},
-                                                        {NO_BANK_SWITCH, 0x09800L, 0xFF, " 6H", "F AV11"},
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
+                                                        {NO_BANK_SWITCH, 0x10010L, 0x0F, 0x00, " 3C", "AY1 Ad"},
+                                                        {NO_BANK_SWITCH, 0x10020L, 0xFF, 0x00, " 3C", "AY1 Wr"},
+                                                        {NO_BANK_SWITCH, 0x10040L, 0x0F, 0x00, " 3D", "AY0 Ad"},
+                                                        {NO_BANK_SWITCH, 0x10080L, 0xFF, 0x00, " 3D", "AY0 Wr"},
+                                                        {NO_BANK_SWITCH, 0x09000L, 0xFF, 0x00, " 6E", "F Clr "}, // Clear filter latches
+                                                        {NO_BANK_SWITCH, 0x09001L, 0xFF, 0x00, " 6E", "F AV0 "},
+                                                        {NO_BANK_SWITCH, 0x09002L, 0xFF, 0x00, " 6E", "F AV1 "},
+                                                        {NO_BANK_SWITCH, 0x09004L, 0xFF, 0x00, " 7E", "F AV2 "},
+                                                        {NO_BANK_SWITCH, 0x09008L, 0xFF, 0x00, " 7E", "F AV3 "},
+                                                        {NO_BANK_SWITCH, 0x09010L, 0xFF, 0x00, " 6F", "F AV4 "},
+                                                        {NO_BANK_SWITCH, 0x09020L, 0xFF, 0x00, " 6F", "F AV5 "},
+                                                        {NO_BANK_SWITCH, 0x09040L, 0xFF, 0x00, " 7F", "F AV6 "},
+                                                        {NO_BANK_SWITCH, 0x09080L, 0xFF, 0x00, " 7F", "F AV7 "},
+                                                        {NO_BANK_SWITCH, 0x09100L, 0xFF, 0x00, " 6G", "F AV8 "},
+                                                        {NO_BANK_SWITCH, 0x09200L, 0xFF, 0x00, " 6G", "F AV9 "},
+                                                        {NO_BANK_SWITCH, 0x09400L, 0xFF, 0x00, " 6H", "F AV10"},
+                                                        {NO_BANK_SWITCH, 0x09800L, 0xFF, 0x00, " 6H", "F AV11"},
                                                         {0}
                                                       }; // end of list
 
@@ -133,7 +133,7 @@ CScrambleSoundBaseGame::CScrambleSoundBaseGame(
            s_outputRegion,
            s_customFunction)
 {
-    m_cpu = new CZ80ACpu();
+    m_cpu = new CZ80Cpu();
     m_cpu->idle();
 
     // The sound commandinterrupt is on the INT pin.
