@@ -44,6 +44,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Jackrabbit  (2)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet2),       false},
                                                   {"Scramble   (S1)",  onSelectGame,    (void*) (CScrambleGame::createInstanceSet1),         false},
                                                   {"Scramble  S(S1)",  onSelectGame,    (void*) (CScrambleSoundGame::createInstanceSet1),    false},
+                                                  {"Scramble   (Z1)",  onSelectGame,    (void*) (CScrambleGame::createInstanceZacSet1),      false},
                                                   {"Scramble  S(Z1)",  onSelectGame,    (void*) (CScrambleSoundGame::createInstanceZacSet1), false},
                                                   { 0, 0 }
                                                  };

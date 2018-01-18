@@ -38,7 +38,7 @@ class CScrambleGame : public CScrambleBaseGame
         static IGame* createInstanceSet1(
         );
 
-        static IGame* createInstanceSet2(
+        static IGame* createInstanceZacSet1(
         );
 
         //
