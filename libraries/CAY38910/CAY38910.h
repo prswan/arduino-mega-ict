@@ -22,78 +22,75 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CScrambleSoundBaseGame_h
-#define CScrambleSoundBaseGame_h
+#ifndef CAY38910_h
+#define CAY38910_h
 
-#include "CGame.h"
-#include "CAY38910.h"
+#include "ICpu.h"
 
 
-class CScrambleSoundBaseGame : public CGame
+//
+// Implementation for testing the AY-3-8910 series of programmable sound
+// generator and IO peripheral ICs. The device is accessed using two
+// IO locations, one to set the register address to access and the other
+// to read or write data to it.
+//
+class CAY38910
 {
     public:
 
         //
-        // CScrambleSoundBaseGame
+        // The AY-3-8910 has the sound channels.
         //
+        typedef enum {
+            CHA,
+            CHB,
+            CHC
+        } Channel;
 
-        virtual PERROR interruptCheck(
+        //
+        // The AY-3-8910 has two IO ports.
+        //
+        typedef enum {
+            IOA,
+            IOB
+        } Port;
+
+        CAY38910(
+            ICpu   *cpu,
+            UINT32 regAddress,
+            UINT32 regData
         );
 
-        static PERROR ayIdle(
-            void *cScrambleSoundBaseGame
+        ~CAY38910(
         );
 
-        static PERROR ayCheck(
-            void *cScrambleSoundBaseGame
+        PERROR idle(
         );
 
-        static PERROR ay_3D_ChA(
-            void *cScrambleSoundBaseGame
+        PERROR check(
         );
 
-        static PERROR ay_3D_ChB(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3D_ChC(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChA(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChB(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChC(
-            void *cScrambleSoundBaseGame
-        );
-
-    protected:
-
-        CScrambleSoundBaseGame(
-            const ROM_REGION *romRegion
-        );
-
-        ~CScrambleSoundBaseGame(
+        PERROR noise(
+            Channel channel
         );
 
     private:
 
-        PERROR ayNoiseFilter(
-            CAY38910 *ay,
-            CAY38910::Channel channel,
-            UINT32 filterAd1,
-            UINT32 filterAd2
+        PERROR read(
+            UINT8 reg,
+            UINT8 *data
+        );
+
+        PERROR write(
+            UINT8 reg,
+            UINT8 data
         );
 
     private:
 
-        CAY38910  *m_ay[2];
-
+        ICpu    *m_cpu;
+        UINT32  m_regAddress;
+        UINT32  m_regData;
 };
 
 #endif
