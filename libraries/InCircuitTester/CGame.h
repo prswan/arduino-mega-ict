@@ -154,6 +154,51 @@ class CGame : public IGame
         ~CGame();
 
         //
+        // These utilities allocate the associated region and perform a
+        // PROGMEM copy from the supplied PROGMEM constant into it.
+        //
+
+        ROM_REGION* mallocProgMem(
+            const ROM_REGION *romRegion
+        );
+
+        RAM_REGION* mallocProgMem(
+            const RAM_REGION *ramRegion
+        );
+
+        INPUT_REGION* mallocProgMem(
+            const INPUT_REGION *inputRegion
+        );
+
+        OUTPUT_REGION* mallocProgMem(
+            const OUTPUT_REGION *outputRegion
+        );
+
+        CUSTOM_FUNCTION* mallocProgMem(
+            const CUSTOM_FUNCTION *customFunction
+        );
+
+        //
+        // These utilities add a simple address offset to the supplied
+        // region to allow the whole address space to be dynamically moved.
+        //
+
+        void addAddressOffset(
+            RAM_REGION *ramRegion,
+            UINT32 offset
+        );
+
+        void addAddressOffset(
+            INPUT_REGION *inputRegion,
+            UINT32 offset
+        );
+
+        void addAddressOffset(
+            OUTPUT_REGION *outputRegion,
+            UINT32 offset
+        );
+
+        //
         // These are filled in by the derived concrete game and are SRAM copies
         // of the supplied PROGMEM source data.
         //

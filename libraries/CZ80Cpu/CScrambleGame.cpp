@@ -115,7 +115,7 @@ CScrambleGame::createInstanceZacSet1(
 
 CScrambleGame::CScrambleGame(
     const ROM_REGION *romRegion
-) : CScrambleBaseGame( romRegion )
+) : CScrambleBaseGame( SCRAMBLE, romRegion )
 {
 }
 

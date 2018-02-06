@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2018, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,56 +22,38 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CScrambleBaseGame_h
-#define CScrambleBaseGame_h
+#ifndef CHustlerGame_h
+#define CHustlerGame_h
 
-#include "CGame.h"
+#include "CScrambleBaseGame.h"
 
-
-class CScrambleBaseGame : public CGame
+class CHustlerGame : public CScrambleBaseGame
 {
     public:
 
-        typedef enum {
-            SCRAMBLE,
-            HUSTLER_SCRAMBLE
-        } Base;
-
         //
-        // CScrambleBaseGame
+        // Constructors for this game.
         //
 
-        virtual PERROR interruptCheck(
+        static IGame* createInstanceZacScramConvSet2(
         );
 
-        static PERROR onBankSwitchSetup8255_0(
-            void *cScrambleBaseGame
-        );
-
-        static PERROR onBankSwitchSetup8255_1(
-            void *cScrambleBaseGame
-        );
-
-    protected:
-
-        CScrambleBaseGame(
-            const Base base,
-            const ROM_REGION *romRegion
-        );
-
-        ~CScrambleBaseGame(
-        );
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
 
     private:
 
         //
-        // These are used internally and vary between platforms.
+        // Different base configuration & ROM sets supplied.
         //
-        UINT32 m_intMaskWriteAddress;
-        UINT32 m_8255WriteBaseAddress0;
-        UINT32 m_8255WriteBaseAddress1;
+        CHustlerGame(
+            const Base base,
+            const ROM_REGION *romRegion
+        );
 
 };
 
 #endif
+
 

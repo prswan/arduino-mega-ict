@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CScrambleBaseGame.h"
-#include "CZ80Cpu.h"
+#include "CZ80ACpu.h"
 #include <DFR_Key.h>
 
 //
@@ -52,30 +52,50 @@
 //
 
 //
+// Base addresses for the base Scramble main PCB hardware.
+//
+static const UINT32 s_scrambleProgRamBase     = 0x004000L;
+static const UINT32 s_scrambleBkVRamBase      = 0x104800L;
+static const UINT32 s_scrambleObjRamBase      = 0x005000L;
+static const UINT32 s_scrambleWdResInputBase  = 0x007000L;
+static const UINT32 s_scrambleCtrlOutputBase  = 0x006800L;
+static const UINT32 s_scramble8255IoBase0     = 0x008100L;
+static const UINT32 s_scramble8255IoBase1     = 0x008200L;
+
+//
+// Address offset for the Hustler Scramble conversion that maps
+// to the "hustlerb4" configuration in MAME. Everything moves
+// up 0x4000 to make more ROM space (that isn't actually used
+// on Hustler but is on Super Cobra).
+//
+static const UINT32 s_hustlerScrambleBaseOffset = 0x4000L;
+
+
+//
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0x0F, " 1K", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0xF0, " 1G", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 1, 0x0F, " 1J", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4400, 0x47FF, 1, 0xF0, " 1H", "Prog. "}, // "Program RAM, 2114"
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                                      "012", "012345"
+                                                  {NO_BANK_SWITCH, s_scrambleProgRamBase + 0x000, s_scrambleProgRamBase + 0x3FF, 1, 0x0F, " 1K", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, s_scrambleProgRamBase + 0x000, s_scrambleProgRamBase + 0x3FF, 1, 0xF0, " 1G", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, s_scrambleProgRamBase + 0x400, s_scrambleProgRamBase + 0x7FF, 1, 0x0F, " 1J", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, s_scrambleProgRamBase + 0x400, s_scrambleProgRamBase + 0x7FF, 1, 0xF0, " 1H", "Prog. "}, // "Program RAM, 2114"
                                                   //
                                                   // See note above about access restrictions w.r.t HBLANK & WAIT.
                                                   // These regions are access with special support in the CZ80Cpu triggered via address 0x10xxxx.
                                                   //
-                                                  //                                            "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0x0F, " 3K", "BkVRam"}, // "Background VRAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0xF0, " 3J", "BkVRam"}, // "Background VRAM, 2114"
+                                                  //                                                                                      "012", "012345"
+                                                  {NO_BANK_SWITCH, s_scrambleBkVRamBase  + 0x000, s_scrambleBkVRamBase  + 0x3FF, 1, 0x0F, " 3K", "BkVRam"}, // "Background VRAM, 2114"
+                                                  {NO_BANK_SWITCH, s_scrambleBkVRamBase  + 0x000, s_scrambleBkVRamBase  + 0x3FF, 1, 0xF0, " 3J", "BkVRam"}, // "Background VRAM, 2114"
                                                   {0}
                                                 }; // end of list
 
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                            "012", "012345"
-                                                          {NO_BANK_SWITCH,   0x4000,   0x43FF,   1, 0xFF, "1KG", "Prog. "}, // "Program RAM, 2114, 1K/1G"
-                                                          {NO_BANK_SWITCH,   0x4400,   0x47FF,   1, 0xFF, "1JH", "Prog. "}, // "Program RAM, 2114, 1J/1H"
-                                                          {NO_BANK_SWITCH, 0x104800, 0x104BFF, 1, 0xFF, "3KJ", "BkVRam"}, // "Background VRAM, 2114, 3K/3J"
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                                      "012", "012345"
+                                                          {NO_BANK_SWITCH, s_scrambleProgRamBase + 0x000, s_scrambleProgRamBase + 0x3FF, 1, 0xFF, "1KG", "Prog. "}, // "Program RAM, 2114, 1K/1G"
+                                                          {NO_BANK_SWITCH, s_scrambleProgRamBase + 0x400, s_scrambleProgRamBase + 0x7FF, 1, 0xFF, "1JH", "Prog. "}, // "Program RAM, 2114, 1J/1H"
+                                                          {NO_BANK_SWITCH, s_scrambleBkVRamBase  + 0x000, s_scrambleBkVRamBase  + 0x3FF, 1, 0xFF, "3KJ", "BkVRam"}, // "Background VRAM, 2114, 3K/3J"
                                                           {0}
                                                         }; // end of list
 
@@ -83,38 +103,38 @@ static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                    
 // RAM region is the same for all games on this board set.
 // Unlike Galaxian, it appears that the object RAM cannot be read.
 //
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                            "012", "012345"
-                                                           {NO_BANK_SWITCH, 0x5000, 0x50FF, 1, 0x0F, " 3L", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
-                                                           {NO_BANK_SWITCH, 0x5000, 0x50FF, 1, 0xF0, " 3M", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                                                                    "012", "012345"
+                                                           {NO_BANK_SWITCH, s_scrambleObjRamBase + 0x000, s_scrambleObjRamBase + 0x0FF, 1, 0x0F, " 3L", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
+                                                           {NO_BANK_SWITCH, s_scrambleObjRamBase + 0x000, s_scrambleObjRamBase + 0x0FF, 1, 0xF0, " 3M", "ObjRam"}, // "Object RAM, 2114, 256 Bytes used."
                                                            {0} }; // end of list
 
 //
 // Input region is the same for all games on this board set.
 //
-static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                                           "012", "012345"
-                                                      {NO_BANK_SWITCH,                             0x7000L, 0xFF,  " 5C", "WD Res"}, // Watchdog reset
-                                                      {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8100L, 0xFF,  "s1E", "Port A"}, // CP Inputs
-                                                      {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8101L, 0xFF,  "s1E", "Port B"}, // CP Inputs
-                                                      {CScrambleBaseGame::onBankSwitchSetup8255_0, 0x8102L, 0xFF,  "s1E", "Port C"}, // CP Inputs
-                                                      {CScrambleBaseGame::onBankSwitchSetup8255_1, 0x8202L, 0xF0,  "s1E", "Prot R"}, // Protection Read
+static const INPUT_REGION s_inputRegion[] PROGMEM = { //                                                                                    "012", "012345"
+                                                      {NO_BANK_SWITCH,                             s_scrambleWdResInputBase + 0x000, 0xFF,  " 5C", "WD Res"}, // Watchdog reset
+                                                      {CScrambleBaseGame::onBankSwitchSetup8255_0, s_scramble8255IoBase0    + 0x000, 0xFF,  "s1E", "Port A"}, // CP Inputs
+                                                      {CScrambleBaseGame::onBankSwitchSetup8255_0, s_scramble8255IoBase0    + 0x001, 0xFF,  "s1E", "Port B"}, // CP Inputs
+                                                      {CScrambleBaseGame::onBankSwitchSetup8255_0, s_scramble8255IoBase0    + 0x002, 0xFF,  "s1E", "Port C"}, // CP Inputs
+                                                      {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x002, 0xF0,  "s1E", "Prot R"}, // Protection Read
                                                       {0}
                                                     }; // end of list
 
 //
 // Output region is the same for all versions on this board set.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                                                 "012", "012345"
-                                                        {NO_BANK_SWITCH,                             0x6801L, 0x01, 0x00,  " 5B", "NMI En"}, // NMI enable
-                                                        {NO_BANK_SWITCH,                             0x6802L, 0x01, 0x00,  " 5B", "Cntr  "}, // Coin counter
-                                                        {NO_BANK_SWITCH,                             0x6803L, 0x01, 0x00,  " 5B", "POUT1 "}, // Blue video drive
-                                                        {NO_BANK_SWITCH,                             0x6804L, 0x01, 0x00,  " 5B", "Stars "}, // Stars on
-                                                        {NO_BANK_SWITCH,                             0x6805L, 0x01, 0x00,  " 5B", "POUT2 "}, // unused
-                                                        {NO_BANK_SWITCH,                             0x6806L, 0x01, 0x00,  " 5B", "Flip X"}, // Flip X
-                                                        {NO_BANK_SWITCH,                             0x6807L, 0x01, 0x00,  " 5B", "Flip Y"}, // Flip Y
-                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, 0x8200L, 0xFF, 0x00,  "s1D", "Snd Cm"}, // Sound command
-                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, 0x8201L, 0x04, 0x00,  "s1D", "Snd In"}, // Sound interrupt
-                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, 0x8201L, 0x10, 0x00,  "s1D", "Amp Mt"}, // Amp Mute
-                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, 0x8202L, 0x0F, 0x00,  "s1D", "Prot W"}, // Protection Write
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                                                                          "012", "012345"
+                                                        {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x001, 0x01, 0x00,  " 5B", "NMI En"}, // NMI enable
+                                                        {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x002, 0x01, 0x00,  " 5B", "Cntr  "}, // Coin counter
+                                                        {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x003, 0x01, 0x00,  " 5B", "POUT1 "}, // Blue video drive
+                                                        {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x004, 0x01, 0x00,  " 5B", "Stars "}, // Stars on
+                                                        {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x005, 0x01, 0x00,  " 5B", "POUT2 "}, // unused
+                                                        {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x006, 0x01, 0x00,  " 5B", "Flip X"}, // Flip X
+                                                        {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x007, 0x01, 0x00,  " 5B", "Flip Y"}, // Flip Y
+                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x000, 0xFF, 0x00,  "s1D", "Snd Cm"}, // Sound command
+                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x001, 0x04, 0x00,  "s1D", "Snd In"}, // Sound interrupt
+                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x001, 0x10, 0x00,  "s1D", "Amp Mt"}, // Amp Mute
+                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x002, 0x0F, 0x00,  "s1D", "Prot W"}, // Protection Write
                                                         {0}
                                                       }; // end of list
 
@@ -125,8 +145,12 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 
 
 CScrambleBaseGame::CScrambleBaseGame(
-    const ROM_REGION    *romRegion
-) : CGame( romRegion,
+    const Base base,
+    const ROM_REGION *romRegion
+) : m_intMaskWriteAddress(s_scrambleCtrlOutputBase + 0x001),
+    m_8255WriteBaseAddress0(s_scramble8255IoBase0),
+    m_8255WriteBaseAddress1(s_scramble8255IoBase1),
+    CGame( romRegion,
            s_ramRegion,
            s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
@@ -134,7 +158,7 @@ CScrambleBaseGame::CScrambleBaseGame(
            s_outputRegion,
            s_customFunction)
 {
-    m_cpu = new CZ80Cpu();
+    m_cpu = new CZ80ACpu();
     m_cpu->idle();
 
     // The VBLANK interrupt is on the NMI pin.
@@ -142,6 +166,30 @@ CScrambleBaseGame::CScrambleBaseGame(
 
     // There is no direct hardware response of a vector on this platform.
     m_interruptAutoVector = true;
+
+    // Dynamically create the various memory mappings
+    switch(base)
+    {
+        // Simple move of everything up.
+        case HUSTLER_SCRAMBLE :
+        {
+            m_intMaskWriteAddress   += s_hustlerScrambleBaseOffset;
+            m_8255WriteBaseAddress0 += s_hustlerScrambleBaseOffset;
+            m_8255WriteBaseAddress1 += s_hustlerScrambleBaseOffset;
+
+            addAddressOffset(m_ramRegion,          s_hustlerScrambleBaseOffset);
+            addAddressOffset(m_ramRegionByteOnly,  s_hustlerScrambleBaseOffset);
+            addAddressOffset(m_ramRegionWriteOnly, s_hustlerScrambleBaseOffset);
+            addAddressOffset(m_inputRegion,        s_hustlerScrambleBaseOffset);
+            addAddressOffset(m_outputRegion,       s_hustlerScrambleBaseOffset);
+        }
+
+        case SCRAMBLE :
+        default :
+        {
+            // Nothing more to do
+        }
+    }
 }
 
 
@@ -168,7 +216,7 @@ CScrambleBaseGame::interruptCheck(
     for (int i = 0 ; i < 4 ; i++)
     {
         // Unmask the interrupt.
-        m_cpu->memoryWrite(0x6801L, 0x01);
+        m_cpu->memoryWrite(m_intMaskWriteAddress, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
                                         true,
@@ -179,7 +227,7 @@ CScrambleBaseGame::interruptCheck(
         }
 
         // Mask the interrupt (also resets the latch)
-        m_cpu->memoryWrite(0x6801L, 0x00);
+        m_cpu->memoryWrite(m_intMaskWriteAddress, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
                                         true,
@@ -195,7 +243,7 @@ CScrambleBaseGame::interruptCheck(
         }
 
         // Unmask the interrupt. Irq should have been cleared.
-        m_cpu->memoryWrite(0x6801L, 0x01);
+        m_cpu->memoryWrite(m_intMaskWriteAddress, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
                                         true,
@@ -211,7 +259,7 @@ CScrambleBaseGame::interruptCheck(
         }
 
         // Mask the interrupt (also resets the latch)
-        m_cpu->memoryWrite(0x6801L, 0x00);
+        m_cpu->memoryWrite(m_intMaskWriteAddress, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
                                         true,
@@ -250,7 +298,7 @@ CScrambleBaseGame::onBankSwitchSetup8255_0(
     CScrambleBaseGame *thisGame  = (CScrambleBaseGame *) cScrambleBaseGame;
     ICpu              *cpu       = thisGame->m_cpu;
 
-    return cpu->memoryWrite(0x8103, 0x9B);
+    return cpu->memoryWrite(thisGame->m_8255WriteBaseAddress0 + 0x003, 0x9B);
 }
 
 
@@ -277,6 +325,6 @@ CScrambleBaseGame::onBankSwitchSetup8255_1(
     CScrambleBaseGame *thisGame  = (CScrambleBaseGame *) cScrambleBaseGame;
     ICpu              *cpu       = thisGame->m_cpu;
 
-    return cpu->memoryWrite(0x8203, 0x88);
+    return cpu->memoryWrite(thisGame->m_8255WriteBaseAddress1 + 0x003, 0x88);
 }
 

@@ -49,122 +49,25 @@ CGame::CGame(
     m_outputWriteRegionOn(true),
     m_customSelect(0)
 {
-    // Copy the PROGMEM based region into local SRAM
-    // Note that data2n is NOT in PROGMEM currently.
-    {
-        UINT16 uIndexCount = 0;
-        UINT16 uRegionSize = 0;
+    m_romRegion = mallocProgMem(romRegion);
+    m_ramRegion = mallocProgMem(ramRegion);
 
-        for ( ;
-              ((pgm_read_word_near((UINT16*) (&romRegion[uIndexCount].length) + 0) != 0) ||
-               (pgm_read_word_near((UINT16*) (&romRegion[uIndexCount].length) + 1) != 0)) ;
-              uIndexCount++) {}
-
-        uRegionSize = sizeof(romRegion[0]) * (uIndexCount+1);
-
-        m_romRegion = (PROM_REGION) malloc( uRegionSize );
-
-        memcpy_P( m_romRegion, romRegion, uRegionSize );
-    }
-
-    // Copy the PROGMEM based region into local SRAM
-    {
-        UINT16 uIndexCount = 0;
-        UINT16 uRegionSize = 0;
-
-        for ( ;
-              ((pgm_read_word_near((UINT16*) (&ramRegion[uIndexCount].end) + 0) != 0) ||
-               (pgm_read_word_near((UINT16*) (&ramRegion[uIndexCount].end) + 1) != 0)) ;
-              uIndexCount++) {}
-
-        uRegionSize = sizeof(ramRegion[0]) * (uIndexCount+1);
-
-        m_ramRegion = (PRAM_REGION) malloc( uRegionSize );
-
-        memcpy_P( m_ramRegion, ramRegion, uRegionSize );
-    }
-
-    // Copy the PROGMEM based region into local SRAM if it's different.
     if (ramRegion != ramRegionByteOnly)
     {
-        UINT16 uIndexCount = 0;
-        UINT16 uRegionSize = 0;
-
-        for ( ;
-              ((pgm_read_word_near((UINT16*) (&ramRegionByteOnly[uIndexCount].end) + 0) != 0) ||
-               (pgm_read_word_near((UINT16*) (&ramRegionByteOnly[uIndexCount].end) + 1) != 0)) ;
-              uIndexCount++) {}
-
-        uRegionSize = sizeof(ramRegionByteOnly[0]) * (uIndexCount+1);
-
-        m_ramRegionByteOnly = (PRAM_REGION) malloc( uRegionSize );
-
-        memcpy_P( m_ramRegionByteOnly, ramRegionByteOnly, uRegionSize );
+        m_ramRegionByteOnly = mallocProgMem(ramRegionByteOnly);
     }
     else
     {
         m_ramRegionByteOnly = m_ramRegion;
     }
 
-    // Copy the PROGMEM based region into local SRAM
-    {
-        UINT16 uIndexCount = 0;
-        UINT16 uRegionSize = 0;
+    m_ramRegionWriteOnly = mallocProgMem(ramRegionWriteOnly);
 
-        for ( ;
-              ((pgm_read_word_near((UINT16*) (&ramRegionWriteOnly[uIndexCount].end) + 0) != 0) ||
-               (pgm_read_word_near((UINT16*) (&ramRegionWriteOnly[uIndexCount].end) + 1) != 0)) ;
-              uIndexCount++) {}
+    m_inputRegion = mallocProgMem(inputRegion);
 
-        uRegionSize = sizeof(ramRegionWriteOnly[0]) * (uIndexCount+1);
+    m_outputRegion = mallocProgMem(outputRegion);
 
-        m_ramRegionWriteOnly = (PRAM_REGION) malloc( uRegionSize );
-
-        memcpy_P( m_ramRegionWriteOnly, ramRegionWriteOnly, uRegionSize );
-    }
-
-    // Copy the PROGMEM based region into local SRAM
-    {
-        UINT16 uIndexCount = 0;
-        UINT16 uRegionSize = 0;
-
-        for ( ; pgm_read_word_near(&inputRegion[uIndexCount].mask) != 0 ; uIndexCount++) {}
-
-        uRegionSize = sizeof(inputRegion[0]) * (uIndexCount+1);
-
-        m_inputRegion = (PINPUT_REGION) malloc( uRegionSize );
-
-        memcpy_P( m_inputRegion, inputRegion, uRegionSize );
-    }
-
-    // Copy the PROGMEM based region into local SRAM
-    {
-        UINT16 uIndexCount = 0;
-        UINT16 uRegionSize = 0;
-
-        for ( ; pgm_read_word_near(&outputRegion[uIndexCount].activeMask) != 0 ; uIndexCount++) {}
-
-        uRegionSize = sizeof(outputRegion[0]) * (uIndexCount+1);
-
-        m_outputRegion = (POUTPUT_REGION) malloc( uRegionSize );
-
-        memcpy_P( m_outputRegion, outputRegion, uRegionSize );
-    }
-
-    // Copy the PROGMEM based region into local SRAM
-    {
-        UINT16 uIndexCount = 0;
-        UINT16 uRegionSize = 0;
-
-        for ( ; pgm_read_ptr_near(&customFunction[uIndexCount].function) != NULL ; uIndexCount++) {}
-
-        uRegionSize = sizeof(customFunction[0]) * (uIndexCount+1);
-
-        m_customFunction = (PCUSTOM_FUNCTION) malloc( uRegionSize );
-
-        memcpy_P( m_customFunction, customFunction, uRegionSize );
-    }
-
+    m_customFunction = mallocProgMem(customFunction);
 }
 
 
@@ -998,5 +901,159 @@ CGame::onCustomKeyMove(
     }
 
     return error;
+}
+
+
+//
+// Copy the PROGMEM based region into local SRAM.
+// Note that data2n is NOT in PROGMEM currently.
+//
+ROM_REGION* CGame::mallocProgMem(
+    const ROM_REGION *romRegion
+)
+{
+    ROM_REGION *retRomRegion;
+    UINT16 uIndexCount = 0;
+    UINT16 uRegionSize = 0;
+
+    for ( ;
+          ((pgm_read_word_near((UINT16*) (&romRegion[uIndexCount].length) + 0) != 0) ||
+           (pgm_read_word_near((UINT16*) (&romRegion[uIndexCount].length) + 1) != 0)) ;
+          uIndexCount++) {}
+
+    uRegionSize = sizeof(romRegion[0]) * (uIndexCount+1);
+
+    retRomRegion = (PROM_REGION) malloc( uRegionSize );
+
+    memcpy_P(retRomRegion, romRegion, uRegionSize);
+
+    return retRomRegion;
+}
+
+
+// Copy the PROGMEM based region into local SRAM.
+RAM_REGION* CGame::mallocProgMem(
+    const RAM_REGION *ramRegion
+)
+{
+    RAM_REGION *retRamRegion;
+    UINT16 uIndexCount = 0;
+    UINT16 uRegionSize = 0;
+
+    for ( ;
+          ((pgm_read_word_near((UINT16*) (&ramRegion[uIndexCount].end) + 0) != 0) ||
+           (pgm_read_word_near((UINT16*) (&ramRegion[uIndexCount].end) + 1) != 0)) ;
+          uIndexCount++) {}
+
+    uRegionSize = sizeof(ramRegion[0]) * (uIndexCount+1);
+
+    retRamRegion = (PRAM_REGION) malloc( uRegionSize );
+
+    memcpy_P( retRamRegion, ramRegion, uRegionSize );
+
+    return retRamRegion;
+}
+
+
+// Copy the PROGMEM based region into local SRAM.
+INPUT_REGION* CGame::mallocProgMem(
+    const INPUT_REGION *inputRegion
+)
+{
+    INPUT_REGION *retInputRegion;
+    UINT16 uIndexCount = 0;
+    UINT16 uRegionSize = 0;
+
+    for ( ; pgm_read_word_near(&inputRegion[uIndexCount].mask) != 0 ; uIndexCount++) {}
+
+    uRegionSize = sizeof(inputRegion[0]) * (uIndexCount+1);
+
+    retInputRegion = (PINPUT_REGION) malloc( uRegionSize );
+
+    memcpy_P( retInputRegion, inputRegion, uRegionSize );
+
+    return retInputRegion;
+}
+
+
+// Copy the PROGMEM based region into local SRAM.
+OUTPUT_REGION* CGame::mallocProgMem(
+    const OUTPUT_REGION *outputRegion
+)
+{
+    OUTPUT_REGION *retOutputRegion;
+    UINT16 uIndexCount = 0;
+    UINT16 uRegionSize = 0;
+
+    for ( ; pgm_read_word_near(&outputRegion[uIndexCount].activeMask) != 0 ; uIndexCount++) {}
+
+    uRegionSize = sizeof(outputRegion[0]) * (uIndexCount+1);
+
+    retOutputRegion = (POUTPUT_REGION) malloc( uRegionSize );
+
+    memcpy_P( retOutputRegion, outputRegion, uRegionSize );
+
+    return retOutputRegion;
+}
+
+
+// Copy the PROGMEM based region into local SRAM.
+CUSTOM_FUNCTION* CGame::mallocProgMem(
+    const CUSTOM_FUNCTION *customFunction
+)
+{
+    CUSTOM_FUNCTION *retCustomFunction;
+    UINT16 uIndexCount = 0;
+    UINT16 uRegionSize = 0;
+
+    for ( ; pgm_read_ptr_near(&customFunction[uIndexCount].function) != NULL ; uIndexCount++) {}
+
+    uRegionSize = sizeof(customFunction[0]) * (uIndexCount+1);
+
+    retCustomFunction = (PCUSTOM_FUNCTION) malloc( uRegionSize );
+
+    memcpy_P( retCustomFunction, customFunction, uRegionSize );
+
+    return retCustomFunction;
+}
+
+
+// Add an offset to the start and end addresses.
+void CGame::addAddressOffset(
+    RAM_REGION *ramRegion,
+    UINT32 offset
+)
+{
+    for ( UINT16 i = 0 ; ramRegion[i].end != 0 ; i++ )
+    {
+        ramRegion[i].start += offset;
+        ramRegion[i].end   += offset;
+    }
+}
+
+
+// Add an offset to the address.
+void CGame::addAddressOffset(
+    INPUT_REGION *inputRegion,
+    UINT32 offset
+)
+{
+    for ( UINT16 i = 0 ; inputRegion[i].mask != 0 ; i++ )
+    {
+        inputRegion[i].address += offset;
+    }
+}
+
+
+// Add an offset to the address.
+void CGame::addAddressOffset(
+    OUTPUT_REGION *outputRegion,
+    UINT32 offset
+)
+{
+    for ( UINT16 i = 0 ; outputRegion[i].activeMask != 0 ; i++ )
+    {
+        outputRegion[i].address += offset;
+    }
 }
 
