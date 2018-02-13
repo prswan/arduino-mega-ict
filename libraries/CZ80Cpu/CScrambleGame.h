@@ -51,6 +51,7 @@ class CScrambleGame : public CScrambleBaseGame
         // Different ROM sets supplied.
         //
         CScrambleGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 

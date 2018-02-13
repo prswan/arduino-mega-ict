@@ -142,6 +142,18 @@ class CGame : public IGame
         //
 
         CGame(
+            const ROM_DATA2N      *romData2n,
+            const ROM_REGION      *romRegion,
+            const RAM_REGION      *ramRegion,
+            const RAM_REGION      *ramRegionByteOnly,
+            const RAM_REGION      *ramRegionWriteOnly,
+            const INPUT_REGION    *inputRegion,
+            const OUTPUT_REGION   *outputRegion,
+            const CUSTOM_FUNCTION *customFunction
+        );
+
+        // Legacy constructor for games with ROM data2n already in SRAM.
+        CGame(
             const ROM_REGION      *romRegion,
             const RAM_REGION      *ramRegion,
             const RAM_REGION      *ramRegionByteOnly,
@@ -153,10 +165,26 @@ class CGame : public IGame
 
         ~CGame();
 
+        // Factored out common constructor
+        void constructor(
+            const ROM_DATA2N      *romData2n,
+            const ROM_REGION      *romRegion,
+            const RAM_REGION      *ramRegion,
+            const RAM_REGION      *ramRegionByteOnly,
+            const RAM_REGION      *ramRegionWriteOnly,
+            const INPUT_REGION    *inputRegion,
+            const OUTPUT_REGION   *outputRegion,
+            const CUSTOM_FUNCTION *customFunction
+        );
+
         //
         // These utilities allocate the associated region and perform a
         // PROGMEM copy from the supplied PROGMEM constant into it.
         //
+        ROM_DATA2N* mallocProgMem(
+            const ROM_DATA2N *romData2n,
+            ROM_REGION *romRegion
+        );
 
         ROM_REGION* mallocProgMem(
             const ROM_REGION *romRegion
@@ -203,6 +231,7 @@ class CGame : public IGame
         // of the supplied PROGMEM source data.
         //
 
+        ROM_DATA2N      *m_romData2n;
         ROM_REGION      *m_romRegion;
         RAM_REGION      *m_ramRegion;
         RAM_REGION      *m_ramRegionByteOnly;

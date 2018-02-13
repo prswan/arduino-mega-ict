@@ -49,6 +49,7 @@ class CHustlerGame : public CScrambleBaseGame
         //
         CHustlerGame(
             const Base base,
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 

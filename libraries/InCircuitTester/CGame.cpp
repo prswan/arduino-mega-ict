@@ -31,6 +31,7 @@
 #include <avr/pgmspace.h>
 
 CGame::CGame(
+    const ROM_DATA2N      *romData2n,
     const ROM_REGION      *romRegion,
     const RAM_REGION      *ramRegion,
     const RAM_REGION      *ramRegionByteOnly,
@@ -38,36 +39,37 @@ CGame::CGame(
     const INPUT_REGION    *inputRegion,
     const OUTPUT_REGION   *outputRegion,
     const CUSTOM_FUNCTION *customFunction
-) : m_interrupt(ICpu::NMI),
-    m_interruptAutoVector(false),
-    m_interruptResponse(0),
-    m_RomReadRegion(0),
-    m_RamWriteReadRegion(0),
-    m_RamWriteReadByteRegion(0),
-    m_inputReadRegion(0),
-    m_outputWriteRegion(0),
-    m_outputWriteRegionOn(true),
-    m_customSelect(0)
+)
 {
-    m_romRegion = mallocProgMem(romRegion);
-    m_ramRegion = mallocProgMem(ramRegion);
+    constructor(romData2n,
+                romRegion,
+                ramRegion,
+                ramRegionByteOnly,
+                ramRegionWriteOnly,
+                inputRegion,
+                outputRegion,
+                customFunction);
+}
 
-    if (ramRegion != ramRegionByteOnly)
-    {
-        m_ramRegionByteOnly = mallocProgMem(ramRegionByteOnly);
-    }
-    else
-    {
-        m_ramRegionByteOnly = m_ramRegion;
-    }
 
-    m_ramRegionWriteOnly = mallocProgMem(ramRegionWriteOnly);
-
-    m_inputRegion = mallocProgMem(inputRegion);
-
-    m_outputRegion = mallocProgMem(outputRegion);
-
-    m_customFunction = mallocProgMem(customFunction);
+CGame::CGame(
+    const ROM_REGION      *romRegion,
+    const RAM_REGION      *ramRegion,
+    const RAM_REGION      *ramRegionByteOnly,
+    const RAM_REGION      *ramRegionWriteOnly,
+    const INPUT_REGION    *inputRegion,
+    const OUTPUT_REGION   *outputRegion,
+    const CUSTOM_FUNCTION *customFunction
+)
+{
+    constructor(0,
+                romRegion,
+                ramRegion,
+                ramRegionByteOnly,
+                ramRegionWriteOnly,
+                inputRegion,
+                outputRegion,
+                customFunction);
 }
 
 
@@ -75,6 +77,12 @@ CGame::~CGame(
 )
 {
     free( m_romRegion );
+
+    if (m_romData2n != 0)
+    {
+        free( m_romData2n );
+    }
+
     free( m_ramRegion );
 
     if (m_ramRegionByteOnly != m_ramRegion)
@@ -904,9 +912,95 @@ CGame::onCustomKeyMove(
 }
 
 
+void CGame::constructor(
+    const ROM_DATA2N      *romData2n,
+    const ROM_REGION      *romRegion,
+    const RAM_REGION      *ramRegion,
+    const RAM_REGION      *ramRegionByteOnly,
+    const RAM_REGION      *ramRegionWriteOnly,
+    const INPUT_REGION    *inputRegion,
+    const OUTPUT_REGION   *outputRegion,
+    const CUSTOM_FUNCTION *customFunction
+)
+{
+    m_interrupt              = ICpu::NMI;
+    m_interruptAutoVector    = false;
+    m_interruptResponse      = 0;
+    m_RomReadRegion          = 0;
+    m_RamWriteReadRegion     = 0;
+    m_RamWriteReadByteRegion = 0;
+    m_inputReadRegion        = 0;
+    m_outputWriteRegion      = 0;
+    m_outputWriteRegionOn    = true;
+    m_customSelect           = 0;
+
+    m_romRegion = mallocProgMem(romRegion);
+
+    if (romData2n != 0)
+    {
+        m_romData2n = mallocProgMem(romData2n, m_romRegion);
+    }
+    else
+    {
+        m_romData2n = 0;
+    }
+
+    m_ramRegion = mallocProgMem(ramRegion);
+
+    if (ramRegion != ramRegionByteOnly)
+    {
+        m_ramRegionByteOnly = mallocProgMem(ramRegionByteOnly);
+    }
+    else
+    {
+        m_ramRegionByteOnly = m_ramRegion;
+    }
+
+    m_ramRegionWriteOnly = mallocProgMem(ramRegionWriteOnly);
+
+    m_inputRegion = mallocProgMem(inputRegion);
+
+    m_outputRegion = mallocProgMem(outputRegion);
+
+    m_customFunction = mallocProgMem(customFunction);
+}
+
+
 //
 // Copy the PROGMEM based region into local SRAM.
-// Note that data2n is NOT in PROGMEM currently.
+// Also updates the romRegion (that must be in SRAM) to
+// point to the SRAM-based entries in romData2n.
+//
+ROM_DATA2N* CGame::mallocProgMem(
+    const ROM_DATA2N *romData2n,
+    ROM_REGION *romRegion
+)
+{
+    ROM_DATA2N *retRomData2n;
+    UINT16 uRegionSize = 0;
+    UINT16 uIndexCount;
+
+    // The number of entries is determined from the romRegion
+    for (uIndexCount = 0 ; (romRegion[uIndexCount].length != 0) ; uIndexCount++) {}
+
+    uRegionSize = sizeof(romData2n[0]) * (uIndexCount+1);
+
+    retRomData2n = (PROM_DATA2N) malloc( uRegionSize );
+
+    memcpy_P(retRomData2n, romData2n, uRegionSize);
+
+    // Update the data2n pointers in the romRegion to reference SRAM
+    for (uIndexCount = 0 ; (romRegion[uIndexCount].length != 0) ; uIndexCount++)
+    {
+        romRegion[uIndexCount].data2n = retRomData2n[uIndexCount].data2n;
+    }
+
+    return retRomData2n;
+}
+
+
+//
+// Copy the PROGMEM based region into local SRAM.
 //
 ROM_REGION* CGame::mallocProgMem(
     const ROM_REGION *romRegion

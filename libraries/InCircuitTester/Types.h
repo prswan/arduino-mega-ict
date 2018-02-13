@@ -166,6 +166,16 @@ typedef struct _CONNECTION {
 
 } CONNECTION, *PCONNECTION;
 
+//
+// Table of data2n records that are linked in the ROM_REGION below.
+// The table is provided to allow data2n records to be in PROGMEM
+// and allocated into program RAM on use.
+//
+typedef struct _ROM_DATA2N {
+
+    const UINT16 data2n[18];
+
+} ROM_DATA2N, *PROM_DATA2N;
 
 //
 // ROM region definition for one device, sample data and it's complete CRC.

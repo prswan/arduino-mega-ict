@@ -146,11 +146,13 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 
 CScrambleBaseGame::CScrambleBaseGame(
     const Base base,
+    const ROM_DATA2N *romData2n,
     const ROM_REGION *romRegion
 ) : m_intMaskWriteAddress(s_scrambleCtrlOutputBase + 0x001),
     m_8255WriteBaseAddress0(s_scramble8255IoBase0),
     m_8255WriteBaseAddress1(s_scramble8255IoBase1),
-    CGame( romRegion,
+    CGame( romData2n,
+           romRegion,
            s_ramRegion,
            s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
