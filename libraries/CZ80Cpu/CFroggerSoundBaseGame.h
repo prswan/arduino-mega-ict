@@ -22,64 +22,52 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CScrambleSoundBaseGame_h
-#define CScrambleSoundBaseGame_h
+#ifndef CFroggerSoundBaseGame_h
+#define CFroggerSoundBaseGame_h
 
 #include "CGame.h"
 #include "CAY38910.h"
 
 
-class CScrambleSoundBaseGame : public CGame
+class CFroggerSoundBaseGame : public CGame
 {
     public:
 
         //
-        // CScrambleSoundBaseGame
+        // CFroggerSoundBaseGame
         //
 
         virtual PERROR interruptCheck(
         );
 
         static PERROR ayIdle(
-            void *cScrambleSoundBaseGame
+            void *cFroggerSoundBaseGame
         );
 
         static PERROR ayCheck(
-            void *cScrambleSoundBaseGame
+            void *cFroggerSoundBaseGame
         );
 
-        static PERROR ay_3D_ChA(
-            void *cScrambleSoundBaseGame
+        static PERROR ay_35_ChA(
+            void *cFroggerSoundBaseGame
         );
 
-        static PERROR ay_3D_ChB(
-            void *cScrambleSoundBaseGame
+        static PERROR ay_35_ChB(
+            void *cFroggerSoundBaseGame
         );
 
-        static PERROR ay_3D_ChC(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChA(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChB(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChC(
-            void *cScrambleSoundBaseGame
+        static PERROR ay_35_ChC(
+            void *cFroggerSoundBaseGame
         );
 
     protected:
 
-        CScrambleSoundBaseGame(
+        CFroggerSoundBaseGame(
             const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 
-        ~CScrambleSoundBaseGame(
+        ~CFroggerSoundBaseGame(
         );
 
     private:
@@ -93,7 +81,7 @@ class CScrambleSoundBaseGame : public CGame
 
     private:
 
-        CAY38910  *m_ay[2];
+        CAY38910  *m_ay;
 
 };
 

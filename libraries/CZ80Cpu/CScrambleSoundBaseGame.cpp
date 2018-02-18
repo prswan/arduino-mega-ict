@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CScrambleSoundBaseGame.h"
-#include "CZ80Cpu.h"
+#include "CZ80ACpu.h"
 #include <DFR_Key.h>
 
 //
@@ -150,8 +150,10 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                  
 
 
 CScrambleSoundBaseGame::CScrambleSoundBaseGame(
-    const ROM_REGION    *romRegion
-) : CGame( romRegion,
+    const ROM_DATA2N *romData2n,
+    const ROM_REGION *romRegion
+) : CGame( romData2n,
+           romRegion,
            s_ramRegion,
            s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
@@ -159,7 +161,7 @@ CScrambleSoundBaseGame::CScrambleSoundBaseGame(
            s_outputRegion,
            s_customFunction)
 {
-    m_cpu = new CZ80Cpu();
+    m_cpu = new CZ80ACpu();
     m_cpu->idle();
 
     // The sound commandinterrupt is on the INT pin.

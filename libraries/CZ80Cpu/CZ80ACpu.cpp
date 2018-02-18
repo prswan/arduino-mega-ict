@@ -756,8 +756,71 @@ CZ80ACpu::IORQread(
     UINT16 *data
 )
 {
-    // IO cycles are slightly different than memory cycles.
-    return errorNotImplemented;
+    PERROR error = errorSuccess;
+
+    //
+    // Using separate counts saves 4 instructions because the compiler
+    // optimizes out the pre-loop test (it knows the 1st time x > 0).
+    //
+    register UINT8 x = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+    register UINT8 r3;
+    register UINT8 r4;
+    register UINT8 r5;
+
+    // Wait for the clock edge
+    WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
+
+    // Start the cycle by assert the control lines
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ); // RD is later on IO cycles.
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B0_BIT_OUT_RD);
+
+    // IO cycles have 1 wait state added by the CPU, 500ns at 2MHz
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B0_BIT_OUT_RD); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B0_BIT_OUT_RD); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B0_BIT_OUT_RD); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B0_BIT_OUT_RD); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B0_BIT_OUT_RD); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B0_BIT_OUT_RD); // Wait state
+
+    // Wait for WAIT to be deasserted.
+    // Port L requires an "lds" to access so no wait state needed from above.
+    WAIT_FOR_WAIT_HI(x,r1,r2);
+
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B0_BIT_OUT_RD); // Wait state
+
+    // Read in reverse order - port L is a slower access.
+    r1 = *g_portInL;
+    r2 = *g_portInG;
+    r3 = *g_portInD;
+    r4 = *g_portInC;
+    r5 = *g_portInA;
+
+    // Terminate the cycle
+    *g_portOutB = ~(0);
+
+    // Check for timeout
+    if (x == 0)
+    {
+        error = errorTimeout;
+        goto Exit;
+    }
+
+    // Populate the output data word
+    *data = (((r2 & s_G1_BIT_D0) >> 1) << 0) |
+            (((r1 & s_L7_BIT_D1) >> 7) << 1) |
+            (((r4 & s_C1_BIT_D2) >> 1) << 2) |
+            (((r5 & s_A6_BIT_D3) >> 6) << 3) |
+            (((r5 & s_A4_BIT_D4) >> 4) << 4) |
+            (((r4 & s_C7_BIT_D5) >> 7) << 5) |
+            (((r4 & s_C5_BIT_D6) >> 5) << 6) |
+            (((r3 & s_D7_BIT_D7) >> 7) << 7);
+
+Exit:
+
+    return error;
 }
 
 
@@ -766,7 +829,60 @@ CZ80ACpu::IORQwrite(
     UINT16 *data
 )
 {
-    // IO cycles are slightly different than memory cycles.
-    return errorNotImplemented;
+    PERROR error = errorSuccess;
+
+    //
+    // Using separate counts saves 4 instructions because the compiler
+    // optimizes out the pre-loop test (it knows the 1st time x > 0).
+    //
+    register UINT8 x = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+    register UINT8 r3;
+    register UINT8 r4;
+    register UINT8 r5;
+
+    // Wait for the clock edge
+    WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
+
+    // Start the cycle by assert the control lines
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ); // WR is later on IO cycles.
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B2_BIT_OUT_WR);
+
+    // IO cycles have 1 wait state added by the CPU, 500ns at 2MHz
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B2_BIT_OUT_WR); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B2_BIT_OUT_WR); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B2_BIT_OUT_WR); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B2_BIT_OUT_WR); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B2_BIT_OUT_WR); // Wait state
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B2_BIT_OUT_WR); // Wait state
+
+    // Wait for WAIT to be deasserted.
+    // Port L requires an "lds" to access so no wait state needed from above.
+    WAIT_FOR_WAIT_HI(x,r1,r2);
+
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ | s_B2_BIT_OUT_WR);
+
+    // This is a write but we keep these here to match the read cycle timing.
+    r1 = *g_portInL;
+    r2 = *g_portInG;
+    r3 = *g_portInD;
+    r4 = *g_portInC;
+    r5 = *g_portInA;
+
+    // Terminate the cycle
+    *g_portOutB = ~(0);
+
+    // Check for timeout
+    if (x == 0)
+    {
+        error = errorTimeout;
+        goto Exit;
+    }
+
+Exit:
+
+    return error;
 }
 

@@ -30,34 +30,36 @@
 
 //
 // Stern Set 1 from MAME.
-//                                               01   02   04   08   10   20   40   80  100  200  400
-static const UINT16 s_romData2nSet1_5C[]    = {0x72,0x02,0xff,0xff,0xff,0xff,0xb7,0xfe,0x02,0xbe,0x00};
-static const UINT16 s_romData2nSet1_5D[]    = {0x80,0x77,0xb7,0x08,0x08,0xfe,0xaf,0x00,0x21,0x80,0x0d};
-static const UINT16 s_romData2nSet1_5E[]    = {0x8c,0x8f,0x88,0x8f,0x09,0x83,0x0d,0x85,0xcd,0x04,0x1c};
+//
+static const ROM_DATA2N s_romData2nSet1[] PROGMEM  = { // 01   02   04   08   10   20   40   80  100  200  400
+                                                       {0x72,0x02,0xff,0xff,0xff,0xff,0xb7,0xfe,0x02,0xbe,0x00}, //  0 - 5C
+                                                       {0x80,0x77,0xb7,0x08,0x08,0xfe,0xaf,0x00,0x21,0x80,0x0d}, //  1 - 5D
+                                                       {0x8c,0x8f,0x88,0x8f,0x09,0x83,0x0d,0x85,0xcd,0x04,0x1c}, //  2 - 5E
+                                                       {0} };  // end of list
 
 //
 // Stern Set 1 from MAME.
 //
 static const ROM_REGION s_romRegionSet1[] PROGMEM = { //
-                                                      {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nSet1_5C, 0xbcd297f0, " 5C"}, // ot1.5c (scrambles)
-                                                      {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nSet1_5D, 0xde7912da, " 5D"}, // ot2.5d (scrambles)
-                                                      {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nSet1_5E, 0xba2fa933, " 5E"}, // ot3.5e (scrambles)
+                                                      {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nSet1[0].data2n, 0xbcd297f0, " 5C"}, // ot1.5c (scrambles)
+                                                      {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nSet1[1].data2n, 0xde7912da, " 5D"}, // ot2.5d (scrambles)
+                                                      {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nSet1[2].data2n, 0xba2fa933, " 5E"}, // ot3.5e (scrambles)
                                                       {0} }; // end of list
 
 //
 // Zaccaria Set 1 from PCB.
 //
 static const ROM_REGION s_romRegionZacSet1[] PROGMEM = { //
-                                                         {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nSet1_5C, 0xbe037cf6, " 5C"}, // 5c.cpu (scramrf)
-                                                         {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nSet1_5D, 0xde7912da, " 5D"}, // ot2.5d (scrambles)
-                                                         {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nSet1_5E, 0xba2fa933, " 5E"}, // ot3.5e (scrambles)
+                                                         {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nSet1[0].data2n, 0xbe037cf6, " 5C"}, // 5c.cpu (scramrf)
+                                                         {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nSet1[1].data2n, 0xde7912da, " 5D"}, // ot2.5d (scrambles)
+                                                         {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nSet1[2].data2n, 0xba2fa933, " 5E"}, // ot3.5e (scrambles)
                                                          {0} }; // end of list
 
 IGame*
 CScrambleSoundGame::createInstanceSet1(
 )
 {
-    return (new CScrambleSoundGame(s_romRegionSet1));
+    return (new CScrambleSoundGame(s_romData2nSet1, s_romRegionSet1));
 }
 
 
@@ -65,12 +67,13 @@ IGame*
 CScrambleSoundGame::createInstanceZacSet1(
 )
 {
-    return (new CScrambleSoundGame(s_romRegionZacSet1));
+    return (new CScrambleSoundGame(s_romData2nSet1, s_romRegionZacSet1));
 }
 
 CScrambleSoundGame::CScrambleSoundGame(
+    const ROM_DATA2N *romData2n,
     const ROM_REGION *romRegion
-) : CScrambleSoundBaseGame( romRegion )
+) : CScrambleSoundBaseGame( romData2n, romRegion )
 {
 }
 

@@ -22,80 +22,38 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CScrambleSoundBaseGame_h
-#define CScrambleSoundBaseGame_h
+#ifndef CHustlerSoundGame_h
+#define CHustlerSoundGame_h
 
-#include "CGame.h"
-#include "CAY38910.h"
+#include "CFroggerSoundBaseGame.h"
 
-
-class CScrambleSoundBaseGame : public CGame
+class CHustlerSoundGame : public CFroggerSoundBaseGame
 {
     public:
 
         //
-        // CScrambleSoundBaseGame
+        // Constructors for this game.
         //
 
-        virtual PERROR interruptCheck(
+        static IGame* createInstanceZacScramConvSet2(
         );
 
-        static PERROR ayIdle(
-            void *cScrambleSoundBaseGame
-        );
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
 
-        static PERROR ayCheck(
-            void *cScrambleSoundBaseGame
-        );
+    private:
 
-        static PERROR ay_3D_ChA(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3D_ChB(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3D_ChC(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChA(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChB(
-            void *cScrambleSoundBaseGame
-        );
-
-        static PERROR ay_3C_ChC(
-            void *cScrambleSoundBaseGame
-        );
-
-    protected:
-
-        CScrambleSoundBaseGame(
+        //
+        // Different ROM sets supplied.
+        //
+        CHustlerSoundGame(
             const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 
-        ~CScrambleSoundBaseGame(
-        );
-
-    private:
-
-        PERROR ayNoiseFilter(
-            CAY38910 *ay,
-            CAY38910::Channel channel,
-            UINT32 filterAd1,
-            UINT32 filterAd2
-        );
-
-    private:
-
-        CAY38910  *m_ay[2];
-
 };
 
 #endif
+
 
