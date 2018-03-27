@@ -402,35 +402,6 @@ C6809ECpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, LOW);
 
     //
-    // Wait for data based on master clock
-    //
-    // If this is incorrect (too long) such that E returns
-    // low then we flag this as a bus error.
-    //
-    for (int x = 0 ; x < m_QLoToDInClockPulses ; x++)
-    {
-        valueE = m_pinE.digitalRead();
-
-        if (valueE == LOW)
-        {
-            break;
-        }
-
-        m_pinClock.digitalWriteHIGH();
-        m_pinClock.digitalWriteLOW();
-    }
-    CHECK_LITERAL_VALUE_EXIT(error, s_E_i, valueE, HIGH);
-
-    //
-    // Phase 3 Actions
-    // - D read
-    //
-    if (readWrite == HIGH)
-    {
-        m_busD.digitalRead(data);
-    }
-
-    //
     // Phase 0 (Initial State)
     // - Wait for E-Lo, Q-Lo
     // - E-falling
@@ -442,6 +413,16 @@ C6809ECpu::memoryReadWrite(
         if (valueE == LOW)
         {
             break;
+        }
+
+        //
+        // Since data-in is latched on the falling edge of E we
+        // read in the data before every clock pulse so we have
+        // the latest data before E transitions.
+        //
+        if (readWrite == HIGH)
+        {
+            m_busD.digitalRead(data);
         }
 
         m_pinClock.digitalWriteHIGH();
