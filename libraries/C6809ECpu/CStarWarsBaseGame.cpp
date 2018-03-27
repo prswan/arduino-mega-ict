@@ -105,9 +105,9 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 // Output region is the same for all versions.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                                "012", "012345"
-                                                        {NO_BANK_SWITCH, c_ADCSTART0_A, 0x00,      0x00,  "9K ", "ADCS0 "}, // ADC start channel 0 (pitch,  J)
-                                                        {NO_BANK_SWITCH, c_ADCSTART1_A, 0x00,      0x00,  "9K ", "ADCS1 "}, // ADC start channel 0 (yaw,    K)
-                                                        {NO_BANK_SWITCH, c_ADCSTART2_A, 0x00,      0x00,  "9K ", "ADCS2 "}, // ADC start channel 0 (thrust, 9)
+                                                        {NO_BANK_SWITCH, c_ADCSTART0_A, 0xFF,      0x00,  "9K ", "ADCS0 "}, // ADC start channel 0 (pitch,  J)
+                                                        {NO_BANK_SWITCH, c_ADCSTART1_A, 0xFF,      0x00,  "9K ", "ADCS1 "}, // ADC start channel 0 (yaw,    K)
+                                                        {NO_BANK_SWITCH, c_ADCSTART2_A, 0xFF,      0x00,  "9K ", "ADCS2 "}, // ADC start channel 0 (thrust, 9)
                                                         {NO_BANK_SWITCH, c_MPAGE_A,     c_MPAGE_D, 0x00,  "9LM", "MPAGE "}, // MPAGE ROM bank switch
                                                         {NO_BANK_SWITCH, c_MW0_A,       0xFF,      0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
                                                         {NO_BANK_SWITCH, c_MW1_A,       0x01,      0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
