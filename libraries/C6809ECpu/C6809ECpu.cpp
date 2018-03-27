@@ -95,9 +95,7 @@ static const CONNECTION s_D_iot[] = { {31, "D0" },
                                       {24, "D7" } }; // 8 bits.
 
 C6809ECpu::C6809ECpu(
-    UINT8 QLoToDInClockPulses
-) : m_QLoToDInClockPulses(QLoToDInClockPulses),
-    m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
+) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinRW(g_pinMap40DIL, &s_RW_o),
     m_pinE(g_pinMap40DIL, &s_E_i),

@@ -45,7 +45,7 @@ C6809EGenericGame::createInstance2732(
 
 C6809EGenericGame::C6809EGenericGame(
     RomSize romSize
-) : CGenericBaseGame( new C6809ECpu(0), romSize )
+) : CGenericBaseGame( new C6809ECpu(), romSize )
 {
 }
 
