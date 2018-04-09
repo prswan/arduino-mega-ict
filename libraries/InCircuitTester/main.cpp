@@ -278,6 +278,15 @@ onSelectSoakTest(
                    SELECT_KEY );
 
         //
+        // Some games may not implement all the selections so account for
+        // not implemented errors as benign.
+        //
+        if (error == errorNotImplemented)
+        {
+            error = errorSuccess;
+        }
+
+        //
         // The reset of the seed based on the loop count is done because the
         // tests reset the random seed so on exit the result of "random" could
         // select the same test again and cause the soak test to get stuck

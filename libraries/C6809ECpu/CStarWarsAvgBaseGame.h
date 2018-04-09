@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Paul R. Swan
+// Copyright (c) 2018, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,20 +22,32 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <C6809EGenericGame.h>
-#include <CStarWarsGame.h>
-#include <CStarWarsAvgGame.h>
+#ifndef CStarWarsAvgBaseGame_h
+#define CStarWarsAvgBaseGame_h
 
-//
-// The initial selector to select the game to test.
-//
-static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2716),    false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2732),    false},
-                                                  {"Star Wars      ",  onSelectGame,    (void*) (CStarWarsGame::createInstance),            false},
-                                                  {"Star Wars (O)  ",  onSelectGame,    (void*) (CStarWarsGame::createInstanceSetO),        false},
-                                                  {"Star Wars AVG  ",  onSelectGame,    (void*) (CStarWarsAvgGame::createInstance),         false},
-                                                  { 0, 0 }
-                                                 };
+#include "CGame.h"
 
+
+class CStarWarsAvgBaseGame : public CGame
+{
+    public:
+
+        //
+        // CStarWarsAvgBaseGame
+        //
+
+    protected:
+
+        CStarWarsAvgBaseGame(
+            const ROM_REGION *romRegion
+        );
+
+        ~CStarWarsAvgBaseGame(
+        );
+
+    private:
+
+};
+
+#endif
 
