@@ -38,6 +38,9 @@ class CStarWarsGame : public CStarWarsBaseGame
         static IGame* createInstance(
         );
 
+        static IGame* createInstanceSet1(
+        );
+
         static IGame* createInstanceSetO(
         );
 

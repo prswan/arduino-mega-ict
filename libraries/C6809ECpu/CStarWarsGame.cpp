@@ -45,6 +45,18 @@ static const ROM_REGION s_romRegion[] PROGMEM =     { //
                                                       {0} }; // end of list
 
 //
+// Set "1" from MAME.
+//
+static const ROM_REGION s_romRegionSet1[] PROGMEM = { //
+                                                      {CStarWarsBaseGame::onBankSwitchMPAGE0, 0x6000, 0x2000, s_romData2n_1F_Lo,  0x67CBA67C, "1F0"}, // 114 - Lo
+                                                      {CStarWarsBaseGame::onBankSwitchMPAGE1, 0x6000, 0x2000, s_romData2n_1F_Hi,  0xB8123618, "1F1"}, // 114 - Hi
+                                                      {NO_BANK_SWITCH,                        0x8000, 0x2000, s_romData2n_1HJ,    0xf725e344, "1HJ"}, // 102
+                                                      {NO_BANK_SWITCH,                        0xA000, 0x2000, s_romData2n_1JK,    0xf6da0a00, "1JK"}, // 203
+                                                      {NO_BANK_SWITCH,                        0xC000, 0x2000, s_romData2n_1KL,    0x7e406703, "1KL"}, // 104
+                                                      {NO_BANK_SWITCH,                        0xE000, 0x2000, s_romData2n_1M,     0xc7e51237, "1M "}, // 206
+                                                      {0} }; // end of list
+
+//
 // Set "O" from MAME.
 //
 static const ROM_REGION s_romRegionSetO[] PROGMEM = { //
@@ -65,11 +77,20 @@ CStarWarsGame::createInstance(
 
 
 IGame*
+CStarWarsGame::createInstanceSet1(
+)
+{
+    return (new CStarWarsGame(s_romRegionSet1));
+}
+
+
+IGame*
 CStarWarsGame::createInstanceSetO(
 )
 {
     return (new CStarWarsGame(s_romRegionSetO));
 }
+
 
 CStarWarsGame::CStarWarsGame(
     const ROM_REGION *romRegion

@@ -366,7 +366,7 @@ CStarWarsBaseGame::testADC(
 {
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
     C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
-    PERROR error = errorCustom;
+    PERROR error = errorSuccess;
     UINT16 data[4] = {0,0,0,0};
 
     for (UINT32 channel = 0 ; channel < 4 ; channel++)
@@ -389,6 +389,7 @@ CStarWarsBaseGame::testADC(
         CHECK_CPU_READ_EXIT(error, cpu, c_ADC_A, &data[channel]);
     }
 
+    error = errorCustom;
     error->code = ERROR_SUCCESS;
     error->description = "OK: ";
 

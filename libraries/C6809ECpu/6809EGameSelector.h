@@ -33,6 +33,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Generic 2716   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2716),    false},
                                                   {"Generic 2732   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2732),    false},
                                                   {"Star Wars      ",  onSelectGame,    (void*) (CStarWarsGame::createInstance),            false},
+                                                  {"Star Wars (1)  ",  onSelectGame,    (void*) (CStarWarsGame::createInstanceSet1),        false},
                                                   {"Star Wars (O)  ",  onSelectGame,    (void*) (CStarWarsGame::createInstanceSetO),        false},
                                                   {"Star Wars AVG  ",  onSelectGame,    (void*) (CStarWarsAvgGame::createInstance),         false},
                                                   { 0, 0 }
