@@ -474,6 +474,11 @@ CZ80ACpu::memoryRead(
 {
     PERROR error = errorSuccess;
 
+    register UINT8 x = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+
     // Enable the address bus and set the value (the lower 16 bits only)
     m_busA.pinMode(OUTPUT);
     m_busA.digitalWrite((UINT16) (address & 0xFFFF));
@@ -489,11 +494,6 @@ CZ80ACpu::memoryRead(
 
     if (IS_WAIT_SPACE(address))
     {
-        register UINT8 x = 255;
-
-        register UINT8 r1;
-        register UINT8 r2;
-
         *g_portOutB = ~(s_B3_BIT_OUT_MREQ);
 
         // Wait for wait to become active (leaving HBLANK)
@@ -503,6 +503,11 @@ CZ80ACpu::memoryRead(
         WAIT_FOR_WAIT_HI(x,r1,r2);
 
         *g_portOutB = ~(0);
+    }
+    else
+    {
+        // Wait for the clock edge
+        WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
     }
 
     // Select the address space based on the supplied address
@@ -529,6 +534,11 @@ CZ80ACpu::memoryWrite(
 {
     PERROR error = errorSuccess;
 
+    register UINT8 x = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+
     // Enable the address bus and set the value.
     m_busA.pinMode(OUTPUT);
     m_busA.digitalWrite((UINT16) (address & 0xFFFF));
@@ -545,11 +555,6 @@ CZ80ACpu::memoryWrite(
 
     if (IS_WAIT_SPACE(address))
     {
-        register UINT8 x = 255;
-
-        register UINT8 r1;
-        register UINT8 r2;
-
         *g_portOutB = ~(s_B3_BIT_OUT_MREQ);
 
         // Wait for wait to become active (leaving HBLANK)
@@ -559,6 +564,11 @@ CZ80ACpu::memoryWrite(
         WAIT_FOR_WAIT_HI(x,r1,r2);
 
         *g_portOutB = ~(0);
+    }
+    else
+    {
+        // Wait for the clock edge
+        WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
     }
 
     // Select the address space based on the supplied address
@@ -650,9 +660,6 @@ CZ80ACpu::MREQread(
     register UINT8 r4;
     register UINT8 r5;
 
-    // Wait for the clock edge
-    WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
-
     // Start the cycle by assert the control lines
     *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD);
     *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
@@ -715,9 +722,6 @@ CZ80ACpu::MREQwrite(
     register UINT8 r4;
     register UINT8 r5;
 
-    // Wait for the clock edge
-    WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
-
     // Start the cycle by assert the control lines
     *g_portOutB = ~(s_B3_BIT_OUT_MREQ);
     *g_portOutB = ~(s_B3_BIT_OUT_MREQ); // wait state
@@ -769,9 +773,6 @@ CZ80ACpu::IORQread(
     register UINT8 r3;
     register UINT8 r4;
     register UINT8 r5;
-
-    // Wait for the clock edge
-    WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
 
     // Start the cycle by assert the control lines
     *g_portOutB = ~(s_B1_BIT_OUT_IORQ); // RD is later on IO cycles.
@@ -842,9 +843,6 @@ CZ80ACpu::IORQwrite(
     register UINT8 r3;
     register UINT8 r4;
     register UINT8 r5;
-
-    // Wait for the clock edge
-    WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
 
     // Start the cycle by assert the control lines
     *g_portOutB = ~(s_B1_BIT_OUT_IORQ); // WR is later on IO cycles.
