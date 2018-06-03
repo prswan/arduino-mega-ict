@@ -1,12 +1,12 @@
 #include "Arduino.h"
 #include "DFR_Key.h"
 
-static int DEFAULT_KEY_PIN = 0; 
-static int DEFAULT_THRESHOLD = 5;
+static int DEFAULT_KEY_PIN = 0;
+static int DEFAULT_THRESHOLD = 20;
 
 /*
 	To use any alternate set of values you will need to enable it by a define.
-	The define should NOT be done in code or it will impact all users. Visual 
+	The define should NOT be done in code or it will impact all users. Visual
 	Studio users can set 'DF_ROBOT_V1' in the Preprocessor definitions of the
 	project, or add '-DDF_ROBOT_V1' under advanced options.
 
@@ -15,13 +15,13 @@ static int DEFAULT_THRESHOLD = 5;
 	be aware that when you upgrade your IDE this file may need to be re-created:
 
 	compiler.cpp.extra_flags=-DDF_ROBOT_V1
-	
+
 	If further values are added in the future then of course adjust the name
 	of the define that you specify accordingly.
 */
 #ifdef DF_ROBOT_V1
 	static int RIGHTKEY_ARV = 0;	//that's read "analogue read value"
-	static int UPKEY_ARV	= 98;  
+	static int UPKEY_ARV	= 98;
 	static int DOWNKEY_ARV	= 254;
 	static int LEFTKEY_ARV	= 407;
 	static int SELKEY_ARV	= 638;
@@ -36,7 +36,7 @@ static int DEFAULT_THRESHOLD = 5;
 #endif
 
 DFR_Key::DFR_Key()
-{	
+{
   _refreshRate = 10;
   _keyPin = DEFAULT_KEY_PIN;
   _threshold = DEFAULT_THRESHOLD;
@@ -54,7 +54,7 @@ int DFR_Key::getKey()
  {
     _prevInput = _curInput;
     _curInput = analogRead(_keyPin);
-  
+
     if (_curInput == _prevInput)
     {
       _change = false;
@@ -64,7 +64,7 @@ int DFR_Key::getKey()
     {
       _change = true;
       _prevKey = _curKey;
-  
+
       if (_curInput > UPKEY_ARV - _threshold && _curInput < UPKEY_ARV + _threshold ) _curKey = UP_KEY;
       else if (_curInput > DOWNKEY_ARV - _threshold && _curInput < DOWNKEY_ARV + _threshold ) _curKey = DOWN_KEY;
       else if (_curInput > RIGHTKEY_ARV - _threshold && _curInput < RIGHTKEY_ARV + _threshold ) _curKey = RIGHT_KEY;
@@ -72,7 +72,7 @@ int DFR_Key::getKey()
       else if (_curInput > SELKEY_ARV - _threshold && _curInput < SELKEY_ARV + _threshold ) _curKey = SELECT_KEY;
       else _curKey = NO_KEY;
    }
-   
+
    if (_change) return _curKey; else return SAMPLE_WAIT;
    _oldTime = millis();
  }
