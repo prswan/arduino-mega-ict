@@ -195,6 +195,40 @@ CScrambleBaseGame::CScrambleBaseGame(
 }
 
 
+CScrambleBaseGame::CScrambleBaseGame(
+    const ROM_DATA2N *romData2n,
+    const ROM_REGION *romRegion,
+    const RAM_REGION *ramRegion,
+    const RAM_REGION *ramRegionByteOnly,
+    const RAM_REGION *ramRegionWriteOnly,
+    const INPUT_REGION  *inputRegion,
+    const OUTPUT_REGION *outputRegion,
+    UINT32 intMaskWriteAddress,
+    UINT32 i8255WriteBaseAddress0,
+    UINT32 i8255WriteBaseAddress1
+) : m_intMaskWriteAddress(intMaskWriteAddress),
+    m_8255WriteBaseAddress0(i8255WriteBaseAddress0),
+    m_8255WriteBaseAddress1(i8255WriteBaseAddress1),
+    CGame( romData2n,
+           romRegion,
+           ramRegion,
+           ramRegionByteOnly,
+           ramRegionWriteOnly,
+           inputRegion,
+           outputRegion,
+           s_customFunction)
+{
+    m_cpu = new CZ80ACpu();
+    m_cpu->idle();
+
+    // The VBLANK interrupt is on the NMI pin.
+    m_interrupt = ICpu::NMI;
+
+    // There is no direct hardware response of a vector on this platform.
+    m_interruptAutoVector = true;
+}
+
+
 CScrambleBaseGame::~CScrambleBaseGame(
 )
 {
