@@ -32,6 +32,7 @@
 #include <CScrambleSoundGame.h>
 #include <CSuperCobraGame.h>
 #include <CSuperCobraSoundGame.h>
+#include <CZaxxonGame.h>
 
 //
 // The initial selector to select the game to test.
@@ -55,6 +56,9 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"S. Cobra   (K1)",  onSelectGame,    (void*) (CSuperCobraGame::createInstanceKonamiSet1),         false},
                                                   {"S. Cobra   (S1)",  onSelectGame,    (void*) (CSuperCobraGame::createInstanceSternSet1),          false},
                                                   {"S. Cobra  S(S1)",  onSelectGame,    (void*) (CSuperCobraSoundGame::createInstanceSternSet1),     false},
+                                                  {"Zaxxon      (1)",  onSelectGame,    (void*) (CZaxxonGame::createInstanceSet1),                   false},
+                                                  {"Zaxxon      (2)",  onSelectGame,    (void*) (CZaxxonGame::createInstanceSet2),                   false},
+                                                  {"Zaxxon      (3)",  onSelectGame,    (void*) (CZaxxonGame::createInstanceSet3),                   false},
                                                   { 0, 0 }
                                                  };
 
