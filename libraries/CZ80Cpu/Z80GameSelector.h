@@ -24,6 +24,7 @@
 //
 #include <CZ80GenericGame.h>
 #include <CAsoGame.h>
+#include <CBuckRogersGame.h>
 #include <CGalaxianGame.h>
 #include <CHustlerGame.h>
 #include <CHustlerSoundGame.h>
@@ -43,6 +44,8 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Arian Mis. A(1)",  onSelectGame,    (void*) (CAsoAGame::createInstanceArianSet1),                false},
                                                   {"Arian Mis. B(1)",  onSelectGame,    (void*) (CAsoBGame::createInstanceArianSet1),                false},
                                                   {"ASO        A(1)",  onSelectGame,    (void*) (CAsoAGame::createInstanceAsoSet1),                  false},
+                                                  {"Buck Rog.  A(1)",  onSelectGame,    (void*) (CBuckRogersGame::createInstanceSet1),               false},
+                                                  {"Buck Rog.  A(2)",  onSelectGame,    (void*) (CBuckRogersGame::createInstanceSet2),               false},
                                                   {"Galaxian   (M1)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet1),                 false},
                                                   {"Galaxian   (M2)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet2),                 false},
                                                   {"Hustler   (ZS2)",  onSelectGame,    (void*) (CHustlerGame::createInstanceZacScramConvSet2),      false},
