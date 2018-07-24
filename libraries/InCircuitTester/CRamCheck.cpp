@@ -765,7 +765,8 @@ CRamCheck::checkAddress(
     UINT8  dataBusWidth    = m_cpu->dataBusWidth(ramRegion->start);
     UINT8  dataAccessWidth = m_cpu->dataAccessWidth(ramRegion->start);
 
-    UINT32 regionLength      = (ramRegion->end - ramRegion->start) + 1;
+    UINT32 regionLength      = (ramRegion->end - ramRegion->start)
+                             + ramRegion->step;
 
     UINT16 dataBusWidthShift = (dataBusWidth    == 2) ? 1 : 0;
     UINT16 stepShift         = (ramRegion->step >= 2) ? 2 : 1;
@@ -799,16 +800,23 @@ CRamCheck::checkAddress(
     {
         RAM_REGION subRamRegion = *ramRegion;
 
-        subRamRegion.end = ramRegion->start + ((1UL << (shift + dataBusWidthAndStepShift)) - 1);
+        subRamRegion.end = ramRegion->start + (1UL << (shift + dataBusWidthAndStepShift))
+                         - ramRegion->step;
 
         // Consistency check that I got the math right
         if (subRamRegion.end > ramRegion->end)
         {
-            error = errorUnexpected;
+            error = errorCustom;
+            error->code = ERROR_FAILED;
+            error->description = "A:";
+            error->description += ramRegion->location;
+            STRING_UINT16_HEX(error->description, ramRegion->end);
+            STRING_UINT16_HEX(error->description, subRamRegion.end);
             break;
         }
 
-        error = checkRandom(&subRamRegion, 1);
+        // Setting seed == shift so each run is a fresh data set
+        error = checkRandom(&subRamRegion, shift);
 
         if (FAILED(error))
         {
