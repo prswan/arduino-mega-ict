@@ -29,13 +29,27 @@
 //
 
 //
+// Encrypted Set 1 from MAME.
+//
+static const ROM_DATA2N s_romData2nEncSet1[] PROGMEM  = { // 01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
+                                                          {0x4d,0x5e,0x88,0x8e,0x50,0x00,0x5b,0x2c,0x45,0x17,0x17,0xc1,0x9a,0xdf}, // IC3
+                                                          {0x68,0xba,0x70,0x1e,0x51,0x87,0xc0,0xbc,0xde,0xc6,0x9e,0x8c,0x7d,0xa8}, // IC4
+                                                          {0} };  // end of list
+//
+// Encrypted Set 1 from MAME.
+//
+static const ROM_REGION s_romRegionEncSet1[] PROGMEM = { //
+                                                         {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nEncSet1[0].data2n, 0xf0055e97, "c3 "}, // epr-5265.cpu-ic3
+                                                         {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nEncSet1[1].data2n, 0x7d084c39, "c4 "}, // epr-5266.cpu-ic4
+                                                         {0} }; // end of list
+
+//
 // Set 1 from MAME.
 //
 static const ROM_DATA2N s_romData2nSet1[] PROGMEM  = { // 01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
                                                        {0xed,0x56,0x00,0x06,0xf8,0xff,0xff,0xff,0xcd,0x97,0x97,0xe1,0x32,0x77}, // IC3
                                                        {0x40,0x3a,0xf8,0x16,0x79,0x0f,0x48,0x3c,0x7e,0x4e,0x16,0x04,0xdd,0x80}, // IC4
                                                        {0} };  // end of list
-
 //
 // Set 1 from MAME.
 //
@@ -51,7 +65,6 @@ static const ROM_DATA2N s_romData2nSet2[] PROGMEM  = { // 01   02   04   08   10
                                                        {0xed,0x56,0x00,0x05,0xf8,0xff,0xff,0xff,0xcd,0x06,0x01,0x30,0xd9,0xb9}, // IC3
                                                        {0x28,0x01,0x32,0xcb,0x20,0x3a,0x06,0x01,0x23,0x49,0x45,0xc2,0x41,0x80}, // IC4
                                                        {0} };  // end of list
-
 //
 // Set 2 from MAME.
 //
@@ -59,6 +72,14 @@ static const ROM_REGION s_romRegionSet2[] PROGMEM = { //
                                                       {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nSet2[0].data2n, 0xb18e428a, "c3 "}, // epr-5204.cpu-ic3
                                                       {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nSet2[1].data2n, 0x1c9ea398, "c4 "}, // epr-5205.cpu-ic4
                                                       {0} }; // end of list
+
+
+IGame*
+CBuckRogersGame::createInstanceEncSet1(
+)
+{
+    return (new CBuckRogersGame(s_romData2nEncSet1, s_romRegionEncSet1));
+}
 
 
 IGame*

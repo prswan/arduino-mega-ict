@@ -42,13 +42,21 @@
 //   * IO space is not used.
 //   * M1 (1st machine cycle) is not used.
 //
-//   * Sprite RAM (0xE0xx -> 0xE7FF)
-//     From what I could determine from the schematics and scope, access to the sprite
+//   * Background RAM (0xC0xx -> 0xC7FF)
+//     From what I could determine from the schematics and scope, access to the fixed RAM
 //     RAM activates WAIT that is held until a short access window appears in the video
 //     timing (derived from the PROM IC78). On the scope, IC31 (74LS74) pin 4 is ~1400ns
 //     of high with ~200ns of low. I suspect the 200ns low portion to tbe the CPU access
-//     window.
-//     Alas, the current ICT Z80 implementation is not compatible with this timing.
+//     window. This does appear to be still compatible with the ICT implementation despite
+//     it's slower access times because the read data is latched by IC94 (LS273).
+//
+//   * Sprite RAM (0xE0xx -> 0xE7xx)
+//     There is a quirk with the sprite RAM. Physically it's the whole block and is
+//     read/write memory BUT the sprite processing logic appears to be able to write
+//     back data to some portion of it. See the "WORN F2" signal that eventually
+//     multiplexes into the RAM WE signal via IC 18 (LS157).
+//     The first verify error occurs at 0xE606 so the upper address for testing has
+//     been set at 0xE5FF.
 //
 
 //
@@ -64,11 +72,18 @@ static const UINT16 s_8255IoPortIdle1C = 0xFF;
 //
 // RAM region is the same for all games on this board set.
 //
+// ** WARNING *** The schematic signal names do not appear to match the game addresses!
+// - IC 84  (2016) RAM is shown as CSE0 but is at address 0xC000
+// - IC 6-9 (2148) RAM is shown as CSC0 but is at address 0xE000
+//
+//
+//
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                            "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x00C000, 0x00C7FF, 2, 0x0F, "c9 ", "VRAM E"}, // Background RAM, Even
-                                                  {NO_BANK_SWITCH, 0x00C000, 0x00C7FF, 2, 0xF0, "c8 ", "VRAM E"}, // Background RAM, Even
-                                                  {NO_BANK_SWITCH, 0x00C001, 0x00C7FF, 2, 0x0F, "c7 ", "VRAM O"}, // Background RAM, Odd
-                                                  {NO_BANK_SWITCH, 0x00C001, 0x00C7FF, 2, 0xF0, "c6 ", "VRAM O"}, // Background RAM, Odd
+                                                  {NO_BANK_SWITCH, 0x00C000, 0x00C7FF, 1, 0xFF, "c84", "FIXRAM"}, // Fixed/background RAM
+                                                  {NO_BANK_SWITCH, 0x00E000, 0x00E5FF, 2, 0x0F, "c9 ", "VRAM E"}, // Control/Object/Sprite RAM, Even
+                                                  {NO_BANK_SWITCH, 0x00E000, 0x00E5FF, 2, 0xF0, "c8 ", "VRAM E"}, // Control/Object/Sprite RAM, Even
+                                                  {NO_BANK_SWITCH, 0x00E001, 0x00E5FF, 2, 0x0F, "c7 ", "VRAM O"}, // Control/Object/Sprite RAM, Odd
+                                                  {NO_BANK_SWITCH, 0x00E001, 0x00E5FF, 2, 0xF0, "c6 ", "VRAM O"}, // Control/Object/Sprite RAM, Odd
                                                   {NO_BANK_SWITCH, 0x00F800, 0x00FFFF, 1, 0xFF, "c14", "Prog. "}, // Program RAM
                                                   {0}
                                                 }; // end of list
@@ -77,7 +92,8 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 // RAM region is the same for all games on this board set.
 //
 static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                            "012", "012345"
-                                                          {NO_BANK_SWITCH, 0x00C000, 0x00C7FF, 1, 0xFF, " - ", "VRAM  "}, // Background RAM, Even
+                                                          {NO_BANK_SWITCH, 0x00C000, 0x00C7FF, 1, 0xFF, "c84", "FIXRAM"}, // Fixed/Background RAM
+                                                          {NO_BANK_SWITCH, 0x00E000, 0x00E5FF, 1, 0xFF, " - ", "VRAM  "}, // Control/Object/Sprite RAM
                                                           {NO_BANK_SWITCH, 0x00F800, 0x00FFFF, 1, 0xFF, "c14", "Prog. "}, // Program RAM
                                                           {0}
                                                         }; // end of list
@@ -86,7 +102,6 @@ static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                    
 // RAM region is the same for all games on this board set.
 //
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                            "012", "012345"
-//                                                         {NO_BANK_SWITCH, 0x00E000, 0x00E7FF, 1, 0xFF, "c84", "SP RAM"}, // Sprite RAM
                                                            {0}
                                                          }; // end of list
 

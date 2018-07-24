@@ -35,6 +35,9 @@ class CBuckRogersGame : public CBuckRogersBaseGame
         // Constructors for this game.
         //
 
+        static IGame* createInstanceEncSet1(
+        );
+
         static IGame* createInstanceSet1(
         );
 
