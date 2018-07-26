@@ -48,13 +48,13 @@
 //     timing (derived from the PROM IC78). On the scope, IC31 (74LS74) pin 4 is ~1400ns
 //     of high with ~200ns of low. I suspect the 200ns low portion to tbe the CPU access
 //     window. This does appear to be still compatible with the ICT implementation despite
-//     it's slower access times because the read data is latched by IC94 (LS273).
+//     it's slower access times.
 //
 //   * Sprite RAM (0xE0xx -> 0xE7xx)
 //     There is a quirk with the sprite RAM. Physically it's the whole block and is
 //     read/write memory BUT the sprite processing logic appears to be able to write
 //     back data to some portion of it. See the "WORN F2" signal that eventually
-//     multiplexes into the RAM WE signal via IC 18 (LS157).
+//     multiplexes into the RAM WE signal via IC18 (LS157).
 //     The first verify error occurs at 0xE606 so the upper address for testing has
 //     been set at 0xE5FF.
 //
@@ -68,6 +68,7 @@ static const UINT32 s_8255IoBase1 = 0x00D000L; // IC155, Sound
 static const UINT16 s_8255IoPortIdle1A = 0xF0;
 static const UINT16 s_8255IoPortIdle1B = 0xBF;
 static const UINT16 s_8255IoPortIdle1C = 0xFF;
+
 
 //
 // RAM region is the same for all games on this board set.
@@ -218,12 +219,56 @@ CBuckRogersBaseGame::~CBuckRogersBaseGame(
 }
 
 
-// TBD
+//
+// INT pin with any IORQ access clearing the interrupt.
+// There is no mask.
+//
 PERROR
 CBuckRogersBaseGame::interruptCheck(
 )
 {
-    return errorNotImplemented;
+    static const UINT32 clearAddress = 0x10000;
+    PERROR error = errorSuccess;
+    UINT16 clearData = 0;
+
+    for (int i = 0 ; i < 4 ; i++)
+    {
+        // Clear the interrupt with a port read.
+        error = m_cpu->memoryRead(clearAddress, &clearData);
+
+        if (FAILED(error))
+        {
+            break;
+        }
+
+        // Wait for interrupt to be active
+        error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
+                                        1000);
+        if (FAILED(error))
+        {
+            break;
+        }
+
+        // Clear the interrupt with a port read.
+        error = m_cpu->memoryRead(clearAddress, &clearData);
+
+        if (FAILED(error))
+        {
+            break;
+        }
+
+        // Check interrupt cleared inactive
+        error = m_cpu->waitForInterrupt(m_interrupt,
+                                        false,
+                                        0);
+        if (FAILED(error))
+        {
+            break;
+        }
+    }
+
+    return error;
 }
 
 
