@@ -25,6 +25,7 @@
 #include "main.h"
 
 #include "Arduino.h"
+#include <MemoryFree.h>
 #include <LiquidCrystal.h>
 #include <DFR_Key.h>
 #include <CGameCallback.h>
@@ -166,20 +167,39 @@ onSelectGameCallback(
     PERROR error = errorSuccess;
     GameConstructor gameConstructor = (GameConstructor) context;
 
+    // Assign the new selector for the game
+    s_currentSelector  = selector;
+    s_currentSelection = 0;
+
+    // Free the game selector memory before we construct the game.
+    if (s_gameSelector != NULL)
+    {
+        free(s_gameSelector);
+        s_gameSelector = NULL;
+    }
+
     if (CGameCallback::game != NULL)
     {
         delete CGameCallback::game;
         CGameCallback::game = (IGame *) NULL;
     }
 
-    //
-    // Assign a new game and reset the selector & selection.
-    //
-
+    // Construct the game object
     CGameCallback::game = (IGame *) gameConstructor();
 
-    s_currentSelector  = selector;
-    s_currentSelection = 0;
+    // After game construction check the free memory
+    {
+        String description = " ";
+
+        description += freeMemory();
+        description += "b free";
+
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(description);
+
+        delay(1000);
+    }
 
     return error;
 }

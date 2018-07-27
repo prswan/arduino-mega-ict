@@ -54,15 +54,14 @@ static const SELECTOR s_selectorGame[] = { //"0123456789abcdef"
 const SELECTOR *CGameCallback::selectorGame = s_selectorGame;
 
 static const SELECTOR s_selectorGeneric[] = { //"0123456789abcdef"
-// TODO: Z80 is out of dynamic memory, removing these for now
-//                                               {"Bus Idle",        CGameCallback::onSelectBusIdle,        (void*) &CGameCallback::game, false},
-                                                 {"Bus Check",       CGameCallback::onSelectBusCheck,       (void*) &CGameCallback::game, false},
-//                                               {"ROM CRC",         CGameCallback::onSelectRomCrc,         (void*) &CGameCallback::game, true},
-//                                               {"ROM Read",        CGameCallback::onSelectRomRead,        (void*) &CGameCallback::game, true},
-//                                               {"RAM Check",       CGameCallback::onSelectRamCheck,       (void*) &CGameCallback::game, true},
-//                                               {"RAM Check RA",    CGameCallback::onSelectRamCheckRA,     (void*) &CGameCallback::game, true},
-//                                               {"RAM Check Ad",    CGameCallback::onSelectRamCheckAd,     (void*) &CGameCallback::game, true},
-//                                               {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
+                                               {"Bus Idle",        CGameCallback::onSelectBusIdle,        (void*) &CGameCallback::game, false},
+                                               {"Bus Check",       CGameCallback::onSelectBusCheck,       (void*) &CGameCallback::game, false},
+                                               {"ROM CRC",         CGameCallback::onSelectRomCrc,         (void*) &CGameCallback::game, true},
+                                               {"ROM Read",        CGameCallback::onSelectRomRead,        (void*) &CGameCallback::game, true},
+                                               {"RAM Check",       CGameCallback::onSelectRamCheck,       (void*) &CGameCallback::game, true},
+                                               {"RAM Check RA",    CGameCallback::onSelectRamCheckRA,     (void*) &CGameCallback::game, true},
+                                               {"RAM Check Ad",    CGameCallback::onSelectRamCheckAd,     (void*) &CGameCallback::game, true},
+                                               {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
                                                { 0, 0 }
                                             };
 
