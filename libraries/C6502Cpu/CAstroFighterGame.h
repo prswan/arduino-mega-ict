@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Paul R. Swan
+// Copyright (c) 2018, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,21 +22,41 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <C6502GenericGame.h>
-#include <CAstroFighterGame.h>
-#include <CTomahawk777Game.h>
+#ifndef CAstroFighterGame_h
+#define CAstroFighterGame_h
 
-//
-// The initial selector to select the game to test.
-//
-static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C6502GenericGame::createInstance2716),             false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C6502GenericGame::createInstance2732),             false},
-                                                  {"Astro F.(2)    ",  onSelectGame,    (void*) (CAstroFighterGame::createInstanceSet2),            false},
-                                                  {"Astro F.(2) clk",  onSelectGame,    (void*) (CAstroFighterGame::createInstanceClockMasterSet2), false},
-                                                  {"T-777   (5)    ",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceSet5),             false},
-                                                  {"T-777   (5) clk",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceClockMasterSet5),  false},
-                                                  { 0, 0 }
-                                                 };
+#include "CAstroFighterBaseGame.h"
+
+class CAstroFighterGame : public CAstroFighterBaseGame
+{
+    public:
+
+        //
+        // Constructors for this game.
+        //
+
+        static IGame* createInstanceSet2(
+        );
+
+        static IGame* createInstanceClockMasterSet2(
+        );
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CAstroFighterGame(
+            const bool       clockMaster,
+            const ROM_REGION *romRegion
+        );
+
+};
+
+#endif
 
 

@@ -35,9 +35,7 @@ static const CONNECTION s_Clock_o    = {  8, "Clock"    };
 
 
 C6502ClockMasterCpu::C6502ClockMasterCpu(
-    UINT8 CLK2oHiToDInClockPulses
-) : m_CLK2oHiToDInClockPulses(CLK2oHiToDInClockPulses),
-    m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
+) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinCLK0i(g_pinMap40DIL, &s_CLK0i_i),
     m_pinCLK1o(g_pinMap40DIL, &s_CLK1o_o),
@@ -214,6 +212,10 @@ C6502ClockMasterCpu::memoryReadWrite(
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
 
+    // Critical timing section
+    noInterrupts();
+    interruptsDisabled = true;
+
     //
     // Phase 0 - Initial State
     // - Wait for CLK2 Lo
@@ -253,10 +255,6 @@ C6502ClockMasterCpu::memoryReadWrite(
     //
     CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RDY_i, HIGH);
 
-    // Critical timing section
-    noInterrupts();
-    interruptsDisabled = true;
-
     //
     // Phase 1
     // - Wait for CLK2 Hi
@@ -272,31 +270,8 @@ C6502ClockMasterCpu::memoryReadWrite(
     CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
 
     //
-    // Wait data based on master clock
-    //
-    // If this is incorrect (too long) such that CLK2o returns
-    // low then we flag this as a bus error.
-    //
-    for (int x = 0 ; x < m_CLK2oHiToDInClockPulses ; x++)
-    {
-        if (m_valueCLK2o == LOW)
-        {
-            break;
-        }
-        clockPulse();
-    }
-    CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
-
-    //
-    // D-Read.
-    //
-    if (readWrite == HIGH)
-    {
-        m_busD.digitalRead(data);
-    }
-
-    //
     // Phase 0 - Back to Initial State
+    // - Wait for data based on master clock
     // - Wait for CLK2 Lo to complete the cycle.
     //
     for (int x = 0 ; x < 100 ; x++)
@@ -305,6 +280,13 @@ C6502ClockMasterCpu::memoryReadWrite(
         {
             break;
         }
+
+        // D-Read.
+        if (readWrite == HIGH)
+        {
+            m_busD.digitalRead(data);
+        }
+
         clockPulse();
     }
     CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, LOW);

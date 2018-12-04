@@ -150,7 +150,7 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
 
     if (clockMaster)
     {
-        m_cpu = new C6502ClockMasterCpu(7);
+        m_cpu = new C6502ClockMasterCpu();
     }
     else
     {
