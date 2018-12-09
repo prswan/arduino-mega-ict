@@ -44,6 +44,7 @@ class C6502ClockMasterCpu : public ICpu
         //
 
         C6502ClockMasterCpu(
+            bool dataBusCheck
         );
 
         // ICpu Interface
@@ -122,6 +123,8 @@ class C6502ClockMasterCpu : public ICpu
 
 
     private:
+
+        bool          m_dataBusCheck;
 
         CBus          m_busA;
         CFast8BitBus  m_busD;
