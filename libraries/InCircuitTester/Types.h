@@ -135,6 +135,18 @@ typedef PERROR (*CustomFunctionCallback)(void *context);
 #define NO_CUSTOM_FUNCTION ((CustomFunctionCallback) (NULL))
 
 //
+// This is used for the delay function implementation.
+// The context supplied an ICpu object.
+//
+typedef PERROR (*DelayFunctionCallback)(void *context, unsigned long ms);
+
+//
+// Setting for the custom function that indicates none.
+//
+#define NO_DELAY_FUNCTION ((DelayFunctionCallback) (NULL))
+
+
+//
 // This is used to construct an object.
 //
 typedef void* (*GameConstructor)();

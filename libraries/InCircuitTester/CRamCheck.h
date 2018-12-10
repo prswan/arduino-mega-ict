@@ -35,7 +35,8 @@ class CRamCheck
     public:
 
         CRamCheck(
-            ICpu *cpu,
+            ICpu  *cpu,
+            const DelayFunctionCallback delayFunction,
             const RAM_REGION ramRegion[],
             const RAM_REGION ramRegionByteOnly[],
             const RAM_REGION ramRegionWriteOnly[],
@@ -125,11 +126,13 @@ class CRamCheck
 
     private:
 
-        ICpu             *m_cpu;
-        const RAM_REGION *m_ramRegion;
-        const RAM_REGION *m_ramRegionByteOnly;
-        const RAM_REGION *m_ramRegionWriteOnly;
-        void             *m_bankSwitchContext;
+        ICpu                        *m_cpu;
+        const DelayFunctionCallback  m_delayFunction;
+
+        const RAM_REGION            *m_ramRegion;
+        const RAM_REGION            *m_ramRegionByteOnly;
+        const RAM_REGION            *m_ramRegionWriteOnly;
+        void                        *m_bankSwitchContext;
 };
 
 #endif

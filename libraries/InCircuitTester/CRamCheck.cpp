@@ -31,11 +31,13 @@ static const long s_randomSize = 0x10000;
 
 CRamCheck::CRamCheck(
     ICpu *cpu,
+    const DelayFunctionCallback delayFunction,
     const RAM_REGION ramRegion[],
     const RAM_REGION ramRegionByteOnly[],
     const RAM_REGION ramRegionWriteOnly[],
     void *bankSwitchContext
 ) : m_cpu(cpu),
+    m_delayFunction(delayFunction),
     m_ramRegion(ramRegion),
     m_ramRegionByteOnly(ramRegionByteOnly),
     m_ramRegionWriteOnly(ramRegionWriteOnly),
@@ -607,7 +609,12 @@ CRamCheck::checkRandomAccess(
             //
             if ((count % (countLength / 4)) == 0)
             {
-                delay(cycle * 200);
+                error = m_delayFunction(m_cpu, cycle * 200);
+
+                if (FAILED(error))
+                {
+                    break;
+                }
             }
 
             //
@@ -686,7 +693,12 @@ CRamCheck::checkRandomAccess(
         // DRAM used on Space Invaders where the RAM fails a few seconds after the
         // data is written.
         //
-        delay(cycle * 300);
+        error = m_delayFunction(m_cpu, cycle * 300);
+
+        if (FAILED(error))
+        {
+            break;
+        }
 
         //
         // Pass 2 - verify/clear entire contents, random access

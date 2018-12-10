@@ -142,39 +142,43 @@ class CGame : public IGame
         //
 
         CGame(
-            const ROM_DATA2N      *romData2n,
-            const ROM_REGION      *romRegion,
-            const RAM_REGION      *ramRegion,
-            const RAM_REGION      *ramRegionByteOnly,
-            const RAM_REGION      *ramRegionWriteOnly,
-            const INPUT_REGION    *inputRegion,
-            const OUTPUT_REGION   *outputRegion,
-            const CUSTOM_FUNCTION *customFunction
+            const ROM_DATA2N            *romData2n,
+            const ROM_REGION            *romRegion,
+            const RAM_REGION            *ramRegion,
+            const RAM_REGION            *ramRegionByteOnly,
+            const RAM_REGION            *ramRegionWriteOnly,
+            const INPUT_REGION          *inputRegion,
+            const OUTPUT_REGION         *outputRegion,
+            const CUSTOM_FUNCTION       *customFunction,
+            const DelayFunctionCallback  delayFunction = NO_DELAY_FUNCTION
+
         );
 
         // Legacy constructor for games with ROM data2n already in SRAM.
         CGame(
-            const ROM_REGION      *romRegion,
-            const RAM_REGION      *ramRegion,
-            const RAM_REGION      *ramRegionByteOnly,
-            const RAM_REGION      *ramRegionWriteOnly,
-            const INPUT_REGION    *inputRegion,
-            const OUTPUT_REGION   *outputRegion,
-            const CUSTOM_FUNCTION *customFunction
+            const ROM_REGION            *romRegion,
+            const RAM_REGION            *ramRegion,
+            const RAM_REGION            *ramRegionByteOnly,
+            const RAM_REGION            *ramRegionWriteOnly,
+            const INPUT_REGION          *inputRegion,
+            const OUTPUT_REGION         *outputRegion,
+            const CUSTOM_FUNCTION       *customFunction,
+            const DelayFunctionCallback  delayFunction = NO_DELAY_FUNCTION
         );
 
         ~CGame();
 
         // Factored out common constructor
         void constructor(
-            const ROM_DATA2N      *romData2n,
-            const ROM_REGION      *romRegion,
-            const RAM_REGION      *ramRegion,
-            const RAM_REGION      *ramRegionByteOnly,
-            const RAM_REGION      *ramRegionWriteOnly,
-            const INPUT_REGION    *inputRegion,
-            const OUTPUT_REGION   *outputRegion,
-            const CUSTOM_FUNCTION *customFunction
+            const ROM_DATA2N            *romData2n,
+            const ROM_REGION            *romRegion,
+            const RAM_REGION            *ramRegion,
+            const RAM_REGION            *ramRegionByteOnly,
+            const RAM_REGION            *ramRegionWriteOnly,
+            const INPUT_REGION          *inputRegion,
+            const OUTPUT_REGION         *outputRegion,
+            const CUSTOM_FUNCTION       *customFunction,
+            const DelayFunctionCallback  delayFunction
         );
 
         //
@@ -227,6 +231,15 @@ class CGame : public IGame
         );
 
         //
+        // Default implementation of the delay function that just
+        // uses the built-in function.
+        //
+        static PERROR delayFunction(
+            void *context,
+            unsigned long ms
+        );
+
+        //
         // These are filled in by the derived concrete game and are SRAM copies
         // of the supplied PROGMEM source data.
         //
@@ -239,6 +252,11 @@ class CGame : public IGame
         INPUT_REGION    *m_inputRegion;
         OUTPUT_REGION   *m_outputRegion;
         CUSTOM_FUNCTION *m_customFunction;
+
+        //
+        // The delay function to use for some tests
+        //
+        DelayFunctionCallback m_delayFunction;
 
         //
         // The applicable processor for this game.

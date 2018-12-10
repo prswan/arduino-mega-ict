@@ -31,14 +31,15 @@
 #include <avr/pgmspace.h>
 
 CGame::CGame(
-    const ROM_DATA2N      *romData2n,
-    const ROM_REGION      *romRegion,
-    const RAM_REGION      *ramRegion,
-    const RAM_REGION      *ramRegionByteOnly,
-    const RAM_REGION      *ramRegionWriteOnly,
-    const INPUT_REGION    *inputRegion,
-    const OUTPUT_REGION   *outputRegion,
-    const CUSTOM_FUNCTION *customFunction
+    const ROM_DATA2N            *romData2n,
+    const ROM_REGION            *romRegion,
+    const RAM_REGION            *ramRegion,
+    const RAM_REGION            *ramRegionByteOnly,
+    const RAM_REGION            *ramRegionWriteOnly,
+    const INPUT_REGION          *inputRegion,
+    const OUTPUT_REGION         *outputRegion,
+    const CUSTOM_FUNCTION       *customFunction,
+    const DelayFunctionCallback  delayFunction
 )
 {
     constructor(romData2n,
@@ -48,18 +49,20 @@ CGame::CGame(
                 ramRegionWriteOnly,
                 inputRegion,
                 outputRegion,
-                customFunction);
+                customFunction,
+                delayFunction);
 }
 
 
 CGame::CGame(
-    const ROM_REGION      *romRegion,
-    const RAM_REGION      *ramRegion,
-    const RAM_REGION      *ramRegionByteOnly,
-    const RAM_REGION      *ramRegionWriteOnly,
-    const INPUT_REGION    *inputRegion,
-    const OUTPUT_REGION   *outputRegion,
-    const CUSTOM_FUNCTION *customFunction
+    const ROM_REGION            *romRegion,
+    const RAM_REGION            *ramRegion,
+    const RAM_REGION            *ramRegionByteOnly,
+    const RAM_REGION            *ramRegionWriteOnly,
+    const INPUT_REGION          *inputRegion,
+    const OUTPUT_REGION         *outputRegion,
+    const CUSTOM_FUNCTION       *customFunction,
+    const DelayFunctionCallback  delayFunction
 )
 {
     constructor(0,
@@ -69,7 +72,8 @@ CGame::CGame(
                 ramRegionWriteOnly,
                 inputRegion,
                 outputRegion,
-                customFunction);
+                customFunction,
+                delayFunction);
 }
 
 
@@ -146,6 +150,7 @@ CGame::ramCheckAll(
     if (m_ramRegion[0].end != 0)
     {
         CRamCheck ramCheck( m_cpu,
+                            m_delayFunction,
                             m_ramRegion,
                             m_ramRegionByteOnly,
                             m_ramRegionWriteOnly,
@@ -168,6 +173,7 @@ CGame::ramCheckAllChipSelect(
     if (m_ramRegion[0].end != 0)
     {
         CRamCheck ramCheck( m_cpu,
+                            m_delayFunction,
                             m_ramRegion,
                             m_ramRegionByteOnly,
                             m_ramRegionWriteOnly,
@@ -190,6 +196,7 @@ CGame::ramCheckAllRandomAccess(
     if (m_ramRegionByteOnly[0].end != 0)
     {
         CRamCheck ramCheck( m_cpu,
+                            m_delayFunction,
                             m_ramRegion,
                             m_ramRegionByteOnly,
                             m_ramRegionWriteOnly,
@@ -357,6 +364,7 @@ CGame::ramCheck(
             const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
 
             CRamCheck ramCheck( m_cpu,
+                                m_delayFunction,
                                 m_ramRegion,
                                 m_ramRegionByteOnly,
                                 m_ramRegionWriteOnly,
@@ -389,6 +397,7 @@ CGame::ramCheckRandomAccess(
             const RAM_REGION *region = &m_ramRegionByteOnly[m_RamWriteReadByteRegion];
 
             CRamCheck ramCheck( m_cpu,
+                                m_delayFunction,
                                 m_ramRegion,
                                 m_ramRegionByteOnly,
                                 m_ramRegionWriteOnly,
@@ -420,6 +429,7 @@ CGame::ramCheckAddress(
             const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
 
             CRamCheck ramCheck( m_cpu,
+                                m_delayFunction,
                                 m_ramRegion,
                                 m_ramRegionByteOnly,
                                 m_ramRegionWriteOnly,
@@ -452,6 +462,7 @@ CGame::ramWriteRead(
             const RAM_REGION *region = &m_ramRegion[m_RamWriteReadRegion];
 
             CRamCheck ramCheck( m_cpu,
+                                m_delayFunction,
                                 m_ramRegion,
                                 m_ramRegionByteOnly,
                                 m_ramRegionWriteOnly,
@@ -494,6 +505,7 @@ CGame::ramWriteAllAD(
     PERROR error = errorSuccess;
 
     CRamCheck ramCheck( m_cpu,
+                        m_delayFunction,
                         m_ramRegion,
                         m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
@@ -513,6 +525,7 @@ CGame::ramWriteAllLo(
     PERROR error = errorSuccess;
 
     CRamCheck ramCheck( m_cpu,
+                        m_delayFunction,
                         m_ramRegion,
                         m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
@@ -532,6 +545,7 @@ CGame::ramWriteAllHi(
     PERROR error = errorSuccess;
 
     CRamCheck ramCheck( m_cpu,
+                        m_delayFunction,
                         m_ramRegion,
                         m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
@@ -551,6 +565,7 @@ CGame::ramReadAll(
     PERROR error = errorSuccess;
 
     CRamCheck ramCheck( m_cpu,
+                        m_delayFunction,
                         m_ramRegion,
                         m_ramRegionByteOnly,
                         m_ramRegionWriteOnly,
@@ -913,14 +928,15 @@ CGame::onCustomKeyMove(
 
 
 void CGame::constructor(
-    const ROM_DATA2N      *romData2n,
-    const ROM_REGION      *romRegion,
-    const RAM_REGION      *ramRegion,
-    const RAM_REGION      *ramRegionByteOnly,
-    const RAM_REGION      *ramRegionWriteOnly,
-    const INPUT_REGION    *inputRegion,
-    const OUTPUT_REGION   *outputRegion,
-    const CUSTOM_FUNCTION *customFunction
+    const ROM_DATA2N            *romData2n,
+    const ROM_REGION            *romRegion,
+    const RAM_REGION            *ramRegion,
+    const RAM_REGION            *ramRegionByteOnly,
+    const RAM_REGION            *ramRegionWriteOnly,
+    const INPUT_REGION          *inputRegion,
+    const OUTPUT_REGION         *outputRegion,
+    const CUSTOM_FUNCTION       *customFunction,
+    const DelayFunctionCallback  delayFunction
 )
 {
     m_interrupt              = ICpu::NMI;
@@ -963,6 +979,16 @@ void CGame::constructor(
     m_outputRegion = mallocProgMem(outputRegion);
 
     m_customFunction = mallocProgMem(customFunction);
+
+    // Select the default if none was provided
+    if (delayFunction == NO_DELAY_FUNCTION)
+    {
+        m_delayFunction = CGame::delayFunction;
+    }
+    else
+    {
+        m_delayFunction = delayFunction;
+    }
 }
 
 
@@ -1150,4 +1176,17 @@ void CGame::addAddressOffset(
         outputRegion[i].address += offset;
     }
 }
+
+
+// Default delay function
+static PERROR CGame::delayFunction(
+    void *context,
+    unsigned long ms
+)
+{
+    // NOTE: The context supplied is an ICpu object.
+    delay(ms);
+    return ERROR_SUCCESS;
+}
+
 

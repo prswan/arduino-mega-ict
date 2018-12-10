@@ -36,6 +36,11 @@ class CAstroFighterBaseGame : public CGame
         // CAstroFighterBaseGame
         //
 
+        static PERROR delayFunction(
+            void *context,
+            unsigned long ms
+        );
+
     protected:
 
         CAstroFighterBaseGame(
