@@ -165,6 +165,11 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
 
     // The interrupt is based on an internal vector
     m_interruptAutoVector = true;
+
+    // Clear the sound latch to quiet the sound hardware
+    m_cpu->memoryWrite(0x8006L, 0);
+    m_cpu->memoryWrite(0x8007L, 0);
+
 }
 
 
