@@ -120,7 +120,8 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
            s_ramRegionWriteOnly,
            inputRegion,
            outputRegion,
-           s_customFunction )
+           s_customFunction,
+           clockMaster ? CAstroFighterBaseGame::delayFunction : NO_DELAY_FUNCTION )
 {
     //        _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _
     // XTAL    \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/
@@ -150,11 +151,11 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
 
     if (clockMaster)
     {
-        m_cpu = new C6502ClockMasterCpu(7);
+        m_cpu = new C6502ClockMasterCpu(false);
     }
     else
     {
-        m_cpu = new C6502Cpu();
+        m_cpu = new C6502Cpu(false);
     }
 
     m_cpu->idle();
@@ -164,6 +165,11 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
 
     // The interrupt is based on an internal vector
     m_interruptAutoVector = true;
+
+    // Clear the sound latch to quiet the sound hardware
+    m_cpu->memoryWrite(0x8006L, 0);
+    m_cpu->memoryWrite(0x8007L, 0);
+
 }
 
 
@@ -172,5 +178,33 @@ CAstroFighterBaseGame::~CAstroFighterBaseGame(
 {
     delete m_cpu;
     m_cpu = (ICpu *) NULL;
+}
+
+
+static PERROR CAstroFighterBaseGame::delayFunction(
+    void *context,
+    unsigned long ms
+)
+{
+    C6502ClockMasterCpu *cpu = (C6502ClockMasterCpu *) context;
+    PERROR error = errorSuccess;
+    UINT16 data;
+
+    unsigned long startTime = millis();
+    unsigned long endTime   = startTime + ms;
+
+    // This *should* be aligned
+    while (millis() < endTime)
+    {
+        for (int x = 0 ; x < 64 ; x++)
+        {
+            cpu->clockPulse();
+        }
+    }
+
+    // This is to bring clock alignment back to the start of a cycle
+    error = cpu->memoryRead(0xFFFF, &data);
+
+    return error;
 }
 

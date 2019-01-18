@@ -73,7 +73,19 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
                                                         {NO_BANK_SWITCH, 0x8005L, 0x02, 0x00,  "c2C", "Out1  "}, // Video control #2 - D1 - Out 1.
                                                         {NO_BANK_SWITCH, 0x8005L, 0x04, 0x00,  "c2C", "ClrSel"}, // Video control #2 - D2 - Colour select.
                                                         {NO_BANK_SWITCH, 0x8005L, 0x08, 0x00,  "c2C", "Red on"}, // Video control #2 - D3 - Red screen
-                                                        {NO_BANK_SWITCH, 0x8006L, 0xFF, 0x00,  "???", "Sound "}, // Sound control
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x01, 0x80,  "???", "Sonar "}, // Sound - Sonar
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x02, 0x80,  "???", "UFO Ex"}, // Sound - UFO Explosion
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x04, 0x80,  "???", "Morse "}, // Sound - Morse code
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x08, 0x80,  "???", "Sh Mis"}, // Sound - Ship Missile
+                                                        //
+                                                        // On my PCB the UFO sound generator is present & working but not connected
+                                                        // to the sound output mixer and thus not present in the game.
+                                                        // The missing resistor appears to be a factory omission.
+                                                        //
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x10, 0x80,  "???", "UFO   "}, // Sound - UFO
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x20, 0x80,  "???", "UFO UW"}, // Sound - UFO Under Water
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x40, 0x80,  "???", "Exp   "}, // Sound - Explosion
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x80, 0x00,  "???", "Snd On"}, // Sound mute
                                                         {NO_BANK_SWITCH, 0x8007L, 0xFF, 0x00,  "???", "Prot. "}, // Protection write
                                                         {0}
                                                       }; // end of list

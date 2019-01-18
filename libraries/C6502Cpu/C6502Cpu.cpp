@@ -30,7 +30,9 @@
 
 
 C6502Cpu::C6502Cpu(
-) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
+    bool dataBusCheck
+) : m_dataBusCheck(dataBusCheck),
+    m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinCLK1o(g_pinMap40DIL, &s_CLK1o_o),
     m_pinCLK2o(g_pinMap40DIL, &s_CLK2o_o)
@@ -111,7 +113,10 @@ C6502Cpu::check(
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
 
     // The data bus should be uncontended and pulled high.
-    CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
+    if (m_dataBusCheck)
+    {
+        CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
+    }
 
     // Loop to detect a clock by sampling and detecting both high and lows.
     {

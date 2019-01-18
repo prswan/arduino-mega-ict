@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2018, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,38 +22,41 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CAstroFighterBaseGame_h
-#define CAstroFighterBaseGame_h
+#ifndef CAstroFighterGame_h
+#define CAstroFighterGame_h
 
-#include "CGame.h"
+#include "CAstroFighterBaseGame.h"
 
-
-class CAstroFighterBaseGame : public CGame
+class CAstroFighterGame : public CAstroFighterBaseGame
 {
     public:
 
         //
-        // CAstroFighterBaseGame
+        // Constructors for this game.
         //
 
-        static PERROR delayFunction(
-            void *context,
-            unsigned long ms
+        static IGame* createInstanceSet2(
         );
 
-    protected:
-
-        CAstroFighterBaseGame(
-            const bool          clockMaster,
-            const ROM_REGION    *romRegion,
-            const INPUT_REGION  *inputRegion,
-            const OUTPUT_REGION *outputRegion
+        static IGame* createInstanceClockMasterSet2(
         );
 
-        ~CAstroFighterBaseGame(
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CAstroFighterGame(
+            const bool       clockMaster,
+            const ROM_REGION *romRegion
         );
 
 };
 
 #endif
+
 
