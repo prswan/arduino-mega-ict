@@ -270,7 +270,11 @@ static const CONNECTION s_D_iot[] = { {14, "D0" },
 
 
 CZ80ACpu::CZ80ACpu(
-    UINT32 vramAddress
+    UINT32                vramAddress,
+    AddressRemapCallback  addressRemapCallback,
+    void                 *addressRemapCallbackContext,
+    DataRemapCallback     dataRemapCallback,
+    void                 *dataRemapCallbackContext
 ) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pin_RD(g_pinMap40DIL, &s__RD_ot),
@@ -278,7 +282,11 @@ CZ80ACpu::CZ80ACpu(
     m_pin_WAIT(g_pinMap40DIL, &s__WAIT_i),
     m_pin_IORQ(g_pinMap40DIL, &s__IORQ_ot),
     m_pin_MREQ(g_pinMap40DIL, &s__MREQ_ot),
-    m_vramAddress(vramAddress)
+    m_vramAddress(vramAddress),
+    m_addressRemapCallback(addressRemapCallback),
+    m_addressRemapCallbackContext(addressRemapCallbackContext),
+    m_dataRemapCallback(dataRemapCallback),
+    m_dataRemapCallbackContext(dataRemapCallbackContext)
 {
 };
 
@@ -479,6 +487,17 @@ CZ80ACpu::memoryRead(
     register UINT8 r1;
     register UINT8 r2;
 
+    // Before processing anything, perform any address remapping.
+    if (m_addressRemapCallback)
+    {
+        error = m_addressRemapCallback(m_addressRemapCallbackContext,
+                                       address, &address);
+        if (FAILED(error))
+        {
+            return error;
+        }
+    }
+
     // Enable the address bus and set the value (the lower 16 bits only)
     m_busA.pinMode(OUTPUT);
     m_busA.digitalWrite((UINT16) (address & 0xFFFF));
@@ -522,6 +541,16 @@ CZ80ACpu::memoryRead(
 
     interrupts();
 
+    // Before return perform any data remapping.
+    if (SUCCESS(error))
+    {
+        if (m_dataRemapCallback)
+        {
+            error = m_dataRemapCallback(m_dataRemapCallbackContext,
+                                           address, *data, data);
+        }
+    }
+
     return error;
 }
 
@@ -538,6 +567,28 @@ CZ80ACpu::memoryWrite(
 
     register UINT8 r1;
     register UINT8 r2;
+
+    // Before processing anything, perform any address remapping.
+    if (m_addressRemapCallback)
+    {
+        error = m_addressRemapCallback(m_addressRemapCallbackContext,
+                                       address, &address);
+        if (FAILED(error))
+        {
+            return error;
+        }
+    }
+
+    // Before write perform any data remapping.
+    if (m_dataRemapCallback)
+    {
+        error = m_dataRemapCallback(m_dataRemapCallbackContext,
+                                       address, data, &data);
+        if (FAILED(error))
+        {
+            return error;
+        }
+    }
 
     // Enable the address bus and set the value.
     m_busA.pinMode(OUTPUT);

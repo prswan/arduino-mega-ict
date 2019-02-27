@@ -82,7 +82,6 @@ typedef struct _ERROR {
 //
 typedef PERROR (*SelectorCallback)(void *context, int key);
 
-
 //
 // This is used as the callback for any bank switching.
 //
@@ -103,6 +102,17 @@ typedef PERROR (*AddressRemapCallback)(void *context, UINT32 addressIn, UINT32 *
 // Setting for the address remap callback that none is required.
 //
 #define NO_ADDRESS_REMAP ((AddressRemapCallback) (NULL))
+
+//
+// This is used as the callback for data bit remapping.
+// The remapped data is returned based on the supplied address.
+//
+typedef PERROR (*DataRemapCallback)(void *context, UINT32 address, UINT16 dataIn, UINT16 *dataOut);
+
+//
+// Setting for the data remap callback that none is required.
+//
+#define NO_DATA_REMAP ((DataRemapCallback) (NULL))
 
 //
 // This is used as the callback for external interrupt setup/enable.

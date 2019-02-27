@@ -39,10 +39,34 @@ class CZ80Cpu : public ICpu
         //
         // Constructor
         //
+        // vramAddress
+        //  If a none-zero VRAM address is supplied then WAIT toggling should be
+        //  active for that access. This is verified in the "check" function
+        //  because there is no timeout in the bus cycles and thus they hang if the
+        //  VRAM WAIT hold-off isn't working.
+        //
+        // addressRemapCallback
+        //  If this is supplied then the callback is made as the first action
+        //  for all IO operations to allow the caller to remap the address.
+        //  e.g. to support basic copy protection schemes that swap address bits.
+        //
+        // dataRemapCallback
+        //  If this is supplied then the callback is made:
+        //    reads  - after any address remap and after any data read to allow the
+        //             read data to be post-remapped.
+        //    writes - after any address remap before any data is written to allow
+        //             the write data to be pre-remapped.
+        //
 
         CZ80Cpu(
+            UINT32                vramAddress                 = 0,
+            AddressRemapCallback  addressRemapCallback        = NO_ADDRESS_REMAP,
+            void                 *addressRemapCallbackContext = NULL,
+            DataRemapCallback     dataRemapCallback           = NO_DATA_REMAP,
+            void                 *dataRemapCallbackContext    = NULL
         );
 
+        //
         // ICpu Interface
         //
 
@@ -117,6 +141,13 @@ class CZ80Cpu : public ICpu
 
         CFastPin      m_pin_IORQ;
         CFastPin      m_pin_MREQ;
+
+        UINT32        m_vramAddress;
+
+        AddressRemapCallback  m_addressRemapCallback;
+        void                 *m_addressRemapCallbackContext;
+        DataRemapCallback     m_dataRemapCallback;
+        void                 *m_dataRemapCallbackContext;
 
 };
 
