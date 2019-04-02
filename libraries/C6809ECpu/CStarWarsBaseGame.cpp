@@ -146,6 +146,7 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                  
                                                             {CStarWarsBaseGame::test24,                      "DV Test 24"},
                                                             {CStarWarsBaseGame::test25,                      "DV Test 25"},
                                                             {CStarWarsBaseGame::testRepeatLastMatrixProgram, "Repeat MX "},
+                                                            {CStarWarsBaseGame::testRepeatLastDividerProgram,"Repeat DV "},
                                                             {CStarWarsBaseGame::testClockPulse,              "Clk Pulse "},
                                                             {CStarWarsBaseGame::testCapture,                 "Capture   "},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
@@ -161,7 +162,9 @@ CStarWarsBaseGame::CStarWarsBaseGame(
            s_outputRegion,
            s_customFunction ),
     m_clockPulseCount(0),
-    m_lastMatrixProgramAddress(0)
+    m_lastMatrixProgramAddress(0),
+    m_lastDivisorDataHi(0),
+    m_lastDivisorDataLo(0)
 {
     m_cpu = new C6809ECpu();
     m_cpu->idle();
@@ -330,6 +333,11 @@ CStarWarsBaseGame::testDivider(
     // Load divisor
     CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRH_A, (divisor >> 8) & 0xFF);
     CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRL_A, (divisor >> 0) & 0xFF);
+
+    // Keep the trigger information for step & capture testing
+    thisGame->m_lastDivisorDataHi = (divisor >> 8) & 0xFF;
+    thisGame->m_lastDivisorDataLo = (divisor >> 0) & 0xFF;
+
     thisGame->m_clockPulseCount = 0;
 
     // Wait for a few clocks.
@@ -626,6 +634,26 @@ CStarWarsBaseGame::testRepeatLastMatrixProgram(
 
     // Write the program address to start
     CHECK_CPU_WRITE_EXIT(error, cpu, c_MW0_A, (thisGame->m_lastMatrixProgramAddress >> 2) & 0xFF);
+    thisGame->m_clockPulseCount = 0;
+
+Exit:
+    return error;
+}
+
+
+PERROR
+CStarWarsBaseGame::testRepeatLastDividerProgram(
+    void   *context
+)
+{
+    CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+
+    // Load divisor
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRH_A, thisGame->m_lastDivisorDataHi);
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRL_A, thisGame->m_lastDivisorDataLo);
+
     thisGame->m_clockPulseCount = 0;
 
 Exit:
