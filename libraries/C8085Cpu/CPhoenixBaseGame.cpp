@@ -93,17 +93,35 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 //
 // Output region is the same for all versions on this board set.
 //
+/************************************************//************************************************/
+/* Effect 2 - A                                 *//* Effect 1 - B                                 */
+/* - bird flying, bird/phoenix/spaceship hit    *//* - shield, bird explode, level 3 & 4 siren    */
+/* - phoenix wing hit                           *//* - level 5 spaceship                          */
+/************************************************//************************************************/
+//
+// The Phoenix\Sounds folder contains recordings of the sound tests from a known good GGI PCB
+//
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                     "012", "012345"
                                                         {NO_BANK_SWITCH, 0x5000L, 0x01, 0x00,  "c37", "V Bank"}, // Video bank select
                                                         {NO_BANK_SWITCH, 0x5000L, 0x02, 0x00,  "c37", "C Bank"}, // Colour bank select
+                                                        //
                                                         {NO_BANK_SWITCH, 0x5800L, 0x55, 0x00,  "r08", "Scrl55"}, // Background scroll register
                                                         {NO_BANK_SWITCH, 0x5800L, 0xAA, 0x00,  "r08", "ScrlAA"}, // Background scroll register
                                                         {NO_BANK_SWITCH, 0x5800L, 0xFF, 0x00,  "r08", "ScrlFF"}, // Background scroll register
-                                                        {NO_BANK_SWITCH, 0x6000L, 0x0F, 0x0F,  "c06", "SCntA "}, // Sound A counter
-                                                        {NO_BANK_SWITCH, 0x6000L, 0x38, 0x0F,  "c06", "SFrqA "}, // Sound A frequency
+                                                        //
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x01, 0x0F,  "c06", "SCntA1"}, // Sound A counter, bit 1
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x02, 0x0F,  "c06", "SCntA2"}, // Sound A counter, bit 2
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x04, 0x0F,  "c06", "SCntA4"}, // Sound A counter, bit 4
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x08, 0x0F,  "c06", "SCntA8"}, // Sound A counter, bit 8
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x18, 0x0F,  "c06", "SFrqA1"}, // Sound A frequency, bit 1
+                                                        {NO_BANK_SWITCH, 0x6000L, 0x28, 0x0F,  "c06", "SFrqA2"}, // Sound A frequency, bit 2
                                                         {NO_BANK_SWITCH, 0x6000L, 0x40, 0x0F,  "c06", "SNoiA1"}, // Sound A noise
                                                         {NO_BANK_SWITCH, 0x6000L, 0x80, 0x0F,  "c06", "SNoiA2"}, // Sound A noise
-                                                        {NO_BANK_SWITCH, 0x6800L, 0x0F, 0x0F,  "c05", "SCntB "}, // Sound B counter
+                                                        //
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x01, 0x0F,  "c05", "SCntB1"}, // Sound B counter, bit 1
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x02, 0x0F,  "c05", "SCntB2"}, // Sound B counter, bit 2
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x04, 0x0F,  "c05", "SCntB4"}, // Sound B counter, bit 4
+                                                        {NO_BANK_SWITCH, 0x6800L, 0x08, 0x0F,  "c05", "SCntB8"}, // Sound B counter, bit 8
                                                         {NO_BANK_SWITCH, 0x6800L, 0x18, 0x0F,  "c05", "SFrqB "}, // Sound B frequency
                                                         {NO_BANK_SWITCH, 0x6800L, 0x28, 0x0F,  "c05", "SFltB "}, // Sound B filter
                                                         {NO_BANK_SWITCH, 0x6800L, 0x80, 0x0F,  "c05", "Mus 2 "}, // Sound B music, ending (MN6221AA)
