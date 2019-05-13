@@ -25,6 +25,7 @@
 #include "CDambustersBaseGame.h"
 #include "CZ80Cpu.h"
 #include "Bitswap.h"
+#include "CRomCheck.h"
 #include <DFR_Key.h>
 
 //
@@ -56,7 +57,7 @@
 // RAM region is the same for all games on this board set.
 //
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
-                                                  {NO_BANK_SWITCH, 0xC000, 0xC7FF, 1, 0xFF, " --", "Prog. "}, // "Program RAM, 6116"
+                                                  {NO_BANK_SWITCH, 0xC000, 0xC7FF, 1, 0xFF, "R13", "Prog. "}, // "Program RAM, 6116"
                                                   {NO_BANK_SWITCH, 0xD800, 0xD8FF, 1, 0x0F, " 4F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
                                                   {NO_BANK_SWITCH, 0xD800, 0xD8FF, 1, 0xF0, " 5F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
                                                   //
@@ -141,6 +142,7 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
 // Custom functions implemented for this game.
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
+                                                            {CDambustersBaseGame::nvRamCrc,       "NV RAM CRC"},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -273,7 +275,6 @@ CDambustersBaseGame::onAddressRemap(
          ((addressIn & 0xF000) == 0x3000) || // d12
          ((addressIn & 0xF000) == 0x6000) )  // d09
     {
-//      *addressOut = BITSWAP16((UINT16) addressIn, 15,14,13,12,4,10,9,8,7,6,5,3,11,2,1,0);
         *addressOut = OUTBITSWAP16((UINT16) addressIn, 15,14,13,12,4,10,9,8,7,6,5,3,11,2,1,0);
     }
     else
@@ -308,6 +309,49 @@ CDambustersBaseGame::onDataRemap(
     else
     {
         *dataOut = dataIn;
+    }
+
+    return error;
+}
+
+
+//
+// Custom function to calculate the CRC of the NV RAM to verify it's keeping data
+//
+PERROR
+CDambustersBaseGame::nvRamCrc(
+    void *cDambustersBaseGame
+)
+{
+    CDambustersBaseGame *thisGame = (CDambustersBaseGame *) cDambustersBaseGame;
+    PERROR error = errorSuccess;
+
+    //
+    // The CRC function is currently intended for ROM's so we make a
+    // ROM_REGION representation for the battery backed RAM we want to CRC
+    //
+    // Known CRC:
+    //   RAM Check All    => 0xdd54b6c9
+    //   RAM Write All AD => 0x9f5edd58
+    //
+    ROM_REGION nvRamRegion = {NO_BANK_SWITCH, 0xC000, 0x0800, NULL, 0x00000000, "R13"};
+
+    CRomCheck romCheck( thisGame->m_cpu,
+                        thisGame->m_romRegion,
+                        (void *) thisGame );
+
+    UINT32 crc = 0;
+
+    error = romCheck.calculateCrc(&nvRamRegion, &crc);
+
+    if (SUCCESS(error))
+    {
+        error = errorCustom;
+
+        error->code = ERROR_SUCCESS;
+        error->description = "OK:";
+        error->description += nvRamRegion.location;
+        STRING_UINT32_HEX(error->description, crc);
     }
 
     return error;

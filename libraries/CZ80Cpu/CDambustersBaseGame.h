@@ -52,6 +52,13 @@ class CDambustersBaseGame : public CGame
             UINT16 *dataOut
         );
 
+        //
+        // Custom function to calculate the CRC of the NV RAM to verify it's keeping data
+        //
+        static PERROR nvRamCrc(
+            void *cDambustersBaseGame
+        );
+
     protected:
 
         CDambustersBaseGame(
