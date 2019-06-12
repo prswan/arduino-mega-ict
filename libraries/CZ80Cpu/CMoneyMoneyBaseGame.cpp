@@ -136,6 +136,10 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
                                                         {NO_BANK_SWITCH, 0x6C02L, 0x01, 0x00,  "c3G", "SndRst"}, // Reset sound
                                                         {NO_BANK_SWITCH, 0x6C06L, 0x01, 0x00,  "c3G", "Cntr  "}, // Coin counter
                                                         {NO_BANK_SWITCH, 0x6C07L, 0x01, 0x00,  "c3G", "IntEn "}, // Int (NMI) enable & reset
+                                                        {NO_BANK_SWITCH, 0x7803L, 0x01, 0x93,  "c4H", "Mode  "}, // 8255 Mode, PC lower in/out
+                                                        {NO_BANK_SWITCH, 0x7803L, 0x01, 0x09,  "c4H", "PC4 5I"}, // 8255 PC4 DSW 5I
+                                                        {NO_BANK_SWITCH, 0x7803L, 0x01, 0x0B,  "c4H", "PC5 4I"}, // 8255 PC5 DSW 4I
+                                                        {NO_BANK_SWITCH, 0x7803L, 0x01, 0x0D,  "c4H", "PC6 3I"}, // 8255 PC6 DSW 3I
                                                         {0}
                                                       }; // end of list
 
