@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CStarWarsAvgBaseGame.h"
-#include "C6809ECpu.h"
+#include "C6809EClockMasterCpu.h"
 
 //
 // Notes
@@ -98,7 +98,7 @@ CStarWarsAvgBaseGame::CStarWarsAvgBaseGame(
            s_outputRegion,
            s_customFunction )
 {
-    m_cpu = new C6809ECpu();
+    m_cpu = new C6809EClockMasterCpu();
     m_cpu->idle();
 
     // A timer is on the INT pin (vector game thus no VBALNK).

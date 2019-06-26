@@ -22,8 +22,8 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef C6809ECpu_h
-#define C6809ECpu_h
+#ifndef C6809EClockMasterCpu_h
+#define C6809EClockMasterCpu_h
 
 #include "Arduino.h"
 #include "ICpu.h"
@@ -32,7 +32,7 @@
 #include "CFastPin.h"
 
 
-class C6809ECpu : public ICpu
+class C6809EClockMasterCpu : public ICpu
 {
     public:
 
@@ -40,7 +40,7 @@ class C6809ECpu : public ICpu
         // Constructor
         //
 
-        C6809ECpu(
+        C6809EClockMasterCpu(
         );
 
         // ICpu Interface
@@ -97,7 +97,7 @@ class C6809ECpu : public ICpu
         );
 
         //
-        // C6809ECpu Interface
+        // C6809EClockMasterCpu Interface
         //
 
         void

@@ -24,7 +24,7 @@
 //
 #include "Arduino.h"
 #include "Error.h"
-#include "C6809ECpu.h"
+#include "C6809EClockMasterCpu.h"
 #include "PinMap.h"
 
 
@@ -94,7 +94,7 @@ static const CONNECTION s_D_iot[] = { {31, "D0" },
                                       {25, "D6" },
                                       {24, "D7" } }; // 8 bits.
 
-C6809ECpu::C6809ECpu(
+C6809EClockMasterCpu::C6809EClockMasterCpu(
 ) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinRW(g_pinMap40DIL, &s_RW_o),
@@ -109,7 +109,7 @@ C6809ECpu::C6809ECpu(
 // and idle state ready for the next bus cycle.
 //
 PERROR
-C6809ECpu::idle(
+C6809EClockMasterCpu::idle(
 )
 {
     pinMode(g_pinMap40DIL[s_GND_i.pin],    INPUT_PULLUP);
@@ -165,7 +165,7 @@ C6809ECpu::idle(
 // to idle state.
 //
 PERROR
-C6809ECpu::check(
+C6809EClockMasterCpu::check(
 )
 {
     PERROR error = errorSuccess;
@@ -254,7 +254,7 @@ Exit:
 
 
 UINT8
-C6809ECpu::dataBusWidth(
+C6809EClockMasterCpu::dataBusWidth(
     UINT32 address
 )
 {
@@ -263,7 +263,7 @@ C6809ECpu::dataBusWidth(
 
 
 UINT8
-C6809ECpu::dataAccessWidth(
+C6809EClockMasterCpu::dataAccessWidth(
     UINT32 address
 )
 {
@@ -272,7 +272,7 @@ C6809ECpu::dataAccessWidth(
 
 
 PERROR
-C6809ECpu::memoryReadWrite(
+C6809EClockMasterCpu::memoryReadWrite(
     UINT32 address,
     UINT16 *data,
     int    readWrite
@@ -450,7 +450,7 @@ Exit:
 }
 
 PERROR
-C6809ECpu::memoryRead(
+C6809EClockMasterCpu::memoryRead(
     UINT32 address,
     UINT16 *data
 )
@@ -459,7 +459,7 @@ C6809ECpu::memoryRead(
 }
 
 PERROR
-C6809ECpu::memoryWrite(
+C6809EClockMasterCpu::memoryWrite(
     UINT32 address,
     UINT16 data
 )
@@ -469,7 +469,7 @@ C6809ECpu::memoryWrite(
 
 
 PERROR
-C6809ECpu::waitForInterrupt(
+C6809EClockMasterCpu::waitForInterrupt(
     Interrupt interrupt,
     bool      active,
     UINT32    timeoutInClockPulses
@@ -480,7 +480,7 @@ C6809ECpu::waitForInterrupt(
 
 
 PERROR
-C6809ECpu::acknowledgeInterrupt(
+C6809EClockMasterCpu::acknowledgeInterrupt(
     UINT16 *response
 )
 {
@@ -491,7 +491,7 @@ C6809ECpu::acknowledgeInterrupt(
 // Pulse the clock pin high.
 //
 void
-C6809ECpu::clockPulse(
+C6809EClockMasterCpu::clockPulse(
 )
 {
     m_pinClock.digitalWriteHIGH();

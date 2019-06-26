@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CStarWarsBaseGame.h"
-#include "C6809ECpu.h"
+#include "C6809EClockMasterCpu.h"
 
 //
 // Notes
@@ -166,7 +166,7 @@ CStarWarsBaseGame::CStarWarsBaseGame(
     m_lastDivisorDataHi(0),
     m_lastDivisorDataLo(0)
 {
-    m_cpu = new C6809ECpu();
+    m_cpu = new C6809EClockMasterCpu();
     m_cpu->idle();
 
     // A timer is on the INT pin (vector game thus no VBALNK).
@@ -373,7 +373,7 @@ CStarWarsBaseGame::testADC(
 )
 {
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
-    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    C6809EClockMasterCpu *cpu = (C6809EClockMasterCpu *) thisGame->m_cpu;
     PERROR error = errorSuccess;
     UINT16 data[4] = {0,0,0,0};
 
@@ -667,7 +667,7 @@ CStarWarsBaseGame::testClockPulse(
 )
 {
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
-    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    C6809EClockMasterCpu *cpu = (C6809EClockMasterCpu *) thisGame->m_cpu;
     PERROR error = errorCustom;
 
     cpu->clockPulse();
@@ -704,7 +704,7 @@ CStarWarsBaseGame::testCapture(
 )
 {
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
-    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    C6809EClockMasterCpu *cpu = (C6809EClockMasterCpu *) thisGame->m_cpu;
     PERROR error = errorCustom;
     UINT8 capture[4] = {0,0,0,0};
 
