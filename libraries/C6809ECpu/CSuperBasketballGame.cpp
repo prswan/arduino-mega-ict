@@ -29,34 +29,38 @@
 //
 
 //
-// Set I from MAME
-//                                                01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
-static const UINT16 s_romData2nSetI_14J[]    = {0x00,0x00,0xd4,0xf5,0xf5,0xdb,0xea,0x09,0x21,0xcd,0x00,0x00,0x00};
-static const UINT16 s_romData2nSetI_11J[]    = {0x32,0x2a,0xcd,0x00,0xcd,0x14,0x25,0x7d,0xc2,0x3a,0x00,0x00,0x00,0x00};
-static const UINT16 s_romData2nSetI_09J[]    = {0x32,0xc1,0xcd,0x67,0x02,0x18,0x0a,0xc3,0x00,0xf1,0x00,0x00,0x00,0x00};
+// Set G from MAME
+//                                                01   02   04   08   10   20   40   80  100  200  400  800 1000
+static const UINT16 s_romData2nSetG_14J[]    = {0x00,0x00,0x3c,0x3c,0x3d,0xf6,0xb5,0x80,0x03,0xac,0xb4,0x2d,0x3a};
+static const UINT16 s_romData2nSetG_13J[]    = {0xa1,0x10,0x07,0x57,0xa4,0xd5,0x32,0x32,0x08,0x74,0x32,0x20,0x6d};
+static const UINT16 s_romData2nSetG_11J[]    = {0xa8,0x36,0xae,0x0f,0xd4,0x01,0x40,0xec,0xa3,0x94,0x22,0x06,0x9f};
+static const UINT16 s_romData2nSetG_10J[]    = {0x5c,0xc2,0x58,0x0e,0x02,0xe3,0x94,0x21,0x80,0x25,0xc8,0xc9,0x05};
+static const UINT16 s_romData2nSetG_09J[]    = {0xc7,0xd7,0x37,0x37,0x38,0xee,0x1e,0x0f,0x1f,0xff,0x37,0x01,0x99};
 
 //
-// Set I from MAME
+// Set G from MAME
 //
-static const ROM_REGION s_romRegionSetI[] PROGMEM = { //
-                                                     {NO_BANK_SWITCH, 0x6000, 0x2000, s_romData2nSetI_14J, 0x336dc0ab, "14J"},
-                                                     {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nSetI_11J, 0xd33b82dd, "11J"},
-                                                     {NO_BANK_SWITCH, 0xC000, 0x4000, s_romData2nSetI_09J, 0x1c09cc3f, "09J"},
+static const ROM_REGION s_romRegionSetG[] PROGMEM = { //
+                                                     {NO_BANK_SWITCH, 0x6000, 0x2000, s_romData2nSetG_14J, 0x336dc0ab, "14J"},
+                                                     {NO_BANK_SWITCH, 0x8000, 0x2000, s_romData2nSetG_13J, 0xf064a9bc, "13J"},
+                                                     {NO_BANK_SWITCH, 0xA000, 0x2000, s_romData2nSetG_11J, 0xb9de7d53, "11J"},
+                                                     {NO_BANK_SWITCH, 0xC000, 0x2000, s_romData2nSetG_10J, 0xe98470a0, "10J"},
+                                                     {NO_BANK_SWITCH, 0xE000, 0x2000, s_romData2nSetG_09J, 0x1bd0cd2e, "09J"},
                                                      {0} }; // end of list
 
 
 IGame*
-CSuperBasketballGame::createInstanceSetI_09(
+CSuperBasketballGame::createInstanceSetG_09(
 )
 {
-    return (new CSuperBasketballGame(false, s_romRegionSetI));
+    return (new CSuperBasketballGame(false, s_romRegionSetG));
 }
 
 IGame*
-CSuperBasketballGame::createInstanceSetI_K1(
+CSuperBasketballGame::createInstanceSetG_K1(
 )
 {
-    return (new CSuperBasketballGame(true, s_romRegionSetI));
+    return (new CSuperBasketballGame(true, s_romRegionSetG));
 }
 
 

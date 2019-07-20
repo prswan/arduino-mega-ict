@@ -32,7 +32,13 @@
 //
 // External master clock on J14 AUX pin 8 (next to the 2-pin GND pin).
 //
-static const CONNECTION s_Clock_o    = {  8, "Clock"    };
+static const CONNECTION s_Clock_o = {  8, "Clock"    };
+
+//
+// The number of clock pulses to issue before declaring a timeout
+// waiting to transitions on the E & Q phase clocks.
+//
+static const int s_EqTimeout = 512;
 
 
 C6809EClockMasterCpu::C6809EClockMasterCpu(const C6809EPinOut *pinOut
@@ -105,7 +111,7 @@ C6809EClockMasterCpu::idle(
     m_pinBA.pinMode(OUTPUT);
 
     // Set the RW pin to output high for read
-    m_pinRW.digitalWriteLOW();
+    m_pinRW.digitalWriteHIGH();
     m_pinRW.pinMode(OUTPUT);
 
     // Set the fast E & Q pins to input
@@ -184,7 +190,7 @@ C6809EClockMasterCpu::check(
         int hiECount = 0, loECount = 0;
         int hiQCount = 0, loQCount = 0;
 
-        for (int i = 0 ; i < 1000 ; i++)
+        for (int i = 0 ; i < s_EqTimeout ; i++)
         {
             int valueE = m_pinE.digitalRead();
             int valueQ = m_pinQ.digitalRead();
@@ -257,7 +263,7 @@ C6809EClockMasterCpu::memoryReadWrite(
     // - Wait for E-Lo, Q-Lo
     // - E-falling
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueE = m_pinE.digitalRead();
         valueQ = m_pinQ.digitalRead();
@@ -305,7 +311,7 @@ C6809EClockMasterCpu::memoryReadWrite(
     // - Wait for E-Lo, Q-Hi
     // - Q-rising
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueQ = m_pinQ.digitalRead();
 
@@ -330,7 +336,7 @@ C6809EClockMasterCpu::memoryReadWrite(
     // - Wait for E-Hi, Q-Hi
     // - E-rising
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueE = m_pinE.digitalRead();
 
@@ -355,7 +361,7 @@ C6809EClockMasterCpu::memoryReadWrite(
     // - Wait for E-Hi, Q-Lo
     // - Q-falling
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueQ = m_pinQ.digitalRead();
 
@@ -375,7 +381,7 @@ C6809EClockMasterCpu::memoryReadWrite(
     // - Wait for E-Lo, Q-Lo
     // - E-falling
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueE = m_pinE.digitalRead();
 

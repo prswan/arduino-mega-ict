@@ -35,11 +35,12 @@ class CSuperBasketballGame : public CSuperBasketballBaseGame
         // Constructors for this game.
         //
         // The game PCB is dual-padded for either 6809E or Koanmi 1 CPU.
+        //
 
-        static IGame* createInstanceSetI_09(
+        static IGame* createInstanceSetG_09(
         );
 
-        static IGame* createInstanceSetI_K1(
+        static IGame* createInstanceSetG_K1(
         );
 
         //
