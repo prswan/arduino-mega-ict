@@ -25,17 +25,22 @@
 #include <C6809EGenericGame.h>
 #include <CStarWarsGame.h>
 #include <CStarWarsAvgGame.h>
+#include <CSuperBasketballGame.h>
+#include <CHyperSportsGame.h>
 
 //
 // The initial selector to select the game to test.
 //
 static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2716),    false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2732),    false},
-                                                  {"Star Wars      ",  onSelectGame,    (void*) (CStarWarsGame::createInstance),            false},
-                                                  {"Star Wars (1)  ",  onSelectGame,    (void*) (CStarWarsGame::createInstanceSet1),        false},
-                                                  {"Star Wars (O)  ",  onSelectGame,    (void*) (CStarWarsGame::createInstanceSetO),        false},
-                                                  {"Star Wars AVG  ",  onSelectGame,    (void*) (CStarWarsAvgGame::createInstance),         false},
+                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2716),       false},
+                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C6809EGenericGame::createInstance2732),       false},
+                                                  {"Hyp. Sprts (1) ",  onSelectGame,    (void*) (CHyperSportsGame::createInstanceSet1),        false},
+                                                  {"Star Wars      ",  onSelectGame,    (void*) (CStarWarsGame::createInstance),               false},
+                                                  {"Star Wars (1)  ",  onSelectGame,    (void*) (CStarWarsGame::createInstanceSet1),           false},
+                                                  {"Star Wars (O)  ",  onSelectGame,    (void*) (CStarWarsGame::createInstanceSetO),           false},
+                                                  {"Star Wars AVG  ",  onSelectGame,    (void*) (CStarWarsAvgGame::createInstance),            false},
+                                                  {"Sup. Bask. I 09",  onSelectGame,    (void*) (CSuperBasketballGame::createInstanceSetI_09), false},
+                                                  {"Sup. Bask. I K1",  onSelectGame,    (void*) (CSuperBasketballGame::createInstanceSetI_K1), false},
                                                   { 0, 0 }
                                                  };
 

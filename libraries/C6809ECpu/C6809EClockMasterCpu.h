@@ -30,6 +30,7 @@
 #include "CBus.h"
 #include "CFast8BitBus.h"
 #include "CFastPin.h"
+#include "C6809EPinOut.h"
 
 
 class C6809EClockMasterCpu : public ICpu
@@ -40,7 +41,7 @@ class C6809EClockMasterCpu : public ICpu
         // Constructor
         //
 
-        C6809EClockMasterCpu(
+        C6809EClockMasterCpu(const C6809EPinOut *pinOut = &s_6809EPinOut
         );
 
         // ICpu Interface
@@ -115,9 +116,12 @@ class C6809EClockMasterCpu : public ICpu
 
     private:
 
+        const C6809EPinOut *m_pinOut;
+
         CBus          m_busA;
         CFast8BitBus  m_busD;
 
+        CFastPin      m_pinBA;
         CFastPin      m_pinRW;
         CFastPin      m_pinE;
         CFastPin      m_pinQ;
