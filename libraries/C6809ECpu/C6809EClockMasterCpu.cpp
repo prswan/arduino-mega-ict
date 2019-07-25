@@ -430,6 +430,7 @@ Exit:
     return error;
 }
 
+
 PERROR
 C6809EClockMasterCpu::memoryRead(
     UINT32 address,
@@ -438,6 +439,7 @@ C6809EClockMasterCpu::memoryRead(
 {
     return memoryReadWrite(address, data, HIGH);
 }
+
 
 PERROR
 C6809EClockMasterCpu::memoryWrite(
@@ -453,10 +455,57 @@ PERROR
 C6809EClockMasterCpu::waitForInterrupt(
     Interrupt interrupt,
     bool      active,
-    UINT32    timeoutInClockPulses
+    UINT32    timeoutInMs
 )
 {
-    return errorNotImplemented;
+    PERROR error = errorSuccess;
+    unsigned long startTime = millis();
+    unsigned long endTime = startTime + timeoutInMs;
+    int sense = (active ? LOW : HIGH);
+    int value = 0;
+    UINT8 intPin = 0;
+
+    switch (interrupt)
+    {
+        case RESET : {intPin = g_pinMap40DIL[m_pinOut->m__RESET_i.pin] ; break;}
+        case NMI   : {intPin = g_pinMap40DIL[m_pinOut->m__NMI_i.pin]   ; break;}
+        case IRQ0  : {intPin = g_pinMap40DIL[m_pinOut->m__FIRQ_i.pin]  ; break;}
+        case IRQ1  : {intPin = g_pinMap40DIL[m_pinOut->m__IRQ_i.pin]   ; break;}
+
+        default    : {return errorNotImplemented;}
+    }
+
+    do
+    {
+        value = ::digitalRead(intPin);
+
+        if (value == sense)
+        {
+            break;
+        }
+
+        //
+        // Since this is clock mastering we need to run the system
+        // on whilst waiting for the interrupt. Using an idle read
+        // to do this keeps the bus cycle clock alignment.
+        //
+        {
+            UINT32 address = 0xFFFF;
+            UINT16 data = 0;
+
+            memoryReadWrite(address, &data, HIGH);
+        }
+    }
+    while (millis() < endTime);
+
+    if (value != sense)
+    {
+        error = errorTimeout;
+    }
+
+Exit:
+
+    return error;
 }
 
 

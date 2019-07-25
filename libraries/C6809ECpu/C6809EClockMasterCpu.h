@@ -88,7 +88,7 @@ class C6809EClockMasterCpu : public ICpu
         waitForInterrupt(
             Interrupt interrupt,
             bool      active,
-            UINT32    timeoutInClockPulses
+            UINT32    timeoutInMs
         );
 
         virtual

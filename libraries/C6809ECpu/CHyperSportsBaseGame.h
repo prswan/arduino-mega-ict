@@ -39,6 +39,15 @@ class CHyperSportsBaseGame : public CGame
         virtual PERROR interruptCheck(
         );
 
+        static PERROR delayFunction(
+            void *context,
+            unsigned long ms
+        );
+
+        static PERROR bankSwitchObjectRamJH(
+            void *cHyperSportsBaseGame
+        );
+
     protected:
 
         CHyperSportsBaseGame(
