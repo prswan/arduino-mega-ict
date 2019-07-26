@@ -137,6 +137,7 @@ class CFast8BitBus
         UINT8             m_physicalPinMask[s_dataBusSize];
         volatile UINT8*   m_physicalPortRegisterIn[s_dataBusSize];
         volatile UINT8*   m_physicalPortRegisterOut[s_dataBusSize];
+        volatile UINT8*   m_physicalPortRegisterMode[s_dataBusSize];
 
         //
         // Simple speed optimization to skip setting a pin mode when

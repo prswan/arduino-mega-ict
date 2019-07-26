@@ -27,7 +27,7 @@
 
 #include "Arduino.h"
 #include "ICpu.h"
-#include "CBus.h"
+#include "CFastBus.h"
 #include "CFast8BitBus.h"
 #include "CFastPin.h"
 #include "C6809EPinOut.h"
@@ -68,6 +68,11 @@ class C6809EClockMasterCpu : public ICpu
         dataAccessWidth(
             UINT32 address
         );
+
+        //
+        // Game Specific Address Space
+        // 0x100000 -> 0x10FFFF - Hyper Sports early data read
+        //
 
         virtual
         PERROR
@@ -118,7 +123,7 @@ class C6809EClockMasterCpu : public ICpu
 
         const C6809EPinOut *m_pinOut;
 
-        CBus          m_busA;
+        CFastBus      m_busA;
         CFast8BitBus  m_busD;
 
         CFastPin      m_pinBA;

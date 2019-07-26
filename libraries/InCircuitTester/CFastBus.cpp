@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2019, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,17 +22,24 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include "CFast8BitBus.h"
+#include "CFastBus.h"
 
 
-CFast8BitBus::CFast8BitBus(
+CFastBus::CFastBus(
     const UINT8        pinMap[],
     const CONNECTION   connection[],
-    UINT16             numOfConnections
-) : m_pinModeSet(false),
+    UINT8              numOfConnections
+) : m_dataBusSize(numOfConnections),
+    m_pinModeSet(false),
     m_currentPinMode(INPUT)
 {
-    for (UINT8 i = 0 ; i < s_dataBusSize ; i++)
+    m_decodedPinMap            = malloc(m_dataBusSize * sizeof(*m_decodedPinMap));
+    m_physicalPinMask          = malloc(m_dataBusSize * sizeof(*m_physicalPinMask));
+    m_physicalPortRegisterIn   = malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterIn));
+    m_physicalPortRegisterOut  = malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterOut));
+    m_physicalPortRegisterMode = malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterMode));
+
+    for (UINT8 i = 0 ; i < m_dataBusSize ; i++)
     {
         UINT8 pin = pinMap[connection[i].pin];
 
@@ -46,8 +53,19 @@ CFast8BitBus::CFast8BitBus(
 };
 
 
+CFastBus::~CFastBus(
+)
+{
+    free(m_decodedPinMap);
+    free(m_physicalPinMask);
+    free(m_physicalPortRegisterIn);
+    free(m_physicalPortRegisterOut);
+    free(m_physicalPortRegisterMode);
+};
+
+
 void
-CFast8BitBus::pinMode(
+CFastBus::pinMode(
     int     mode
 )
 {
@@ -57,7 +75,7 @@ CFast8BitBus::pinMode(
         m_pinModeSet     = true;
         m_currentPinMode = mode;
 
-        for (UINT8 i = 0 ; i < s_dataBusSize; i++)
+        for (UINT8 i = 0 ; i < m_dataBusSize; i++)
         {
             UINT8 rawMode = *(m_physicalPortRegisterMode[i]);
 
@@ -99,11 +117,11 @@ CFast8BitBus::pinMode(
 
 
 void
-CFast8BitBus::digitalWrite(
+CFastBus::digitalWrite(
     UINT16  value
 )
 {
-    for (UINT8 i = 0 ; i < s_dataBusSize; i++)
+    for (UINT8 i = 0 ; i < m_dataBusSize; i++)
     {
         UINT8 rawBit = *(m_physicalPortRegisterOut[i]);
 
@@ -124,13 +142,13 @@ CFast8BitBus::digitalWrite(
 
 
 void
-CFast8BitBus::digitalRead(
+CFastBus::digitalRead(
     UINT16  *value
 )
 {
     UINT16 localValue = 0;
 
-    for (UINT8 i = 0 ; i < s_dataBusSize; i++)
+    for (UINT8 i = 0 ; i < m_dataBusSize; i++)
     {
         UINT8 rawIn = *(m_physicalPortRegisterIn[i]);
 

@@ -257,6 +257,7 @@ C6809EClockMasterCpu::memoryReadWrite(
     bool interruptsDisabled = false;
     int valueE;
     int valueQ;
+    UINT16 dataN[2] = {0};
 
     //
     // Phase 0 - Initial State
@@ -285,7 +286,7 @@ C6809EClockMasterCpu::memoryReadWrite(
     // - Drive RW, A, BA, BS onto the bus.
     //
     m_busA.pinMode(OUTPUT);
-    m_busA.digitalWrite(address);
+    m_busA.digitalWrite(address & 0xFFFF);
 
     m_pinBA.digitalWriteLOW();
 
@@ -395,9 +396,14 @@ C6809EClockMasterCpu::memoryReadWrite(
         // read in the data before every clock pulse so we have
         // the latest data before E transitions.
         //
+        // A short history of the data read is kept for games
+        // that don't hold data until E transitions
+        // (a timing  violation)
+        //
         if (readWrite == HIGH)
         {
-            m_busD.digitalRead(data);
+            dataN[0] = dataN[1];
+            m_busD.digitalRead(&dataN[1]);
         }
 
         m_pinClock.digitalWriteHIGH();
@@ -405,6 +411,20 @@ C6809EClockMasterCpu::memoryReadWrite(
     }
     CHECK_LITERAL_VALUE_EXIT(error, m_pinOut->m_E_i, valueE, LOW);
     CHECK_PIN_VALUE_EXIT(error, m_pinQ, m_pinOut->m_Q_i, LOW);
+
+    if (readWrite == HIGH)
+    {
+        if (address & 0x100000)
+        {
+            // Use the data from the N-1 clock transition
+            *data = dataN[0];
+        }
+        else
+        {
+            // Use the bus data from the last clock transition
+            *data = dataN[1];
+        }
+    }
 
     //
     // Phase 0 Actions

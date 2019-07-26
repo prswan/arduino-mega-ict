@@ -52,13 +52,28 @@ static const int s_intWaitInMs = 20000; // 20s
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x1000, 0x13FF, 1, 0x0F, "JH8", "Object"}, // Vid PCB - 2114 Object RAM
-                                                  {NO_BANK_SWITCH, 0x1000, 0x13FF, 1, 0xF0, "JH9", "Object"}, // Vid PCB - 2114 Object RAM
-                                                  {NO_BANK_SWITCH, 0x2000, 0x27FF, 1, 0xFF, "G10", "Bckgnd"}, // Vid PCB - 2128 Background RAM
-                                                  {NO_BANK_SWITCH, 0x2800, 0x2FFF, 1, 0xFF, "G9 ", "Colour"}, // Vid PCB - 2128 Colour RAM
-                                                  {NO_BANK_SWITCH, 0x3000, 0x37FF, 1, 0xFF, "G2 ", "Prog. "}, // CPU PCB - 2128 Program RAM
-                                                  {NO_BANK_SWITCH, 0x3800, 0x3FFF, 1, 0xFF, "G4 ", "Nv Ram"}, // CPU PCB - 6116 Battery backed RAM
+// Background RAM G9/G10 Note
+// --------------------------
+// Using standard 6809E data latching on E rising edge these return 0xFF on read.
+// On the scope this appears to be because the gate G on pin 19 of E10 (LS245)
+// is disabled before E rises due to the gating with clock 2H on E11 (LS32) pin 10.
+// Comparing with the 18Mhz system clock, the gate of G is 1 clock pulse before
+// the rise of E.
+//
+// Further, ~V1CS and ~V2CS are specially delayed by the RC circuit on the
+// input pins 1 & 2 of A2 (LS08) on the CPU PCB suggesting there was a tweak
+// needed on the RAM timing, possibly to push CS into the 2H window.
+//
+// To accomodate this timing violation we use an address flag that cause
+// C6809EClockMaster to read the data 1 clock before E rises.
+//
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                            "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x001000, 0x0013FF, 1, 0x0F, "JH8", "Object"}, // Vid PCB - 2114 Object RAM
+                                                  {NO_BANK_SWITCH, 0x001000, 0x0013FF, 1, 0xF0, "JH9", "Object"}, // Vid PCB - 2114 Object RAM
+                                                  {NO_BANK_SWITCH, 0x102000, 0x1027FF, 1, 0xFF, "G10", "Bckgnd"}, // Vid PCB - 2128 Background RAM
+                                                  {NO_BANK_SWITCH, 0x102800, 0x102FFF, 1, 0xFF, "G9 ", "Colour"}, // Vid PCB - 2128 Colour RAM
+                                                  {NO_BANK_SWITCH, 0x003000, 0x0037FF, 1, 0xFF, "G2 ", "Prog. "}, // CPU PCB - 2128 Program RAM
+                                                  {NO_BANK_SWITCH, 0x003800, 0x003FFF, 1, 0xFF, "G4 ", "Nv Ram"}, // CPU PCB - 6116 Battery backed RAM
                                                   {0}
                                                 }; // end of list
 
@@ -67,11 +82,11 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 // This description is used for the byte-wide intensive random access memory test.
 //
 static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                        "012", "012345"
-                                                          {NO_BANK_SWITCH, 0x1000, 0x13FF, 1, 0xFF, "JH ", "Object"}, // Vid PCB - 2114 Object RAM
-                                                          {NO_BANK_SWITCH, 0x2000, 0x27FF, 1, 0xFF, "G10", "Bckgnd"}, // Vid PCB - 2128 Background RAM
-                                                          {NO_BANK_SWITCH, 0x2800, 0x2FFF, 1, 0xFF, "G9 ", "Colour"}, // Vid PCB - 2128 Colour RAM
-                                                          {NO_BANK_SWITCH, 0x3000, 0x37FF, 1, 0xFF, "G2 ", "Prog. "}, // CPU PCB - 2128 Program RAM
-                                                          {NO_BANK_SWITCH, 0x3800, 0x3FFF, 1, 0xFF, "G4 ", "Nv Ram"}, // CPU PCB - 6116 Battery backed RAM
+                                                          {NO_BANK_SWITCH, 0x001000, 0x0013FF, 1, 0xFF, "JH ", "Object"}, // Vid PCB - 2114 Object RAM
+                                                          {NO_BANK_SWITCH, 0x102000, 0x1027FF, 1, 0xFF, "G10", "Bckgnd"}, // Vid PCB - 2128 Background RAM
+                                                          {NO_BANK_SWITCH, 0x102800, 0x102FFF, 1, 0xFF, "G9 ", "Colour"}, // Vid PCB - 2128 Colour RAM
+                                                          {NO_BANK_SWITCH, 0x003000, 0x0037FF, 1, 0xFF, "G2 ", "Prog. "}, // CPU PCB - 2128 Program RAM
+                                                          {NO_BANK_SWITCH, 0x003800, 0x003FFF, 1, 0xFF, "G4 ", "Nv Ram"}, // CPU PCB - 6116 Battery backed RAM
                                                           {0}
                                                         }; // end of list
 
@@ -145,7 +160,7 @@ CHyperSportsBaseGame::~CHyperSportsBaseGame(
 
 
 //
-// This is a specific implementation for that uses an externally
+// This is a specific implementation that uses an externally
 // maskable/resetable latch for the VBLANK interrupt on
 // Konami-1 pin 24 IRQ line (maps to IRQ1 on the ICT).
 //
@@ -209,6 +224,7 @@ CHyperSportsBaseGame::interruptCheck(
 
     return error;
 }
+
 
 // Note that this takes an ICpu as context
 static PERROR CHyperSportsBaseGame::delayFunction(
