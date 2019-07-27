@@ -37,7 +37,16 @@
 //   According to MAME CPU frequency is 1.4MHz giving a half cycle time of 357nS
 //   (5 Arduino instructions per half cycle)
 //
-
+// Note on the shield configuration
+// --------------------------------
+//  There was an issue with the RA test using the video RAM where the RA test fails
+//  and then JH & G9/10 are unreliable afterwards. The intermittancy is cleared
+//  by a UUT power cycle so I suspected that something went out of alignment
+//  w.r.t. clocks on the UUT. Since the clock is being driven directly into
+//  custom 504 I suspected it may need the line resistors installed to dampen
+//  the signal edges. Switching from the zero-Ohm shield to the 470-Ohm shield
+//  appeared to fix the problem.
+//
 
 static const UINT32 s_intMaskA    = 0x1487L;
 static const UINT16 s_intMaskD    = 0x01;
@@ -81,7 +90,7 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 // RAM region is the same for all games on this board set.
 // This description is used for the byte-wide intensive random access memory test.
 //
-static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                        "012", "012345"
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                            "012", "012345"
                                                           {NO_BANK_SWITCH, 0x001000, 0x0013FF, 1, 0xFF, "JH ", "Object"}, // Vid PCB - 2114 Object RAM
                                                           {NO_BANK_SWITCH, 0x102000, 0x1027FF, 1, 0xFF, "G10", "Bckgnd"}, // Vid PCB - 2128 Background RAM
                                                           {NO_BANK_SWITCH, 0x102800, 0x102FFF, 1, 0xFF, "G9 ", "Colour"}, // Vid PCB - 2128 Colour RAM
