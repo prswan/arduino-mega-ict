@@ -31,6 +31,7 @@
 
 //
 // Optimized bus handling for N bit width for the address bus
+// NOTE: Interrupts disabled is recomended as pins may be shared
 //
 
 class CFastBus

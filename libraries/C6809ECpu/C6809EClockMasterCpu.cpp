@@ -259,6 +259,10 @@ C6809EClockMasterCpu::memoryReadWrite(
     int valueQ;
     UINT16 dataN[2] = {0};
 
+    // Critical timing section
+    noInterrupts();
+    interruptsDisabled = true;
+
     //
     // Phase 0 - Initial State
     // - Wait for E-Lo, Q-Lo
@@ -302,10 +306,6 @@ C6809EClockMasterCpu::memoryReadWrite(
         m_busD.pinMode(OUTPUT);
         m_busD.digitalWrite(*data);
     }
-
-    // Critical timing section
-    noInterrupts();
-    interruptsDisabled = true;
 
     //
     // Phase 1
