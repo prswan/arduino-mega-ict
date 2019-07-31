@@ -48,6 +48,10 @@ class CHyperSportsBaseGame : public CGame
             void *cHyperSportsBaseGame
         );
 
+        static PERROR runClock1m(
+            void *cHyperSportsBaseGame
+        );
+
     protected:
 
         CHyperSportsBaseGame(

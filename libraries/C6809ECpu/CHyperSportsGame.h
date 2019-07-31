@@ -38,6 +38,9 @@ class CHyperSportsGame : public CHyperSportsBaseGame
         static IGame* createInstanceSet1(
         );
 
+        static IGame* createInstanceSet2(
+        );
+
         //
         // IGame Interface - wholly implemented in the Base game.
         //

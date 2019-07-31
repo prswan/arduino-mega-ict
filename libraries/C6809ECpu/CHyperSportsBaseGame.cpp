@@ -137,6 +137,7 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                            "0123456789"
                                                             {CHyperSportsBaseGame::bankSwitchObjectRamJH, "JH Bank Sw"},
+                                                            {CHyperSportsBaseGame::runClock1m,            "Run Clk 1m"},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -313,5 +314,18 @@ CHyperSportsBaseGame::bankSwitchObjectRamJH(
     }
 
     return error;
+}
+
+
+// Run the system clock for 1 minute
+PERROR
+CHyperSportsBaseGame::runClock1m(
+    void *cHyperSportsBaseGame
+)
+{
+    CHyperSportsBaseGame *thisGame  = (CHyperSportsBaseGame *) cHyperSportsBaseGame;
+    ICpu                 *cpu       = (ICpu *) thisGame->m_cpu;
+
+    return delayFunction(cpu, 60 * 1000UL);
 }
 

@@ -50,6 +50,18 @@ static const ROM_REGION s_romRegionSet1[] PROGMEM = { //
                                                      {NO_BANK_SWITCH, 0xE000, 0x2000, s_romData2nSet1_G15, 0x1a34a849, "G15"},
                                                      {0} }; // end of list
 
+//
+// Set 2 "hypersptb" from MAME. Stated as a bootleg but this G11 was found on a Konmai PCB so likely a Konami version.
+//
+static const ROM_REGION s_romRegionSet2[] PROGMEM = { //
+                                                     {NO_BANK_SWITCH, 0x4000, 0x2000, s_romData2nSet1_G5,  0x0c720eeb, " G5"},
+                                                     {NO_BANK_SWITCH, 0x6000, 0x2000, s_romData2nSet1_G7,  0x560258e0, " G7"},
+                                                     {NO_BANK_SWITCH, 0x8000, 0x2000, s_romData2nSet1_G9,  0x9b01c7e6, " G9"},
+                                                     {NO_BANK_SWITCH, 0xA000, 0x2000, s_romData2nSet1_G11, 0x4ed32240, "G11"},
+                                                     {NO_BANK_SWITCH, 0xC000, 0x2000, s_romData2nSet1_G13, 0xb105a8cd, "G13"},
+                                                     {NO_BANK_SWITCH, 0xE000, 0x2000, s_romData2nSet1_G15, 0x1a34a849, "G15"},
+                                                     {0} }; // end of list
+
 
 IGame*
 CHyperSportsGame::createInstanceSet1(
@@ -57,6 +69,15 @@ CHyperSportsGame::createInstanceSet1(
 {
     return (new CHyperSportsGame(s_romRegionSet1));
 }
+
+
+IGame*
+CHyperSportsGame::createInstanceSet2(
+)
+{
+    return (new CHyperSportsGame(s_romRegionSet2));
+}
+
 
 CHyperSportsGame::CHyperSportsGame(
     const ROM_REGION *romRegion
