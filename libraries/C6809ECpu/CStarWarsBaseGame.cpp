@@ -186,6 +186,17 @@ CStarWarsBaseGame::~CStarWarsBaseGame(
 
 
 //
+// TBD.
+//
+PERROR
+CStarWarsBaseGame::interruptCheck(
+)
+{
+    return errorNotImplemented;
+}
+
+
+//
 // The program memory is banked.
 //
 PERROR

@@ -36,6 +36,9 @@ class CStarWarsBaseGame : public CGame
         // CStarWarsBaseGame
         //
 
+        virtual PERROR interruptCheck(
+        );
+
         static PERROR onBankSwitchMPAGE0(
             void *cStarWarsBaseGame
         );
