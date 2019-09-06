@@ -91,7 +91,7 @@ const C6809EPinOut s_6809EPinOut =
 // pin number shift w.r.t. 40 pins (i.e. all pins > 20 subtract 2.
 //
 // Unnaccounted for pins:
-// 11, 14, 16, 18, 26, 27, 28
+// 11, 14, 16, 18, 27, 28
 //
 // NOTES:
 //  There is a scehmatic that has:-
@@ -107,7 +107,7 @@ const C6809EPinOut s_Konami1PinOut =
     {23-2, "_NMI "    },
     {24-2, "_IRQ"     },
     {25-2, "_FIRQ"    },
-    { 0  , "BS"       },
+    {26-2, "BS"       }, // Used on Mega Zone to clear the FIRQ
     {28-2, "BA"       }, // ? estimated, there is one schematic that uses this to gate ROM OE
     {29-2, "Vcc"      },
     {13  , "RW"       },
