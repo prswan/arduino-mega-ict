@@ -33,11 +33,11 @@ CFastBus::CFastBus(
     m_pinModeSet(false),
     m_currentPinMode(INPUT)
 {
-    m_decodedPinMap            = malloc(m_dataBusSize * sizeof(*m_decodedPinMap));
-    m_physicalPinMask          = malloc(m_dataBusSize * sizeof(*m_physicalPinMask));
-    m_physicalPortRegisterIn   = malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterIn));
-    m_physicalPortRegisterOut  = malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterOut));
-    m_physicalPortRegisterMode = malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterMode));
+    m_decodedPinMap            = (UINT8*)malloc(m_dataBusSize * sizeof(*m_decodedPinMap));
+    m_physicalPinMask          = (UINT8*)malloc(m_dataBusSize * sizeof(*m_physicalPinMask));
+    m_physicalPortRegisterIn   = (volatile UINT8**)malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterIn));
+    m_physicalPortRegisterOut  = (volatile UINT8**)malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterOut));
+    m_physicalPortRegisterMode = (volatile UINT8**)malloc(m_dataBusSize * sizeof(*m_physicalPortRegisterMode));
 
     for (UINT8 i = 0 ; i < m_dataBusSize ; i++)
     {

@@ -181,7 +181,7 @@ CAstroFighterBaseGame::~CAstroFighterBaseGame(
 }
 
 
-static PERROR CAstroFighterBaseGame::delayFunction(
+PERROR CAstroFighterBaseGame::delayFunction(
     void *context,
     unsigned long ms
 )
