@@ -31,8 +31,6 @@
 // System wide definitions
 //
 
-#define NULL ((void*)(0))
-
 #define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
 
 //                     "0123456789ABCDEF"
@@ -208,7 +206,8 @@ typedef struct _ROM_DATA2N {
 //  - 0x1000 bytes (max address 0xFFF) has 12 data samples.
 //
 // ROM Regions support 8-bit & 16-bit data access.
-//
+//
+
 
 typedef struct _ROM_REGION {
 

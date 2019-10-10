@@ -1179,7 +1179,7 @@ void CGame::addAddressOffset(
 
 
 // Default delay function
-static PERROR CGame::delayFunction(
+PERROR CGame::delayFunction(
     void *context,
     unsigned long ms
 )
