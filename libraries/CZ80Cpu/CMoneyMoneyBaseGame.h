@@ -58,7 +58,8 @@ class CMoneyMoneyBaseGame : public CGame
     protected:
 
         CMoneyMoneyBaseGame(
-            const ROM_REGION    *romRegion
+            const ROM_DATA2N *romData2n,
+            const ROM_REGION *romRegion
         );
 
         ~CMoneyMoneyBaseGame(

@@ -51,6 +51,7 @@ class CJackrabbitGame : public CMoneyMoneyBaseGame
         // Different ROM sets supplied.
         //
         CJackrabbitGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 
