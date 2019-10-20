@@ -33,8 +33,16 @@
 // Watchdog Disable:
 //   CPU (top) PCB J1, IC DE13 (LS00) pin 12
 //
-// CPU Compatibility Notes
+//   There are two watchdog circuits, one kicked by the Konami-1
+//   and the other kicked by the sound Z80. If the sound Z80
+//   isn't booting then it'll look like the game doesn't boot
+//   because the sound watchdog kills the Konami-1 before
+//   it can display anything. In this case when the watchdog
+//   is disabled the game boots with self test failure
+//   "SOUND ROM BAD"
 //
+// CPU Compatibility Notes
+//   None.
 //
 // Shield Configuration
 // ---------------------
@@ -60,6 +68,9 @@ static const int s_intWaitInMs = 20000; // 20s
 //   video buffers likely written during blanking.
 // - The designations in MAME for the "vram" 1 & 2 sections don't match the PCB
 //   schematics that are used here.
+// - The shared RAM may not test correctly because the sound Z80 is using it. To
+//   test it reliably from the Konami-1 the IC D8 (custom 501) can be removed to
+//   isolate it.
 //
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                            "012", "012345"
                                                   {NO_BANK_SWITCH, 0x002000, 0x0027FF, 1, 0xFF, "F8 ", "VRam 1"}, // Vid PCB, 2128

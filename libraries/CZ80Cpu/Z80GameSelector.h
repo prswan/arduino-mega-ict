@@ -30,6 +30,7 @@
 #include <CHustlerGame.h>
 #include <CHustlerSoundGame.h>
 #include <CJackrabbitGame.h>
+#include <CMegaZoneSoundGame.h>
 #include <CScrambleGame.h>
 #include <CScrambleSoundGame.h>
 #include <CSuperCobraGame.h>
@@ -55,6 +56,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Hustler  S(ZS2)",  onSelectGame,    (void*) (CHustlerSoundGame::createInstanceZacScramConvSet2), false},
                                                   {"Jackrabbit  (1)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet1),               false},
                                                   {"Jackrabbit  (2)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet2),               false},
+                                                  {"Mega Zone S(S1)",  onSelectGame,    (void*) (CMegaZoneSoundGame::createInstanceSet1),            false},
                                                   {"Scramble   (S1)",  onSelectGame,    (void*) (CScrambleGame::createInstanceSet1),                 false},
                                                   {"Scramble  S(S1)",  onSelectGame,    (void*) (CScrambleSoundGame::createInstanceSet1),            false},
                                                   {"Scramble   (Z1)",  onSelectGame,    (void*) (CScrambleGame::createInstanceZacSet1),              false},
