@@ -51,6 +51,7 @@ class CGalaxianGame : public CGalaxianBaseGame
         // Different ROM sets supplied.
         //
         CGalaxianGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 

@@ -29,51 +29,55 @@
 //
 
 //
-// Set 1 from MAME.
-//                                              01   02   04   08   10   20   40   80  100  200  400
-static const UINT16 s_romData2nSet1_rU[]    = {0x32,0x01,0xc3,0x3a,0x77,0x85,0x87,0x80,0x32,0x21,0x08};//
-static const UINT16 s_romData2nSet1_rV[]    = {0x11,0x03,0xcd,0x00,0xca,0x32,0x3a,0x65,0x2c,0x04,0x0c};//
-static const UINT16 s_romData2nSet1_rW[]    = {0x35,0x02,0x3a,0x01,0x09,0x6e,0xc0,0x03,0x7e,0x77,0x15};//
-static const UINT16 s_romData2nSet1_rY[]    = {0x7e,0xe6,0xc2,0x60,0x30,0x41,0x41,0x20,0x2f,0x1a,0xc0};//
-static const UINT16 s_romData2nSet1_rZ[]    = {0xa2,0x40,0x1e,0x10,0x7e,0x2c,0x20,0xcb,0x50,0x30,0x3f};//
+// Set 1 "galaxianm" from MAME.
+//
+static const ROM_DATA2N s_romData2nSet1[] PROGMEM  = { // 01   02   04   08   10   20   40   80  100  200  400
+                                                       {0x32,0x01,0xc3,0x3a,0x77,0x85,0x87,0x80,0x32,0x21,0x08},//
+                                                       {0x11,0x03,0xcd,0x00,0xca,0x32,0x3a,0x65,0x2c,0x04,0x0c},//
+                                                       {0x35,0x02,0x3a,0x01,0x09,0x6e,0xc0,0x03,0x7e,0x77,0x15},//
+                                                       {0x7e,0xe6,0xc2,0x60,0x30,0x41,0x41,0x20,0x2f,0x1a,0xc0},//
+                                                       {0xa2,0x40,0x1e,0x10,0x7e,0x2c,0x20,0xcb,0x50,0x30,0x3f},//
+                                                       {0} };  // end of list
 
 //
-// Set 1 from MAME.
+// Set 1 "galaxianm" from MAME.
 //
 static const ROM_REGION s_romRegionSet1[] PROGMEM = { //
-                                                      {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nSet1_rU, 0x745e2d61, " rU"}, // galmidw.u
-                                                      {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nSet1_rV, 0x9c999a40, " rV"}, // galmidw.v
-                                                      {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nSet1_rW, 0xb5894925, " rW"}, // galmidw.w
-                                                      {NO_BANK_SWITCH, 0x1800, 0x0800, s_romData2nSet1_rY, 0x6b3ca10b, " rY"}, // galmidw.y
-                                                      {NO_BANK_SWITCH, 0x2000, 0x0800, s_romData2nSet1_rZ, 0xcb24f797, " rZ"}, // galmidw.z
+                                                      {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nSet1[0].data2n, 0x745e2d61, " rU"}, // galmidw.u
+                                                      {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nSet1[1].data2n, 0x9c999a40, " rV"}, // galmidw.v
+                                                      {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nSet1[2].data2n, 0xb5894925, " rW"}, // galmidw.w
+                                                      {NO_BANK_SWITCH, 0x1800, 0x0800, s_romData2nSet1[3].data2n, 0x6b3ca10b, " rY"}, // galmidw.y
+                                                      {NO_BANK_SWITCH, 0x2000, 0x0800, s_romData2nSet1[4].data2n, 0xcb24f797, " rZ"}, // galmidw.z
                                                       {0} }; // end of list
 
 
 //
-// Set 2 from MAME.
-//                                              01   02   04   08   10   20   40   80  100  200  400
-static const UINT16 s_romData2nSet2_rU[]    = {0x32,0x01,0xc3,0x3a,0x77,0x85,0xFF,0x80,0x32,0x21,0x08};//
-static const UINT16 s_romData2nSet2_rV[]    = {0x11,0x03,0xcd,0x00,0xca,0x32,0x3a,0x65,0x2c,0x04,0x04};//
-static const UINT16 s_romData2nSet2_rW[]    = {0x35,0x09,0xa5,0x13,0x77,0x2c,0x05,0x62,0x04,0xe8,0x0F};//
-static const UINT16 s_romData2nSet2_rY[]    = {0x3d,0x32,0x41,0xc2,0x0f,0x0f,0xc0,0x8a,0x2c,0xc6,0x21};//
-static const UINT16 s_romData2nSet2_rZ[]    = {0xa2,0x40,0x1e,0x10,0x7e,0x2c,0x20,0xcb,0x50,0xad,0x52};//
+// Set 2 "galaxianmo" from MAME.
+//
+static const ROM_DATA2N s_romData2nSet2[] PROGMEM  = { // 01   02   04   08   10   20   40   80  100  200  400
+                                                       {0x32,0x01,0xc3,0x3a,0x77,0x85,0xFF,0x80,0x32,0x21,0x08},//
+                                                       {0x11,0x03,0xcd,0x00,0xca,0x32,0x3a,0x65,0x2c,0x04,0x04},//
+                                                       {0x35,0x09,0xa5,0x13,0x77,0x2c,0x05,0x62,0x04,0xe8,0x0F},//
+                                                       {0x3d,0x32,0x41,0xc2,0x0f,0x0f,0xc0,0x8a,0x2c,0xc6,0x21},//
+                                                       {0xa2,0x40,0x1e,0x10,0x7e,0x2c,0x20,0xcb,0x50,0xad,0x52},//
+                                                       {0} };  // end of list
 
 //
-// Set 2 from MAME.
+// Set 2 "galaxianmo" from MAME.
 //
 static const ROM_REGION s_romRegionSet2[] PROGMEM = { //
-                                                      {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nSet2_rU, 0xfac42d34, " rU"}, // galaxian.u
-                                                      {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nSet2_rV, 0xf58283e3, " rV"}, // galaxian.v
-                                                      {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nSet2_rW, 0x4c7031c0, " rW"}, // galaxian.w
-                                                      {NO_BANK_SWITCH, 0x1800, 0x0800, s_romData2nSet2_rY, 0x96a7ac94, " rY"}, // galaxian.y
-                                                      {NO_BANK_SWITCH, 0x2000, 0x0800, s_romData2nSet2_rZ, 0x5341d75a, " rZ"}, // galaxian.z
+                                                      {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nSet2[0].data2n, 0xfac42d34, " rU"}, // galaxian.u
+                                                      {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nSet2[1].data2n, 0xf58283e3, " rV"}, // galaxian.v
+                                                      {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nSet2[2].data2n, 0x4c7031c0, " rW"}, // galaxian.w
+                                                      {NO_BANK_SWITCH, 0x1800, 0x0800, s_romData2nSet2[3].data2n, 0x96a7ac94, " rY"}, // galaxian.y
+                                                      {NO_BANK_SWITCH, 0x2000, 0x0800, s_romData2nSet2[4].data2n, 0x5341d75a, " rZ"}, // galaxian.z
                                                       {0} }; // end of list
 
 IGame*
 CGalaxianGame::createInstanceSet1(
 )
 {
-    return (new CGalaxianGame(s_romRegionSet1));
+    return (new CGalaxianGame(s_romData2nSet1, s_romRegionSet1));
 }
 
 
@@ -81,13 +85,14 @@ IGame*
 CGalaxianGame::createInstanceSet2(
 )
 {
-    return (new CGalaxianGame(s_romRegionSet2));
+    return (new CGalaxianGame(s_romData2nSet2, s_romRegionSet2));
 }
 
 
 CGalaxianGame::CGalaxianGame(
+    const ROM_DATA2N *romData2n,
     const ROM_REGION *romRegion
-) : CGalaxianBaseGame( romRegion )
+) : CGalaxianBaseGame(romData2n, romRegion)
 {
 }
 

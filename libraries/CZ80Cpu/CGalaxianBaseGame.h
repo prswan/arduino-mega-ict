@@ -56,6 +56,7 @@ class CGalaxianBaseGame : public CGame
     protected:
 
         CGalaxianBaseGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 

@@ -147,8 +147,10 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                  
 
 
 CGalaxianBaseGame::CGalaxianBaseGame(
-    const ROM_REGION    *romRegion
-) : CGame( romRegion,
+    const ROM_DATA2N *romData2n,
+    const ROM_REGION *romRegion
+) : CGame( romData2n,
+           romRegion,
            s_ramRegion,
            s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
