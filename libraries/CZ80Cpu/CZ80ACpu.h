@@ -40,6 +40,11 @@ class CZ80ACpu : public ICpu
 {
     public:
 
+        typedef enum {
+            CYCLE_TYPE_DEFAULT,
+            CYCLE_TYPE_PUCKMAN
+        } CycleType;
+
         //
         // Constructor
         //
@@ -61,13 +66,17 @@ class CZ80ACpu : public ICpu
         //    writes - after any address remap before any data is written to allow
         //             the write data to be pre-remapped.
         //
+        // cycleType
+        //  Sets the specific Z80 cycle implementation to use.
+        //
 
         CZ80ACpu(
             UINT32                vramAddress                 = 0,
             AddressRemapCallback  addressRemapCallback        = NO_ADDRESS_REMAP,
             void                 *addressRemapCallbackContext = NULL,
             DataRemapCallback     dataRemapCallback           = NO_DATA_REMAP,
-            void                 *dataRemapCallbackContext    = NULL
+            void                 *dataRemapCallbackContext    = NULL,
+            CycleType             cycleType                   = CYCLE_TYPE_DEFAULT
         );
 
         // ICpu Interface
@@ -126,6 +135,10 @@ class CZ80ACpu : public ICpu
 
     private:
 
+        //
+        // The original implementation of the Z80 bus
+        // cycle that's used for most games.
+        //
         PERROR
         MREQread(
             UINT16 *data
@@ -133,6 +146,22 @@ class CZ80ACpu : public ICpu
 
         PERROR
         MREQwrite(
+            UINT16 *data
+        );
+
+        //
+        // An implementation that has a longer wait prior
+        // to the initial detection of WAIT and immediate
+        // data read after WAIT is cleared.
+        // This handles the Puckman Sync Bus Controller
+        //
+        PERROR
+        MREQreadPuckman(
+            UINT16 *data
+        );
+
+        PERROR
+        MREQwritePuckman(
             UINT16 *data
         );
 
@@ -164,6 +193,7 @@ class CZ80ACpu : public ICpu
         void                 *m_addressRemapCallbackContext;
         DataRemapCallback     m_dataRemapCallback;
         void                 *m_dataRemapCallbackContext;
+        CycleType             m_cycleType;
 
 };
 
