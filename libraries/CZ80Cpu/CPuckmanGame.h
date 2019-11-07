@@ -38,6 +38,9 @@ class CPuckmanGame : public CPuckmanBaseGame
         static IGame* createInstanceSet1(
         );
 
+        static IGame* createInstanceBSet1(
+        );
+
         //
         // IGame Interface - wholly implemented in the Base game.
         //

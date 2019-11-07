@@ -119,6 +119,7 @@ static const UINT8 s_L2_BIT_IN_WAIT    = 0x04;
 //
 // Output definitions.
 //
+static const UINT8 s_A5_BIT_OUT_M1     = 0x20;
 static const UINT8 s_B0_BIT_OUT_RD     = 0x01;
 static const UINT8 s_B1_BIT_OUT_IORQ   = 0x02;
 static const UINT8 s_B2_BIT_OUT_WR     = 0x04;
@@ -281,6 +282,7 @@ CZ80ACpu::CZ80ACpu(
     m_pin_RD(g_pinMap40DIL, &s__RD_ot),
     m_pin_WR(g_pinMap40DIL, &s__WR_ot),
     m_pin_WAIT(g_pinMap40DIL, &s__WAIT_i),
+    m_pin_M1(g_pinMap40DIL, &s__M1_o),
     m_pin_IORQ(g_pinMap40DIL, &s__IORQ_ot),
     m_pin_MREQ(g_pinMap40DIL, &s__MREQ_ot),
     m_vramAddress(vramAddress),
@@ -315,8 +317,6 @@ CZ80ACpu::idle(
     pinMode(g_pinMap40DIL[s__BUSREQ_i.pin],       INPUT);
     pinMode(g_pinMap40DIL[s__RESET_i.pin],        INPUT);
 
-    digitalWrite(g_pinMap40DIL[s__M1_o.pin],      HIGH);
-    pinMode(g_pinMap40DIL[s__M1_o.pin],           OUTPUT);
     digitalWrite(g_pinMap40DIL[s__RFSH_ot.pin],   HIGH);
     pinMode(g_pinMap40DIL[s__RFSH_ot.pin],        OUTPUT);
 
@@ -332,6 +332,9 @@ CZ80ACpu::idle(
 
     m_pin_WR.digitalWrite(HIGH);
     m_pin_WR.pinMode(OUTPUT);
+
+    m_pin_M1.digitalWrite(HIGH);
+    m_pin_M1.pinMode(OUTPUT);
 
     m_pin_IORQ.digitalWrite(HIGH);
     m_pin_IORQ.pinMode(OUTPUT);
@@ -693,7 +696,7 @@ Exit:
 
 
 //
-// TBD.
+// Interrupt Mode 2 acknowledge cycle to read the vector address
 //
 PERROR
 CZ80ACpu::acknowledgeInterrupt(
@@ -702,7 +705,80 @@ CZ80ACpu::acknowledgeInterrupt(
 {
     PERROR error = errorSuccess;
 
-    *response = 0;
+    // Enable the address bus, unused for interrupt acknowledge
+    m_busA.pinMode(OUTPUT);
+    m_busA.digitalWrite((UINT16) 0xFFFF);
+
+    // Set the databus to input.
+    m_busD.pinMode(INPUT);
+
+    // Critical timing section
+    noInterrupts();
+
+    //
+    // Using separate counts saves 4 instructions because the compiler
+    // optimizes out the pre-loop test (it knows the 1st time x > 0).
+    //
+    register UINT8 x = 255;
+
+    register UINT8 r1;
+    register UINT8 r2;
+    register UINT8 r3;
+    register UINT8 r4;
+    register UINT8 r5;
+
+    // Wait for the clock edge
+    WAIT_FOR_CLK_RISING_EDGE(x,r1,r2);
+
+    // Start the cycle by assert the control line M1
+    m_pin_M1.digitalWrite(LOW);
+
+    // Interrupt acknowledge  cycles have 2 wait state added by the CPU
+    *g_portOutB = ~(0); // Wait state
+    *g_portOutB = ~(0); // Wait state
+    *g_portOutB = ~(0); // Wait state
+    *g_portOutB = ~(0); // Wait state
+    *g_portOutB = ~(0); // Wait state
+    *g_portOutB = ~(0); // Wait state
+
+    // Assert IORQ for the interrupt acknowledge "read"
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ);
+
+    // Wait for WAIT to be deasserted.
+    // Port L requires an "lds" to access so no wait state needed from above.
+    WAIT_FOR_WAIT_HI(x,r1,r2);
+
+    *g_portOutB = ~(s_B1_BIT_OUT_IORQ); // Wait state
+
+    // Read in reverse order - port L is a slower access.
+    r1 = *g_portInL;
+    r2 = *g_portInG;
+    r3 = *g_portInD;
+    r4 = *g_portInC;
+    r5 = *g_portInA;
+
+    // Terminate the cycle
+    *g_portOutB = ~(0);          // Deassert IORQ
+    m_pin_M1.digitalWrite(HIGH); // Deassert M1
+
+    // Check for timeout
+    if (x == 0)
+    {
+        error = errorTimeout;
+        goto Exit;
+    }
+
+    // Populate the output data word
+    *response = (((r2 & s_G1_BIT_D0) >> 1) << 0) |
+                (((r1 & s_L7_BIT_D1) >> 7) << 1) |
+                (((r4 & s_C1_BIT_D2) >> 1) << 2) |
+                (((r5 & s_A6_BIT_D3) >> 6) << 3) |
+                (((r5 & s_A4_BIT_D4) >> 4) << 4) |
+                (((r4 & s_C7_BIT_D5) >> 7) << 5) |
+                (((r4 & s_C5_BIT_D6) >> 5) << 6) |
+                (((r3 & s_D7_BIT_D7) >> 7) << 7);
+
+Exit:
 
     return error;
 }

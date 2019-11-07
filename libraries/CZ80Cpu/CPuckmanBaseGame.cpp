@@ -87,9 +87,11 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 // Output region is the same for all versions on this board set.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                   "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x5000, 0x01, 0x00, " 9N", "IRQ En"}, //
-                                                        {NO_BANK_SWITCH, 0x5003, 0x01, 0x00, " 9N", "ScFlip"}, //
-                                                        {NO_BANK_SWITCH, 0x50c0, 0x01, 0x00, " 9N", "WdRes "}, //
+                                                        {NO_BANK_SWITCH, 0x05000, 0x01, 0x00, " 9N", "IRQ En"}, //
+                                                        {NO_BANK_SWITCH, 0x05003, 0x01, 0x00, " 9N", "ScFlip"}, //
+                                                        {NO_BANK_SWITCH, 0x050c0, 0x01, 0x00, " 9N", "WdRes "}, //
+                                                        {NO_BANK_SWITCH, 0x10000, 0x55, 0x00, " ??", "Int-55"}, //
+                                                        {NO_BANK_SWITCH, 0x10000, 0x55, 0x00, " ??", "Int-AA"}, //
                                                         {0}
                                                       }; // end of list
 
@@ -123,7 +125,7 @@ CPuckmanBaseGame::CPuckmanBaseGame(
     // The VBLANK interrupt is on the IRQ pin.
     m_interrupt = ICpu::IRQ0;
 
-    // TBD: MAME states the vector is set by an OUT at IO address 0
+    // MAME states the vector is set by an OUT at IO address 0
     m_interruptAutoVector = false;
 }
 
@@ -136,8 +138,12 @@ CPuckmanBaseGame::~CPuckmanBaseGame(
 }
 
 
-// This is a specific implementation for Puckman that uses an externally
-// maskable/resetable latch for the VBLANK interrupt on the NMI line.
+//
+// The original game PCB & ROM set uses Interrupt Mode 2 with a programmable vector
+// latch (in the Sync Bus Controller) that's set by output port 0.
+// The bootleg game PCB & ROM set uses Interrupt Mode 1 with no vector latch hardware
+// that thus means the original ROM test won't run on the bootleg game PCB.
+//
 PERROR
 CPuckmanBaseGame::interruptCheck(
 )

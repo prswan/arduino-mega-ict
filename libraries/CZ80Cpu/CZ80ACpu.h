@@ -184,6 +184,7 @@ class CZ80ACpu : public ICpu
         CFastPin      m_pin_WR;
         CFastPin      m_pin_WAIT;
 
+        CFastPin      m_pin_M1;
         CFastPin      m_pin_IORQ;
         CFastPin      m_pin_MREQ;
 
