@@ -25,6 +25,7 @@
 #include <C6502GenericGame.h>
 #include <CAstroFighterGame.h>
 #include <CTomahawk777Game.h>
+#include <CVanguardGame.h>
 
 //
 // The initial selector to select the game to test.
@@ -36,6 +37,8 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Astro F.(2) clk",  onSelectGame,    (void*) (CAstroFighterGame::createInstanceClockMasterSet2), false},
                                                   {"T-777   (5)    ",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceSet5),             false},
                                                   {"T-777   (5) clk",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceClockMasterSet5),  false},
+                                                  {"Vanguard Cen(1)",  onSelectGame,    (void*) (CVanguardGame::createInstanceCenturiSet1),         false},
+                                                  {"Vanguard Ger(1)",  onSelectGame,    (void*) (CVanguardGame::createInstanceGermanSet1),          false},
                                                   { 0, 0 }
                                                  };
 

@@ -114,9 +114,6 @@ C6502ClockMasterCpu::check(
     // The Vcc pin should be high (power is on).
     CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
-    // Nothing should be driving wait states.
-    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RDY_i, HIGH);
-
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
 
@@ -148,18 +145,26 @@ C6502ClockMasterCpu::check(
     {
         UINT16 hiCount = 0;
         UINT16 loCount = 0;
+        UINT16 rdyHiCount = 0;
 
         for (int i = 0 ; i < 0x400 ; i++)
         {
-            int value = m_pinCLK0i.digitalRead();
+            int clk = m_pinCLK0i.digitalRead();
 
-            if (value == LOW)
+            if (clk == LOW)
             {
                 loCount++;
             }
             else
             {
                 hiCount++;
+            }
+
+            int rdy = m_pinRDY.digitalRead();
+
+            if (rdy == HIGH)
+            {
+                rdyHiCount++;
             }
 
             clockPulse();
@@ -172,6 +177,11 @@ C6502ClockMasterCpu::check(
         else if (hiCount == 0)
         {
             CHECK_PIN_VALUE_EXIT(error, m_pinCLK0i, s_CLK0i_i, HIGH);
+        }
+
+        if (rdyHiCount == 0)
+        {
+            CHECK_PIN_VALUE_EXIT(error, m_pinRDY, s_RDY_i, HIGH);
         }
     }
 
@@ -255,24 +265,51 @@ C6502ClockMasterCpu::memoryReadWrite(
     }
 
     //
-    // Currently no support for RDY delayed cycles.
-    // It only works for reads making it of little use in practice.
-    //
-    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RDY_i, HIGH);
-
-    //
     // Phase 1
-    // - Wait for CLK2 Hi
+    // - Wait for CLK2 Hi & RDY
     //
-    for (int x = 0 ; x < 100 ; x++)
     {
-        if (m_valueCLK2o == HIGH)
+        int rdy = HIGH;
+
+        for (int wait = 0 ; wait < 5 ; wait++)
         {
-            break;
+            for (int low = 0 ; low < 100 ; low++)
+            {
+                if (m_valueCLK2o == HIGH)
+                {
+                    break;
+                }
+
+                rdy = m_pinRDY.digitalRead();
+
+                clockPulse();
+            }
+            CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
+
+            // Check for wait state due to RDY (as used by Vanguard)
+            if ((readWrite == LOW) || (rdy == HIGH))
+            {
+                break;
+            }
+            else
+            {
+                // Read and RDY is not asserted, wait
+                for (int high = 0 ; high < 100 ; high++)
+                {
+                    if (m_valueCLK2o == LOW)
+                    {
+                        break;
+                    }
+                    clockPulse();
+                }
+                CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, LOW);
+            }
         }
-        clockPulse();
+
+        // Reconfirm we're in the right state
+        CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
+        CHECK_LITERAL_VALUE_EXIT(error, s_RDY_i, rdy, HIGH);
     }
-    CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
 
     //
     // Phase 0 - Back to Initial State
