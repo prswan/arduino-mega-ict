@@ -26,6 +26,7 @@
 #include <CAstroWarsGame.h>
 #include <CGalaxiaGame.h>
 #include <CQuasarGame.h>
+#include <CTheInvadersGame.h>
 
 //
 // The initial selector to select the game to test.
@@ -44,6 +45,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Quasar      (1)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet1),      false},
                                                   {"Quasar      (2)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet2),      false},
                                                   {"Quasar      (3)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet3),      false},
+                                                  {"The Invaders(1)",  onSelectGame,    (void*) (CTheInvadersGame::createInstanceSet1), false},
                                                   { 0, 0 }
                                                  };
 

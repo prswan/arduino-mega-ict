@@ -212,7 +212,6 @@ static const UINT8 s_L6_BIT_D7        = (1 << 6);
         }                                  \
     }                                      \
 
-
 //
 // Control Pins
 //
@@ -549,19 +548,17 @@ C2650Cpu::read(
         portOutL = *g_portOutL;
         portOutB = *g_portOutB;
 
-        // Wait for the clock edge
-        WAIT_FOR_CLK_RISING_EDGE(r1,r2);
-
         // Start the cycle by assert the control lines
+        *g_portOutB = portOutB;
         *g_portOutL = portOutL | s_L2_BIT_OUT_OPREQ;
-        *g_portOutB = portOutB; // Wait state, ~60ns
 
         // 600ns *maximum* for peripherals to assert OPACK
-        *g_portInA; // Wait state, ~120ns
-        *g_portInA; // Wait state, ~180ns
-        *g_portInA; // Wait state, ~240ns
-        *g_portInA; // Wait state, ~300ns
-        *g_portInA; // Wait state, ~360ns
+        *g_portInA;             // Wait state, ~ 60ns
+        *g_portInA;             // Wait state, ~120ns
+        *g_portInA;             // Wait state, ~180ns
+        *g_portInA;             // Wait state, ~240ns
+        *g_portOutB = portOutB; // Wait State, ~300ns
+        *g_portInA;             // Wait state, ~360ns
 
         // Wait for OPACK to be asserted.
         WAIT_FOR_OPACK_LO(r1);
@@ -570,15 +567,15 @@ C2650Cpu::read(
         // The 2636 requires 450ns to assert data on the bus after OPACK
         // is asserted.
         //
-        *g_portOutB = portOutB;//  ~ 60ns
-        *g_portInA; // Wait state, ~120ns
-        *g_portInA; // Wait state, ~180ns
-        *g_portInA; // Wait state, ~240ns
-        *g_portInA; // Wait state, ~300ns
-        *g_portInA; // Wait state, ~360ns
-        *g_portInA; // Wait state, ~420ns
-        *g_portInA; // Wait state, ~480ns
-        *g_portInA; // Wait state, ~540ns
+        *g_portInA;             // Wait state, ~ 60ns
+        *g_portInA;             // Wait state, ~120ns
+        *g_portInA;             // Wait state, ~180ns
+        *g_portInA;             // Wait state, ~240ns
+        *g_portOutB = portOutB; // Wait state, ~300ns
+        *g_portInA;             // Wait state, ~360ns
+        *g_portInA;             // Wait state, ~420ns
+        *g_portInA;             // Wait state, ~480ns
+        *g_portInA;             // Wait state, ~540ns
 
         // Read in reverse order - port L is a slower access.
         r1 = *g_portInL;
@@ -589,6 +586,13 @@ C2650Cpu::read(
         // Terminate the cycle
         *g_portOutL = portOutL;
 
+        // Wait For 2636 CE inactive
+        *g_portInA;             // Wait state, ~ 60ns
+        *g_portInA;             // Wait state, ~120ns
+        *g_portInA;             // Wait state, ~180ns
+        *g_portInA;             // Wait state, ~240ns
+        *g_portOutB = portOutB; // Wait state, ~300ns
+
         // Populate the output data word
         *data = (((r4 & s_A7_BIT_D0) >> 7) << 0) |
                 (((r3 & s_C6_BIT_D1) >> 6) << 1) |
@@ -598,7 +602,6 @@ C2650Cpu::read(
                 (((r2 & s_G2_BIT_D5) >> 2) << 5) |
                 (((r2 & s_G0_BIT_D6) >> 0) << 6) |
                 (((r1 & s_L6_BIT_D7) >> 6) << 7);
-
     }
 
 Exit:
@@ -695,19 +698,29 @@ C2650Cpu::write(
         portOutL = *g_portOutL;
         portOutB = *g_portOutB;
 
-        // Wait for the clock edge
-        WAIT_FOR_CLK_RISING_EDGE(r1,r2);
+        //
+        // The 2650 datasheet shows WRP:
+        // OPREQ: ____-----------------____
+        // WRP:   ----______-----______----
+        //
+        // The way this is used on The Invaders for clocking
+        // the tile RAM write depends on the slow CE from
+        // the 2636 masking off the first WRP low pulse
+        // such that the WRP high time clocks the data in
+        // the middle.
+        //
 
         // Start the cycle by assert the control lines
+        *g_portOutB = portOutB & ~s_B2_BIT_OUT_WRP; // WRP - Lo
         *g_portOutL = portOutL | s_L2_BIT_OUT_OPREQ;
-        *g_portOutB = portOutB & ~s_B2_BIT_OUT_WRP; // ~60ns
 
         // 600ns *maximum* for peripherals to assert OPACK
-        *g_portInA; // Wait state, ~120ns
-        *g_portInA; // Wait state, ~180ns
-        *g_portInA; // Wait state, ~240ns
-        *g_portInA; // Wait state, ~300ns
-        *g_portInA; // Wait state, ~360ns
+        *g_portInA;             // Wait state, ~ 60ns
+        *g_portInA;             // Wait state, ~120ns
+        *g_portInA;             // Wait state, ~180ns
+        *g_portInA;             // Wait state, ~240ns
+        *g_portOutB = portOutB; // Wait State, ~300ns, WRP - Hi
+        *g_portInA;             // Wait state, ~360ns
 
         // Wait for OPACK to be asserted.
         WAIT_FOR_OPACK_LO(r1);
@@ -716,15 +729,15 @@ C2650Cpu::write(
         // The 2636 requires 450ns to assert data on the bus after OPACK
         // is asserted.
         //
-        *g_portOutB = portOutB;//  ~ 60ns
-        *g_portInA; // Wait state, ~120ns
-        *g_portInA; // Wait state, ~180ns
-        *g_portInA; // Wait state, ~240ns
-        *g_portInA; // Wait state, ~300ns
-        *g_portInA; // Wait state, ~360ns
-        *g_portInA; // Wait state, ~420ns
-        *g_portInA; // Wait state, ~480ns
-        *g_portInA; // Wait state, ~540ns
+        *g_portInA;                                 // Wait state, ~ 60ns
+        *g_portInA;                                 // Wait state, ~120ns
+        *g_portInA;                                 // Wait state, ~180ns
+        *g_portInA;                                 // Wait state, ~240ns
+        *g_portOutB = portOutB & ~s_B2_BIT_OUT_WRP; // Wait state, ~300ns, WRP - Lo
+        *g_portInA;                                 // Wait state, ~360ns
+        *g_portInA;                                 // Wait state, ~420ns
+        *g_portInA;                                 // Wait state, ~480ns
+        *g_portInA;                                 // Wait state, ~540ns
 
         // This is a write but we keep these here to match the read cycle timing.
         r1 = *g_portInL;
@@ -734,6 +747,13 @@ C2650Cpu::write(
 
         // Terminate the cycle
         *g_portOutL = portOutL;
+
+        // Wait For 2636 CE inactive
+        *g_portInA;             // Wait state, ~ 60ns
+        *g_portInA;             // Wait state, ~120ns
+        *g_portInA;             // Wait state, ~180ns
+        *g_portInA;             // Wait state, ~240ns
+        *g_portOutB = portOutB; // Wait State, ~300ns, WRP - Hi
     }
 
 Exit:
