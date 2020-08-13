@@ -526,7 +526,7 @@ CZ80ACpu::memoryRead(
 
         *g_portOutB = ~(0);
     }
-    else if (m_cycleType == CYCLE_TYPE_DEFAULT)
+    else if (m_cycleType != CYCLE_TYPE_PUCKMAN)
     {
         // Wait for the clock edge
         WAIT_FOR_CLK_RISING_EDGE(r1,r2);
@@ -542,6 +542,10 @@ CZ80ACpu::memoryRead(
         if (m_cycleType == CYCLE_TYPE_PUCKMAN)
         {
             error = MREQreadPuckman(data);
+        }
+        else if (m_cycleType == CYCLE_TYPE_LADYBUG)
+        {
+            error = MREQreadLadybug(data);
         }
         else
         {
@@ -955,6 +959,60 @@ Exit:
 
     return error;
 }
+
+
+PERROR
+CZ80ACpu::MREQreadLadybug(
+    UINT16 *data
+)
+{
+    PERROR error = errorSuccess;
+
+    register UINT8 r1;
+    register UINT8 r2;
+    register UINT8 r3;
+    register UINT8 r4;
+    register UINT8 r5;
+
+    // Start the cycle by assert the control lines
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD);
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+
+    // Wait for WAIT to be deasserted.
+    // Port L requires an "lds" to access so no wait state needed from above.
+    WAIT_FOR_WAIT_HI(r1,r2);
+
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state
+
+    // Read in reverse order - port L is a slower access.
+    r1 = *g_portInL;
+    r2 = *g_portInG;
+    r3 = *g_portInD;
+    r4 = *g_portInC;
+    r5 = *g_portInA;
+
+    // Terminate the cycle
+    *g_portOutB = ~(0);
+
+    // Populate the output data word
+    *data = (((r2 & s_G1_BIT_D0) >> 1) << 0) |
+            (((r1 & s_L7_BIT_D1) >> 7) << 1) |
+            (((r4 & s_C1_BIT_D2) >> 1) << 2) |
+            (((r5 & s_A6_BIT_D3) >> 6) << 3) |
+            (((r5 & s_A4_BIT_D4) >> 4) << 4) |
+            (((r4 & s_C7_BIT_D5) >> 7) << 5) |
+            (((r4 & s_C5_BIT_D6) >> 5) << 6) |
+            (((r3 & s_D7_BIT_D7) >> 7) << 7);
+
+Exit:
+
+    return error;
+}
+
+
 PERROR
 CZ80ACpu::IORQread(
     UINT16 *data
