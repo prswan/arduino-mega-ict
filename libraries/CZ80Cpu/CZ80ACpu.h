@@ -43,7 +43,8 @@ class CZ80ACpu : public ICpu
         typedef enum {
             CYCLE_TYPE_DEFAULT,
             CYCLE_TYPE_PUCKMAN,
-            CYCLE_TYPE_CRAZYKONG
+            CYCLE_TYPE_CRAZYKONG,
+            CYCLE_TYPE_LADYBUG
         } CycleType;
 
         //
@@ -177,6 +178,15 @@ class CZ80ACpu : public ICpu
 
         PERROR
         MREQwriteCrazyKong(
+            UINT16 *data
+        );
+
+        // An implementation that has a longer wait prior
+        // to the initial detection of WAIT.
+        // This handles reading the Ladybug video and color ram
+        //
+        PERROR
+        MREQreadLadybug(
             UINT16 *data
         );
 
