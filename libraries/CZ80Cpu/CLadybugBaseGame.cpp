@@ -62,7 +62,7 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                                      "012", "012345"
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                                                    "012", "012345"
                                                           {NO_BANK_SWITCH, 0x006000, 0x0063FF, 1, 0xFF, "FH3", "CpuRam"}, // 2114
                                                           {NO_BANK_SWITCH, 0x006400, 0x0067FF, 1, 0xFF, "JK3", "CpuRam"}, // 2114
                                                           {NO_BANK_SWITCH, 0x006800, 0x006BFF, 1, 0xFF, "LM3", "CpuRam"}, // 2114
@@ -75,7 +75,7 @@ static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                    
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                                                                    "012", "012345"
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                                                                            "012", "012345"
                                                   {NO_BANK_SWITCH, 0x007000, 0x0073FF, 1, 0x0F, " N5", "SprRam"}, // 2114
                                                   {NO_BANK_SWITCH, 0x007000, 0x0073FF, 1, 0xF0, " P5", "SprRam"}, // 2114
                                                   {0} }; // end of list
@@ -95,7 +95,7 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 //
 // Output region is the same for all versions on this board set.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                   "012", "012345"
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                    "012", "012345"
                                                         {NO_BANK_SWITCH, 0x0A000, 0x01, 0x00, " L5", "ScFlip"}, //
                                                         {0}
                                                       }; // end of list
