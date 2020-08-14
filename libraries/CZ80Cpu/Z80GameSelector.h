@@ -31,6 +31,7 @@
 #include <CHustlerGame.h>
 #include <CHustlerSoundGame.h>
 #include <CJackrabbitGame.h>
+#include <CLadybugGame.h>
 #include <CMegaZoneSoundGame.h>
 #include <CPuckmanGame.h>
 #include <CScrambleGame.h>
@@ -51,6 +52,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Buck Rog. A(e1)",  onSelectGame,    (void*) (CBuckRogersGame::createInstanceEncSet1),            false},
                                                   {"Buck Rog. A(u1)",  onSelectGame,    (void*) (CBuckRogersGame::createInstanceSet1),               false},
                                                   {"Buck Rog. A(u2)",  onSelectGame,    (void*) (CBuckRogersGame::createInstanceSet2),               false},
+                                                  {"Cosmic Avenger ",  onSelectGame,    (void*) (CLadybugGame::createInstanceSet2),                  false},
                                                   {"Dambusters(UK1)",  onSelectGame,    (void*) (CDambustersGame::createInstanceUKSet1),             false},
                                                   {"Fitter    (KD1)",  onSelectGame,    (void*) (CFitterGame::createInstanceKagaDenshiSet1),         false},
                                                   {"Fitter     (T1)",  onSelectGame,    (void*) (CFitterGame::createInstanceTaitoSet1),              false},
@@ -60,6 +62,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Hustler  S(ZS2)",  onSelectGame,    (void*) (CHustlerSoundGame::createInstanceZacScramConvSet2), false},
                                                   {"Jackrabbit  (1)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet1),               false},
                                                   {"Jackrabbit  (2)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet2),               false},
+                                                  {"Ladybug        ",  onSelectGame,    (void*) (CLadybugGame::createInstanceSet1),                  false},
                                                   {"Mega Zone S(S1)",  onSelectGame,    (void*) (CMegaZoneSoundGame::createInstanceSet1),            false},
                                                   {"Puckman    (S1)",  onSelectGame,    (void*) (CPuckmanGame::createInstanceSet1),                  false},
                                                   {"Puckman    (B1)",  onSelectGame,    (void*) (CPuckmanGame::createInstanceBSet1),                 false},
