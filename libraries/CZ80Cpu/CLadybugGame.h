@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, Paul R. Swan
+// Copyright (c) 2020, Marc Deslauriers
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
