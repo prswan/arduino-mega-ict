@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, Paul R. Swan
+// Copyright (c) 2020, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,34 +22,59 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CPuckmanBaseGame_h
-#define CPuckmanBaseGame_h
+#ifndef CCrazyKongBaseGame_h
+#define CCrazyKongBaseGame_h
 
 #include "CGame.h"
 
 
-class CPuckmanBaseGame : public CGame
+class CCrazyKongBaseGame : public CGame
 {
     public:
 
         //
-        // CPuckmanBaseGame
+        // CCrazyKongBaseGame
         //
 
         virtual PERROR interruptCheck(
         );
 
+        PERROR waitVblank(
+        );
+
+        //
+        // One of the RAM appears to be synchronized for
+        // access during VBLANK, not using WAIT.
+        //
+        static PERROR onBankSwitchWaitVblank(
+            void *cCrazyKongBaseGame
+        );
+
+        //
+        // One of the RAM is connected up omitting A5
+        // so we provide an address remap handler to fix
+        // that.
+        //
+        static PERROR onAddressRemap(
+            void   *cCrazyKongBaseGame,
+            UINT32  addressIn,
+            UINT32 *addressOut
+        );
+
     protected:
 
-        CPuckmanBaseGame(
+        CCrazyKongBaseGame(
             const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 
-        ~CPuckmanBaseGame(
+        ~CCrazyKongBaseGame(
         );
 
     private:
+
+        // Counter tracking RAM access during VBLANK to wait for next period
+        UINT8 m_vblankAccessCount;
 
 };
 

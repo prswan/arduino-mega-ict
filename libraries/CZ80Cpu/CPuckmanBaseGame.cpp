@@ -57,7 +57,7 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                                      "012", "012345"
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                            "012", "012345"
                                                           {NO_BANK_SWITCH, 0x004000, 0x0043FF, 1, 0xFF, "4HL", "VidRam"}, // 2114
                                                           {NO_BANK_SWITCH, 0x004400, 0x0047FF, 1, 0xFF, "4JM", "ClrRam"}, // 2114
                                                           {NO_BANK_SWITCH, 0x004C00, 0x004FFF, 1, 0xFF, "4KN", "SprRam"}, // 2114
@@ -67,10 +67,10 @@ static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                    
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                                                                    "012", "012345"
-                                                           {NO_BANK_SWITCH, 0x005040, 0x00505F, 1, 0xFF, " 2JH", "Sound"},
-                                                           {NO_BANK_SWITCH, 0x005060, 0x00506F, 1, 0xFF, " 2JH", "SprXY"},
-                                                           {NO_BANK_SWITCH, 0x005070, 0x00507F, 1, 0xFF, " 2JH", "Ram  "},
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                            "012", "012345"
+                                                           {NO_BANK_SWITCH, 0x005040, 0x00505F, 1, 0xFF, "2JH", "Sound"},
+                                                           {NO_BANK_SWITCH, 0x005060, 0x00506F, 1, 0xFF, "2JH", "SprXY"},
+                                                           {NO_BANK_SWITCH, 0x005070, 0x00507F, 1, 0xFF, "2JH", "Ram  "},
                                                            {0} }; // end of list
 
 //
@@ -86,7 +86,7 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 //
 // Output region is the same for all versions on this board set.
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                   "012", "012345"
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                    "012", "012345"
                                                         {NO_BANK_SWITCH, 0x05000, 0x01, 0x00, " 9N", "IRQ En"}, //
                                                         {NO_BANK_SWITCH, 0x05003, 0x01, 0x00, " 9N", "ScFlip"}, //
                                                         {NO_BANK_SWITCH, 0x050c0, 0x01, 0x00, " 9N", "WdRes "}, //

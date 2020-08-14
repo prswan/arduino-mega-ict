@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, Paul R. Swan
+// Copyright (c) 2020, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,36 +22,41 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CPuckmanBaseGame_h
-#define CPuckmanBaseGame_h
+#ifndef CCrazyKongGame_h
+#define CCrazyKongGame_h
 
-#include "CGame.h"
+#include "CCrazyKongBaseGame.h"
 
-
-class CPuckmanBaseGame : public CGame
+class CCrazyKongGame : public CCrazyKongBaseGame
 {
     public:
 
         //
-        // CPuckmanBaseGame
+        // Constructors for this game.
         //
 
-        virtual PERROR interruptCheck(
+        static IGame* createInstancePt2Set1(
         );
 
-    protected:
+        static IGame* createInstancePt2ZacSet1(
+        );
 
-        CPuckmanBaseGame(
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CCrazyKongGame(
             const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 
-        ~CPuckmanBaseGame(
-        );
-
-    private:
-
 };
 
 #endif
+
 

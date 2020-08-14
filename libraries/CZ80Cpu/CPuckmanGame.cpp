@@ -42,10 +42,10 @@ static const ROM_DATA2N s_romData2nSet1[] PROGMEM  = { // 01   02   04   08   10
 // Namco Set 1 from MAME, converted to 2532
 //
 static const ROM_REGION s_romRegionSet1[] PROGMEM = { //
-                                                      {NO_BANK_SWITCH, 0x0000, 0x1000, s_romData2nSet1[0].data2n, 0xc1e6ab10, " 7D"}, // 2d(__scrambles)
-                                                      {NO_BANK_SWITCH, 0x1000, 0x1000, s_romData2nSet1[1].data2n, 0x1a6fb2d4, " 7E"}, // 2e(__scrambles)
-                                                      {NO_BANK_SWITCH, 0x2000, 0x1000, s_romData2nSet1[2].data2n, 0xbcdd1beb, " 7F"}, // 2f(__scrambles)"
-                                                      {NO_BANK_SWITCH, 0x3000, 0x1000, s_romData2nSet1[3].data2n, 0x67a513e4, " 7H"}, // 2h(__scrambles)"
+                                                      {NO_BANK_SWITCH, 0x0000, 0x1000, s_romData2nSet1[0].data2n, 0xc1e6ab10, " 7D"},
+                                                      {NO_BANK_SWITCH, 0x1000, 0x1000, s_romData2nSet1[1].data2n, 0x1a6fb2d4, " 7E"},
+                                                      {NO_BANK_SWITCH, 0x2000, 0x1000, s_romData2nSet1[2].data2n, 0xbcdd1beb, " 7F"},
+                                                      {NO_BANK_SWITCH, 0x3000, 0x1000, s_romData2nSet1[3].data2n, 0x67a513e4, " 7H"},
                                                       {0} }; // end of list
 
 //
@@ -62,10 +62,10 @@ static const ROM_DATA2N s_romData2nBSet1[] PROGMEM  = { // 01   02   04   08   1
 // Bootleg "puckmanb" Set 1 from MAME
 //
 static const ROM_REGION s_romRegionBSet1[] PROGMEM = { //
-                                                       {NO_BANK_SWITCH, 0x0000, 0x1000, s_romData2nBSet1[0].data2n, 0xfee263b3, " 7D"}, // 2d(__scrambles)
-                                                       {NO_BANK_SWITCH, 0x1000, 0x1000, s_romData2nBSet1[1].data2n, 0x39d1fc83, " 7E"}, // 2e(__scrambles)
-                                                       {NO_BANK_SWITCH, 0x2000, 0x1000, s_romData2nBSet1[2].data2n, 0x02083b03, " 7F"}, // 2f(__scrambles)"
-                                                       {NO_BANK_SWITCH, 0x3000, 0x1000, s_romData2nBSet1[3].data2n, 0x7a36fe55, " 7H"}, // 2h(__scrambles)"
+                                                       {NO_BANK_SWITCH, 0x0000, 0x1000, s_romData2nBSet1[0].data2n, 0xfee263b3, " 7D"},
+                                                       {NO_BANK_SWITCH, 0x1000, 0x1000, s_romData2nBSet1[1].data2n, 0x39d1fc83, " 7E"},
+                                                       {NO_BANK_SWITCH, 0x2000, 0x1000, s_romData2nBSet1[2].data2n, 0x02083b03, " 7F"},
+                                                       {NO_BANK_SWITCH, 0x3000, 0x1000, s_romData2nBSet1[3].data2n, 0x7a36fe55, " 7H"},
                                                        {0} }; // end of list
 
 IGame*

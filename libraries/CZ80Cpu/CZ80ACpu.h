@@ -42,7 +42,8 @@ class CZ80ACpu : public ICpu
 
         typedef enum {
             CYCLE_TYPE_DEFAULT,
-            CYCLE_TYPE_PUCKMAN
+            CYCLE_TYPE_PUCKMAN,
+            CYCLE_TYPE_CRAZYKONG
         } CycleType;
 
         //
@@ -162,6 +163,20 @@ class CZ80ACpu : public ICpu
 
         PERROR
         MREQwritePuckman(
+            UINT16 *data
+        );
+
+        //
+        // Same as Puckman but with one extra wait state for
+        // Crazy Kong RAM at 0x9000.
+        //
+        PERROR
+        MREQreadCrazyKong(
+            UINT16 *data
+        );
+
+        PERROR
+        MREQwriteCrazyKong(
             UINT16 *data
         );
 

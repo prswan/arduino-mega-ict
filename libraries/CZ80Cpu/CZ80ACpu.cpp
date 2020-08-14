@@ -179,6 +179,25 @@ static const UINT8 s_D7_BIT_D7        = 0x80;
 
 
 //
+// Wait for CLK high.
+// This loop is 2 instructions total, 125ns.
+// Note that the system will hang here if CLK is stuck.
+//
+#define WAIT_FOR_CLK_HI(r1,r2)            \
+    {                                      \
+        while(1)                           \
+        {                                  \
+            r1 = *g_portInA;               \
+                                           \
+            if ((r1 & s_A2_BIT_IN_CLK))   \
+            {                              \
+                break;                     \
+            }                              \
+        }                                  \
+    }                                      \
+
+
+//
 // Wait for WAIT high.
 // This loop is 2 instructions total, 125ns.
 // Note that the system will hang here if WAIT is stuck.
@@ -217,6 +236,7 @@ static const UINT8 s_D7_BIT_D7        = 0x80;
 
 #define IS_IO_SPACE(ad)   ((ad & (UINT32) 0x010000) != 0)
 #define IS_WAIT_SPACE(ad) ((ad & (UINT32) 0x100000) != 0)
+#define IS_SYNC_SPACE(ad) ((ad & (UINT32) 0x200000) != 0)
 
 
 //
@@ -543,6 +563,16 @@ CZ80ACpu::memoryRead(
         {
             error = MREQreadPuckman(data);
         }
+        else if (m_cycleType == CYCLE_TYPE_CRAZYKONG)
+        {
+            if (IS_SYNC_SPACE(address))
+            {
+                // Wait for the clock edge
+                WAIT_FOR_CLK_FALLING_EDGE(r1,r2);
+            }
+
+            error = MREQreadCrazyKong(data);
+        }
         else
         {
             error = MREQread(data);
@@ -640,6 +670,16 @@ CZ80ACpu::memoryWrite(
         if (m_cycleType == CYCLE_TYPE_PUCKMAN)
         {
             error = MREQwritePuckman(data);
+        }
+        else if (m_cycleType == CYCLE_TYPE_CRAZYKONG)
+        {
+            if (IS_SYNC_SPACE(address))
+            {
+                // Wait for the clock edge
+                WAIT_FOR_CLK_FALLING_EDGE(r1,r2);
+            }
+
+            error = MREQwriteCrazyKong(data);
         }
         else
         {
@@ -955,6 +995,106 @@ Exit:
 
     return error;
 }
+
+
+PERROR
+CZ80ACpu::MREQreadCrazyKong(
+    UINT16 *data
+)
+{
+    PERROR error = errorSuccess;
+
+    register UINT8 r1;
+    register UINT8 r2;
+    register UINT8 r3;
+    register UINT8 r4;
+    register UINT8 r5;
+
+    // Start the cycle by assert the control lines
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD);
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state +
+
+    // Wait for WAIT to be deasserted.
+    // Port L requires an "lds" to access so no wait state needed from above.
+    WAIT_FOR_WAIT_HI(r1,r2);
+
+    // Read in reverse order - port L is a slower access.
+    r1 = *g_portInL;
+    r2 = *g_portInG;
+    r3 = *g_portInD;
+    r4 = *g_portInC;
+    r5 = *g_portInA;
+
+    // Terminate the cycle
+    *g_portOutB = ~(0);
+
+    // Populate the output data word
+    *data = (((r2 & s_G1_BIT_D0) >> 1) << 0) |
+            (((r1 & s_L7_BIT_D1) >> 7) << 1) |
+            (((r4 & s_C1_BIT_D2) >> 1) << 2) |
+            (((r5 & s_A6_BIT_D3) >> 6) << 3) |
+            (((r5 & s_A4_BIT_D4) >> 4) << 4) |
+            (((r4 & s_C7_BIT_D5) >> 7) << 5) |
+            (((r4 & s_C5_BIT_D6) >> 5) << 6) |
+            (((r3 & s_D7_BIT_D7) >> 7) << 7);
+
+Exit:
+
+    return error;
+}
+
+
+PERROR
+CZ80ACpu::MREQwriteCrazyKong(
+    UINT16 *data
+)
+{
+    PERROR error = errorSuccess;
+
+    register UINT8 r1;
+    register UINT8 r2;
+    register UINT8 r3;
+    register UINT8 r4;
+    register UINT8 r5;
+
+    // Start the cycle by assert the control lines
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ);
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // wait state
+
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state +
+    // Write one less wait state than Read
+
+    // Wait for WAIT to be deasserted.
+    // Port L requires an "lds" to access so no wait state needed from above.
+    WAIT_FOR_WAIT_HI(r1,r2);
+
+    // This is a write but we keep these here to match the read cycle timing.
+    r1 = *g_portInL;
+    r2 = *g_portInG;
+    r3 = *g_portInD;
+    r4 = *g_portInC;
+    r5 = *g_portInA;
+
+    // Terminate the cycle
+    *g_portOutB = ~(0);
+
+Exit:
+
+    return error;
+}
+
+
 PERROR
 CZ80ACpu::IORQread(
     UINT16 *data

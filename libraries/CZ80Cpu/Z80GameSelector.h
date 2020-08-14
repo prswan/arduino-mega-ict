@@ -25,6 +25,7 @@
 #include <CZ80GenericGame.h>
 #include <CAsoGame.h>
 #include <CBuckRogersGame.h>
+#include <CCrazyKongGame.h>
 #include <CDambustersGame.h>
 #include <CFitterGame.h>
 #include <CGalaxianGame.h>
@@ -51,6 +52,8 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Buck Rog. A(e1)",  onSelectGame,    (void*) (CBuckRogersGame::createInstanceEncSet1),            false},
                                                   {"Buck Rog. A(u1)",  onSelectGame,    (void*) (CBuckRogersGame::createInstanceSet1),               false},
                                                   {"Buck Rog. A(u2)",  onSelectGame,    (void*) (CBuckRogersGame::createInstanceSet2),               false},
+                                                  {"Crazy K. P2( 1)",  onSelectGame,    (void*) (CCrazyKongGame::createInstancePt2Set1),             false},
+                                                  {"Crazy K. P2(Z1)",  onSelectGame,    (void*) (CCrazyKongGame::createInstancePt2ZacSet1),          false},
                                                   {"Dambusters(UK1)",  onSelectGame,    (void*) (CDambustersGame::createInstanceUKSet1),             false},
                                                   {"Fitter    (KD1)",  onSelectGame,    (void*) (CFitterGame::createInstanceKagaDenshiSet1),         false},
                                                   {"Fitter     (T1)",  onSelectGame,    (void*) (CFitterGame::createInstanceTaitoSet1),              false},
