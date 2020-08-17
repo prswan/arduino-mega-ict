@@ -38,7 +38,10 @@
 //   v - Video board
 //
 // Z80 Compatibility Notes
-//   VBLANK interrupt is only activated with a write to INT ON at 0x0a181
+//   * VBLANK interrupt is only activated with a write to INT ON at 0x0a181
+//   * While this board has a Sync Bus Controller, it doesn't work with the
+//     Puckman wait configuration. It does work with the Ladybug wait
+//     configuration though, so that is what is used here.
 
 
 //
