@@ -42,6 +42,7 @@ class CAsoABaseGame : public CGame
     protected:
 
         CAsoABaseGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 
@@ -64,6 +65,7 @@ class CAsoBBaseGame : public CGame
     protected:
 
         CAsoBBaseGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 

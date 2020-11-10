@@ -49,10 +49,23 @@ CAY38910::CAY38910(
     UINT32 regData
 ) : m_cpu(cpu),
     m_regAddress(regAddress),
-    m_regData(regData)
+    m_regDataRd(regData),
+    m_regDataWr(regData)
 {
 }
 
+
+CAY38910::CAY38910(
+    ICpu   *cpu,
+    UINT32 regAddress,
+    UINT32 regDataRd,
+    UINT32 regDataWr
+) : m_cpu(cpu),
+    m_regAddress(regAddress),
+    m_regDataRd(regDataRd),
+    m_regDataWr(regDataWr)
+{
+}
 
 CAY38910::~CAY38910(
 )
@@ -224,7 +237,7 @@ CAY38910::read(
 
     if (SUCCESS(error))
     {
-        error = m_cpu->memoryRead(m_regData, &data16);
+        error = m_cpu->memoryRead(m_regDataRd, &data16);
     }
 
     *data = (UINT8) data16;
@@ -245,7 +258,7 @@ CAY38910::write(
 
     if (SUCCESS(error))
     {
-        error = m_cpu->memoryWrite(m_regData, (UINT16) data);
+        error = m_cpu->memoryWrite(m_regDataWr, (UINT16) data);
     }
 
     return error;

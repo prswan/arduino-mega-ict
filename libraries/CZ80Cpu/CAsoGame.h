@@ -51,6 +51,7 @@ class CAsoAGame : public CAsoABaseGame
         // Different ROM sets supplied.
         //
         CAsoAGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 
@@ -78,6 +79,7 @@ class CAsoBGame : public CAsoBBaseGame
         // Different ROM sets supplied.
         //
         CAsoBGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 

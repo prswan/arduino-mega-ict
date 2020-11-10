@@ -22,13 +22,13 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include <CZ80GenericGame.h>
 #include <CAsoGame.h>
 #include <CBuckRogersGame.h>
 #include <CCrazyKongGame.h>
 #include <CDambustersGame.h>
 #include <CFitterGame.h>
 #include <CGalaxianGame.h>
+#include <CGyrussSoundGame.h>
 #include <CHustlerGame.h>
 #include <CHustlerSoundGame.h>
 #include <CJackrabbitGame.h>
@@ -46,8 +46,6 @@
 // The initial selector to select the game to test.
 //
 static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (CZ80GenericGame::createInstance2716),               false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (CZ80GenericGame::createInstance2732),               false},
                                                   {"Arian Mis. A(1)",  onSelectGame,    (void*) (CAsoAGame::createInstanceArianSet1),                false},
                                                   {"Arian Mis. B(1)",  onSelectGame,    (void*) (CAsoBGame::createInstanceArianSet1),                false},
                                                   {"ASO        A(1)",  onSelectGame,    (void*) (CAsoAGame::createInstanceAsoSet1),                  false},
@@ -62,6 +60,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Fitter     (T1)",  onSelectGame,    (void*) (CFitterGame::createInstanceTaitoSet1),              false},
                                                   {"Galaxian   (M1)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet1),                 false},
                                                   {"Galaxian   (M2)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet2),                 false},
+                                                  {"Gyruss    S(S1)",  onSelectGame,    (void*) (CGyrussSoundGame::createInstanceSet1),              false},
                                                   {"Hustler   (ZS2)",  onSelectGame,    (void*) (CHustlerGame::createInstanceZacScramConvSet2),      false},
                                                   {"Hustler  S(ZS2)",  onSelectGame,    (void*) (CHustlerSoundGame::createInstanceZacScramConvSet2), false},
                                                   {"Jackrabbit  (1)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet1),               false},

@@ -30,57 +30,63 @@
 
 //
 // Set 1 from MAME.
-//                                                   01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
-static const UINT16 s_romData2nAsoASet1_cD8[]    = {0xc0,0xfe,0xc3,0xc3,0xc3,0xc3,0xff,0x00,0xcb,0xc9,0xdd,0x20,0x10,0xa8};
-static const UINT16 s_romData2nAsoASet1_cD7[]    = {0x40,0xdd,0x15,0xdd,0x77,0xed,0x4e,0x18,0x19,0xdd,0x7e,0x48,0x50,0xe8};
-static const UINT16 s_romData2nAsoASet1_cD5[]    = {0x45,0x45,0x65,0x85,0xc4,0x46,0x46,0x67,0x67,0xa7,0x4a,0xff,0x06,0x07};
+//
+static const ROM_DATA2N s_romData2nAsoASet1[] PROGMEM = { // 01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
+                                                          {0xc0,0xfe,0xc3,0xc3,0xc3,0xc3,0xff,0x00,0xcb,0xc9,0xdd,0x20,0x10,0xa8}, // cD8
+                                                          {0x40,0xdd,0x15,0xdd,0x77,0xed,0x4e,0x18,0x19,0xdd,0x7e,0x48,0x50,0xe8}, // cD7
+                                                          {0x45,0x45,0x65,0x85,0xc4,0x46,0x46,0x67,0x67,0xa7,0x4a,0xff,0x06,0x07}, // cD5
+                                                          {0} };  // end of list
 
 //
 // Set 1 from MAME.
 //
 static const ROM_REGION s_romRegionAsoASet1[] PROGMEM = { //
-                                                         {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nAsoASet1_cD8, 0x84981f3c, "cD8"}, // P1
-                                                         {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nAsoASet1_cD7, 0xcfe912a6, "cD7"}, // P2
-                                                         {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nAsoASet1_cD5, 0x39a666d2, "cD5"}, // P3
+                                                         {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nAsoASet1[0].data2n, 0x84981f3c, "cD8"}, // P1
+                                                         {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nAsoASet1[1].data2n, 0xcfe912a6, "cD7"}, // P2
+                                                         {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nAsoASet1[2].data2n, 0x39a666d2, "cD5"}, // P3
                                                          {0} }; // end of list
 
 //
 // Set 1 from MAME.
-//                                                      01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
-static const UINT16 s_romData2nArianASet1_cD8[]    = {0xc0,0xfe,0xc3,0xc3,0xc3,0xc3,0xff,0x00,0xcb,0xc9,0xdd,0xf9,0xdd,0xc9};
-static const UINT16 s_romData2nArianASet1_cD7[]    = {0x00,0x10,0x1b,0x03,0xf1,0x0f,0xd1,0x76,0x41,0x34,0x21,0x01,0x7e,0xeb};
-static const UINT16 s_romData2nArianASet1_cD5[]    = {0x46,0x46,0x65,0x85,0xc5,0x46,0x47,0x67,0x87,0xc8,0x4a,0x67,0x88,0x07};
+//
+static const ROM_DATA2N s_romData2nArianASet1[] PROGMEM = { // 01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
+                                                            {0xc0,0xfe,0xc3,0xc3,0xc3,0xc3,0xff,0x00,0xcb,0xc9,0xdd,0xf9,0xdd,0xc9}, // cD8
+                                                            {0x00,0x10,0x1b,0x03,0xf1,0x0f,0xd1,0x76,0x41,0x34,0x21,0x01,0x7e,0xeb}, // cD7
+                                                            {0x46,0x46,0x65,0x85,0xc5,0x46,0x47,0x67,0x87,0xc8,0x4a,0x67,0x88,0x07}, // cD5
+                                                            {0} };  // end of list
 
 //
 // Set 1 from MAME.
 //
 static const ROM_REGION s_romRegionArianASet1[] PROGMEM = { //
-                                                           {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nArianASet1_cD8, 0x0ca89307, "cD8"}, // P1
-                                                           {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nArianASet1_cD7, 0x724518c3, "cD7"}, // P2
-                                                           {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nArianASet1_cD5, 0x4d8db650, "cD5"}, // P3
+                                                           {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nArianASet1[0].data2n, 0x0ca89307, "cD8"}, // P1
+                                                           {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nArianASet1[1].data2n, 0x724518c3, "cD7"}, // P2
+                                                           {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nArianASet1[2].data2n, 0x4d8db650, "cD5"}, // P3
                                                            {0} }; // end of list
 
 //
 // Set 1 from MAME.
-//                                                      01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
-static const UINT16 s_romData2nArianBSet1_cD3[]    = {0x31,0xc0,0xc3,0xc3,0xc3,0xc3,0xff,0x48,0xc3,0xc1,0xb7,0xfd,0x22,0x00};
-static const UINT16 s_romData2nArianBSet1_cD2[]    = {0xff,0xfd,0xff,0xff,0xff,0xff,0x0f,0x0e,0xa0,0x9b,0xbd,0x8f,0xff,0xfc};
-static const UINT16 s_romData2nArianBSet1_cD1[]    = {0x76,0x68,0x31,0x3a,0x73,0x6b,0x99,0xff,0xff,0xff,0xfd,0xfb,0xfc,0x5d};
+//
+static const ROM_DATA2N s_romData2nArianBSet1[] PROGMEM = { // 01   02   04   08   10   20   40   80  100  200  400  800 1000 2000
+                                                            {0x31,0xc0,0xc3,0xc3,0xc3,0xc3,0xff,0x48,0xc3,0xc1,0xb7,0xfd,0x22,0x00}, // cD3
+                                                            {0xff,0xfd,0xff,0xff,0xff,0xff,0x0f,0x0e,0xa0,0x9b,0xbd,0x8f,0xff,0xfc}, // cD2
+                                                            {0x76,0x68,0x31,0x3a,0x73,0x6b,0x99,0xff,0xff,0xff,0xfd,0xfb,0xfc,0x5d}, // cD1
+                                                            {0} };  // end of list
 
 //
 // Set 1 from MAME.
 //
 static const ROM_REGION s_romRegionArianBSet1[] PROGMEM = { //
-                                                           {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nArianBSet1_cD3, 0x47baf1db, "cD3"}, // P4
-                                                           {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nArianBSet1_cD2, 0x9879e506, "cD2"}, // P5
-                                                           {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nArianBSet1_cD1, 0xc0bfdf1f, "cD1"}, // P6
+                                                           {NO_BANK_SWITCH, 0x0000, 0x4000, s_romData2nArianBSet1[0].data2n, 0x47baf1db, "cD3"}, // P4
+                                                           {NO_BANK_SWITCH, 0x4000, 0x4000, s_romData2nArianBSet1[1].data2n, 0x9879e506, "cD2"}, // P5
+                                                           {NO_BANK_SWITCH, 0x8000, 0x4000, s_romData2nArianBSet1[2].data2n, 0xc0bfdf1f, "cD1"}, // P6
                                                            {0} }; // end of list
 
 IGame*
 CAsoAGame::createInstanceAsoSet1(
 )
 {
-    return (new CAsoAGame(s_romRegionAsoASet1));
+    return (new CAsoAGame(s_romData2nAsoASet1, s_romRegionAsoASet1));
 }
 
 
@@ -88,13 +94,14 @@ IGame*
 CAsoAGame::createInstanceArianSet1(
 )
 {
-    return (new CAsoAGame(s_romRegionArianASet1));
+    return (new CAsoAGame(s_romData2nArianASet1, s_romRegionArianASet1));
 }
 
 
 CAsoAGame::CAsoAGame(
+    const ROM_DATA2N *romData2n,
     const ROM_REGION *romRegion
-) : CAsoABaseGame( romRegion )
+) : CAsoABaseGame( romData2n, romRegion )
 {
 }
 
@@ -103,13 +110,14 @@ IGame*
 CAsoBGame::createInstanceArianSet1(
 )
 {
-    return (new CAsoBGame(s_romRegionArianBSet1));
+    return (new CAsoBGame(s_romData2nArianBSet1, s_romRegionArianBSet1));
 }
 
 
 CAsoBGame::CAsoBGame(
+    const ROM_DATA2N *romData2n,
     const ROM_REGION *romRegion
-) : CAsoBBaseGame( romRegion )
+) : CAsoBBaseGame( romData2n, romRegion )
 {
 }
 

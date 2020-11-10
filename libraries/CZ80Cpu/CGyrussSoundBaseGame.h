@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Paul R. Swan
+// Copyright (c) 2020, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,30 +22,66 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include "CZ80GenericGame.h"
-#include "CZ80Cpu.h"
+#ifndef CGyrussSoundBaseGame_h
+#define CGyrussSoundBaseGame_h
 
-//
-// See the base game cpp comments for details about this platform.
-//
+#include "CGame.h"
+#include "CAY38910.h"
 
-IGame*
-CZ80GenericGame::createInstance2716(
-)
+
+class CGyrussSoundBaseGame : public CGame
 {
-    return (new CZ80GenericGame(I2716));
-}
+    public:
 
-IGame*
-CZ80GenericGame::createInstance2732(
-)
-{
-    return (new CZ80GenericGame(I2732));
-}
+        //
+        // CGyrussSoundBaseGame
+        //
 
-CZ80GenericGame::CZ80GenericGame(
-    RomSize romSize
-) : CGenericBaseGame( new CZ80Cpu(), romSize )
-{
-}
+        virtual PERROR interruptCheck(
+        );
+
+        static PERROR ayIdle(
+            void *cGyrussSoundBaseGame
+        );
+
+        static PERROR ayCheck(
+            void *cGyrussSoundBaseGame
+        );
+
+        static PERROR ayNoise(
+            void *cGyrussSoundBaseGame
+        );
+
+    protected:
+
+        CGyrussSoundBaseGame(
+            const ROM_DATA2N *romData2n,
+            const ROM_REGION *romRegion
+        );
+
+        ~CGyrussSoundBaseGame(
+        );
+
+    private:
+
+        PERROR ayNoiseFilter(
+            CAY38910 *ay,
+            CAY38910::Channel channel,
+            UINT32 filterAd1,
+            UINT32 filterAd2
+        );
+
+    private:
+
+        // 0 - 11D - Port B filter o/p
+        // 1 - 12D - Port B filter o/p
+        // 2 - 10B - Port A clock i/p
+        // 3 -  9B
+        // 4  - 8B
+
+        CAY38910 *m_ay[5];
+
+};
+
+#endif
 

@@ -546,7 +546,7 @@ CZ80ACpu::memoryRead(
 
         *g_portOutB = ~(0);
     }
-    else if (m_cycleType != CYCLE_TYPE_PUCKMAN)
+    else if (m_cycleType == CYCLE_TYPE_DEFAULT)
     {
         // Wait for the clock edge
         WAIT_FOR_CLK_RISING_EDGE(r1,r2);

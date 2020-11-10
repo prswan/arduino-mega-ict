@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Paul R. Swan
+// Copyright (c) 2020, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,12 +22,12 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CZ80GenericGame_h
-#define CZ80GenericGame_h
+#ifndef CGyrussSoundGame_h
+#define CGyrussSoundGame_h
 
-#include "CGenericBaseGame.h"
+#include "CGyrussSoundBaseGame.h"
 
-class CZ80GenericGame : public CGenericBaseGame
+class CGyrussSoundGame : public CGyrussSoundBaseGame
 {
     public:
 
@@ -35,10 +35,7 @@ class CZ80GenericGame : public CGenericBaseGame
         // Constructors for this game.
         //
 
-        static IGame* createInstance2716(
-        );
-
-        static IGame* createInstance2732(
+        static IGame* createInstanceSet1(
         );
 
         //
@@ -48,10 +45,11 @@ class CZ80GenericGame : public CGenericBaseGame
     private:
 
         //
-        // Different ROM sizes selected
+        // Different ROM sets supplied.
         //
-        CZ80GenericGame(
-            RomSize romSize
+        CGyrussSoundGame(
+            const ROM_DATA2N *romData2n,
+            const ROM_REGION *romRegion
         );
 
 };

@@ -48,6 +48,7 @@ class CDambustersGame : public CDambustersBaseGame
         // Different ROM sets supplied.
         //
         CDambustersGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 

@@ -61,6 +61,13 @@ class CAY38910
             UINT32 regData
         );
 
+        CAY38910(
+            ICpu   *cpu,
+            UINT32 regAddress,
+            UINT32 regDataRd,
+            UINT32 regDataWr
+        );
+
         ~CAY38910(
         );
 
@@ -90,7 +97,8 @@ class CAY38910
 
         ICpu    *m_cpu;
         UINT32  m_regAddress;
-        UINT32  m_regData;
+        UINT32  m_regDataRd;
+        UINT32  m_regDataWr;
 };
 
 #endif

@@ -131,8 +131,10 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 
 
 CAsoABaseGame::CAsoABaseGame(
-    const ROM_REGION    *romRegion
-) : CGame( romRegion,
+    const ROM_DATA2N *romData2n,
+    const ROM_REGION *romRegion
+) : CGame( romData2n,
+           romRegion,
            s_ramRegionA,
            s_ramRegionA, //ByteOnly,
            s_ramRegionWriteOnly,
@@ -171,8 +173,10 @@ CAsoABaseGame::interruptCheck(
 
 
 CAsoBBaseGame::CAsoBBaseGame(
-    const ROM_REGION    *romRegion
-) : CGame( romRegion,
+    const ROM_DATA2N *romData2n,
+    const ROM_REGION *romRegion
+) : CGame( romData2n,
+           romRegion,
            s_ramRegionB,
            s_ramRegionB, //ByteOnly,
            s_ramRegionWriteOnly,

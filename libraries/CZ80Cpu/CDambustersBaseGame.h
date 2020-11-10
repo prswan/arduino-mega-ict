@@ -62,6 +62,7 @@ class CDambustersBaseGame : public CGame
     protected:
 
         CDambustersBaseGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 
