@@ -24,6 +24,7 @@
 //
 #include <C2650GenericGame.h>
 #include <CAstroWarsGame.h>
+#include <CCatnMouseGame.h>
 #include <CGalaxiaGame.h>
 #include <CQuasarGame.h>
 #include <CTheInvadersGame.h>
@@ -38,6 +39,8 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Astro Wars  (2)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet2),   false},
                                                   {"Astro Wars  (3)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet3),   false},
                                                   {"Astro Wars (02)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet02),  false},
+                                                  {"CantnMouse (01)",  onSelectGame,    (void*) (CCatnMouseGame::createInstanceSet01),  false},
+                                                  {"CantnMouse (02)",  onSelectGame,    (void*) (CCatnMouseGame::createInstanceSet02),  false},
                                                   {"Galaxia     (1)",  onSelectGame,    (void*) (CGalaxiaGame::createInstance),         false},
                                                   {"Galaxia     (2)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet2),     false},
                                                   {"Galaxia     (3)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet3),     false},
