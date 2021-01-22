@@ -26,7 +26,7 @@
 #include "CRomCheck.h"
 #include "CRamCheck.h"
 #include "CIoCheck.h"
-#include <DFR_Key.h>
+#include "keypad.h"
 
 #include <avr/pgmspace.h>
 
