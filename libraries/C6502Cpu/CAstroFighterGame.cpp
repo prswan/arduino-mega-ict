@@ -63,7 +63,7 @@ static const ROM_REGION s_romRegionSet2[] PROGMEM = { //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
                                                       {NO_BANK_SWITCH, 0xA000L, 0xFF,  "???", "IN    "}, // Inputs
                                                       {NO_BANK_SWITCH, 0xA001L, 0xFF,  "???", "DSW   "}, // Dip switch
-                                                      {NO_BANK_SWITCH, 0xA002L, 0xFF,  "???", "IrqClr"}, // Interupt clear
+                                                      {NO_BANK_SWITCH, 0xA002L, 0xFF,  "???", "IrqClr"}, // Interrupt clear
                                                       {0}
                                                     }; // end of list
 
