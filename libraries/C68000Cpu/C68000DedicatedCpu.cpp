@@ -173,8 +173,8 @@ C68000DedicatedCpu::idle(
 
     // Control inputs are always input with no pullup
     *g_portOutControlIn   = s_PORT_BYTE_OFF;
-    *g_dirControlIn       = ~(s_BIT_IN_CLK|s_BIT_IN_VPA|s_BIT_IN_DTACK|s_BIT_IN_BERR);
-    // LabRat: change from s_DIR_BYTE_INPUT as the upper NIBBLE should not be cleared
+    *g_dirControlIn       &= ~(s_BIT_IN_CLK|s_BIT_IN_VPA|s_BIT_IN_DTACK|s_BIT_IN_BERR);
+    // LabRat: change from s_DIR_BYTE_INPUT; only clear the bits we have under emulated control
 
     //
     // Control outputs are always outputs
