@@ -341,6 +341,8 @@ static size_t srcbuflen;
 static uint8_t *dstbuf;
 static size_t dstbuflen;
 
+static bool dataio_swap = false;
+
 static uint16_t inputpins[26];
 static uint16_t inputpinscount;
 
@@ -7887,6 +7889,8 @@ static int command_convert(int argc, char *argv[])
 
 	memset(&jed, 0, sizeof(jed));
 
+	jed.dataio_swap = dataio_swap;
+
 	/* if the source is JED or PLA, convert to binary */
 	if (src_is_jed || src_is_pla)
 	{
@@ -8175,7 +8179,13 @@ end:
 	return result;
 }
 
+static int command_dataio(int argc, char *argv[])
+{
+	printf("DataIO UniSite bit order swap mode\n");
 
+	dataio_swap = true;
+	return 0;
+}
 
 /*-------------------------------------------------
     main - primary entry point
@@ -8184,10 +8194,12 @@ end:
 int main(int argc, char *argv[])
 {
 	command_entry command_entries[] = {
+		{"-dataio",         &command_dataio },
 		{"-convert",        &command_convert},
 		{"-view",           &command_view},
 		{"-viewlist",       &command_viewlist},
 		{"-listcompatible", &command_listcompatible}};
+	int arg = 1;
 	int index;
 
 	if (argc < 2)
@@ -8195,10 +8207,20 @@ int main(int argc, char *argv[])
 		return print_usage();
 	}
 
+	/* Grab the optional dataIO selector */
+	if (!strcmp(argv[arg], command_entries[0].command))
+	{
+		arg++;
+		command_entries[0].command_func(argc - arg, &argv[arg]);
+	}
+
 	for (index = 0; index < ARRAY_LENGTH(command_entries); ++index)
 	{
-		if (!strcmp(argv[1], command_entries[index].command))
-			return command_entries[index].command_func(argc - 2, &argv[2]);
+		if (!strcmp(argv[arg], command_entries[index].command))
+		{
+			arg++;
+			return command_entries[index].command_func(argc - arg, &argv[arg]);
+		}
 	}
 
 	return print_usage();

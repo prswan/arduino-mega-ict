@@ -159,7 +159,31 @@ static void process_field(jed_data *data, const uint8_t *cursrc, const uint8_t *
 			for ( ; cursrc < srcend; cursrc++)
 				if (*cursrc == '0' || *cursrc == '1')
 				{
-					jed_set_fuse(data, curfuse, *cursrc - '0');
+					uint32_t jedcurfuse = curfuse;
+
+					/* Special handling to correct the fuse order from the
+					   DataIO UnitSite read of an 82S100. The fuse order
+					   translation is 01234567 => 10325476 applied to the
+					   AND matrix block (4 bytes of 5). Thus, the lower
+					   bit of the fuse address is inverted.
+
+					   0000000E: A5 5A
+					   0000000F: FE FD
+					   00000013: A9 56
+					   00000014: FD FE
+					   00000018: A6 59
+					*/
+					if (data->dataio_swap)
+					{
+						if ((jedcurfuse < 1920) &&
+							((jedcurfuse % 40) < 32))
+						{
+							jedcurfuse = curfuse & ~0x1UL;
+							jedcurfuse |= (curfuse & 0x1) ^ 1;
+						}
+					}
+
+					jed_set_fuse(data, jedcurfuse, *cursrc - '0');
 					if (LOG_PARSE) printf("  fuse %u = %d\n", curfuse, 0);
 					if (curfuse >= data->numfuses)
 						data->numfuses = curfuse + 1;
@@ -195,10 +219,13 @@ int jed_parse(const void *data, size_t length, jed_data *result)
 	const uint8_t *scan;
 	jed_parse_info pinfo;
 	uint16_t checksum;
+	bool dataio_swap = result->dataio_swap;
 	int i;
 
 	/* initialize the output and the intermediate info struct */
 	memset(result, 0, sizeof(*result));
+	result->dataio_swap = dataio_swap;
+
 	memset(&pinfo, 0, sizeof(pinfo));
 
 	/* first scan for the STX character; ignore anything prior */
@@ -266,11 +293,14 @@ int jed_parse(const void *data, size_t length, jed_data *result)
 	memset(&result->fusemap[(result->numfuses + 7) / 8], 0, sizeof(result->fusemap) - (result->numfuses + 7) / 8);
 
 	/* validate the checksum */
-	checksum = 0;
-	for (i = 0; i < (result->numfuses + 7) / 8; i++)
-		checksum += result->fusemap[i];
-	if (pinfo.checksum != 0 && checksum != pinfo.checksum)
-		return JEDERR_BAD_FUSE_SUM;
+	if (!result->dataio_swap)
+	{
+		checksum = 0;
+		for (i = 0; i < (result->numfuses + 7) / 8; i++)
+			checksum += result->fusemap[i];
+		if (pinfo.checksum != 0 && checksum != pinfo.checksum)
+			return JEDERR_BAD_FUSE_SUM;
+	}
 
 	return JEDERR_NONE;
 }

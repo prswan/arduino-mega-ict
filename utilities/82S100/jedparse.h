@@ -40,8 +40,11 @@ struct jed_data
 	uint32_t      numfuses;           /* number of defined fuses */
 	uint8_t       fusemap[JED_MAX_FUSES / 8];/* array of bit-packed data */
 
-	// PLA format for the 82S100 EPROM converter
+	/* PLA format for the 82S100 EPROM converter */
 	PLA           pla;
+
+	/* Switch to apply the DataIO UniSite transformation */
+	bool          dataio_swap;
 };
 
 
