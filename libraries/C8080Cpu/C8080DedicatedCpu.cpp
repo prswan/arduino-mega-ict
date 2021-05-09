@@ -90,7 +90,10 @@ C8080DedicatedCpu::idle(
     // to give the rising edge a minor boost.
     //
     *g_portOutControlIn  = (s_BIT_IN_CLK1 | s_BIT_IN_CLK2);
-    *g_dirControlIn      = s_DIR_BYTE_INPUT;
+    // LabRat - BugFix: changed to 0xF0 from s_DIR_BYTE_INPUT so that we don't impact the upper nibble
+    //          BugFix2: Keypad Shield uses B4 for LED enable/disable on the keypad 
+    //                &= ensure we only clear the 4 bits relevant to the emulated CPU
+    *g_dirControlIn      &= ~(s_BIT_IN_CLK1 | s_BIT_IN_READY | s_BIT_IN_CLK2 | s_BIT_IN_HOLD); 
 
     // Set address to input with pullup for bus check.
     *g_portOutAddressHi  = s_PORT_BYTE_PULLUP;
