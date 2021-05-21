@@ -52,6 +52,17 @@ class CScrambleBaseGame : public CGame
             void *cScrambleBaseGame
         );
 
+        //
+        // Custom function to clear the video display to blank.
+        //
+        static PERROR clearBk(
+            void *context
+        );
+
+        static PERROR clearObj(
+            void *context
+        );
+
     protected:
 
         CScrambleBaseGame(

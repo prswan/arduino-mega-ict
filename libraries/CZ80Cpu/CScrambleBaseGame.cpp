@@ -141,8 +141,10 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
 //
 // Custom functions implemented for this game.
 //
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}; // end of list
-
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
+                                                            {CScrambleBaseGame::clearBk,          "Clear Bk  "},
+                                                            {CScrambleBaseGame::clearObj,         "Clear Obj "},
+                                                            {NO_CUSTOM_FUNCTION}}; // end of list
 
 CScrambleBaseGame::CScrambleBaseGame(
     const Base base,
@@ -363,4 +365,71 @@ CScrambleBaseGame::onBankSwitchSetup8255_1(
 
     return cpu->memoryWrite(thisGame->m_8255WriteBaseAddress1 + 0x003, 0x88);
 }
+
+
+//
+// Clear the video display to blank (background)
+//
+PERROR
+CScrambleBaseGame::clearBk(
+    void *context
+)
+{
+    CScrambleBaseGame *thisGame = (CScrambleBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+    UINT32 count;
+
+    //
+    // The 0x080 is the address in the 5F/5H graphics ROMS
+    // of the all-zero character on Scorpion.
+    //
+    static const UINT32 bkVRamStart  = s_scrambleBkVRamBase;
+    static const UINT32 bkVRamLen    = 0x400;
+    static const UINT8  bkVBlankChar = (0x080 >> 3); // 8x8
+
+    //
+    // Clear the background RAM to a blank character.
+    //
+    for (count = 0 ; count < bkVRamLen ; count++)
+    {
+        (void) cpu->memoryWrite(bkVRamStart + count, bkVBlankChar);
+    }
+
+    return error;
+}
+
+
+//
+// Clear the video display to blank (sprites)
+//
+PERROR
+CScrambleBaseGame::clearObj(
+    void *context
+)
+{
+    CScrambleBaseGame *thisGame = (CScrambleBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+    UINT32 count;
+
+    //
+    // The 0x080 is the address in the 5F/5H graphics ROMS
+    // of the all-zero character on Scorpion.
+    //
+    static const UINT32 objRamStart  = s_scrambleObjRamBase;
+    static const UINT32 objRamLen    = 0x100;
+    static const UINT8  objBlankChar = (0x080 >> 5); // 16x16
+
+    //
+    // Clear the object RAM to a blank character.
+    //
+    for (count = 0 ; count < objRamLen ; count++)
+    {
+        (void) cpu->memoryWrite(objRamStart + count, objBlankChar);
+    }
+
+    return error;
+}
+
 

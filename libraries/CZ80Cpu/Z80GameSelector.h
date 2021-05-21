@@ -36,6 +36,7 @@
 #include <CMegaZoneSoundGame.h>
 #include <CPuckmanGame.h>
 #include <CRallyXGame.h>
+#include <CScorpionGame.h>
 #include <CScrambleGame.h>
 #include <CScrambleSoundGame.h>
 #include <CSuperCobraGame.h>
@@ -71,6 +72,9 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Puckman    (B1)",  onSelectGame,    (void*) (CPuckmanGame::createInstanceBSet1),                 false},
                                                   {"Rally-X(Midway)",  onSelectGame,    (void*) (CRallyXGame::createInstanceSet2),                   false},
                                                   {"Rally-X (Namco)",  onSelectGame,    (void*) (CRallyXGame::createInstanceSet1),                   false},
+                                                  {"Scorpion  (S1 )",  onSelectGame,    (void*) (CScorpionGame::createInstanceSet1),                 false},
+                                                  {"Scorpion  (S2 )",  onSelectGame,    (void*) (CScorpionGame::createInstanceSet2),                 false},
+                                                  {"Scorpion  (S2A)",  onSelectGame,    (void*) (CScorpionGame::createInstanceSet2A),                false},
                                                   {"Scramble   (S1)",  onSelectGame,    (void*) (CScrambleGame::createInstanceSet1),                 false},
                                                   {"Scramble  S(S1)",  onSelectGame,    (void*) (CScrambleSoundGame::createInstanceSet1),            false},
                                                   {"Scramble   (Z1)",  onSelectGame,    (void*) (CScrambleGame::createInstanceZacSet1),              false},
