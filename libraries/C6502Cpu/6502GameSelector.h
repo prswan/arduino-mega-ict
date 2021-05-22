@@ -24,6 +24,7 @@
 //
 #include <C6502GenericGame.h>
 #include <CAstroFighterGame.h>
+#include <CGravitarGame.h>
 #include <CTempestGame.h>
 #include <CTomahawk777Game.h>
 #include <CVanguardGame.h>
@@ -36,6 +37,10 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Generic 2732   ",  onSelectGeneric, (void*) (C6502GenericGame::createInstance2732),             false},
                                                   {"Astro F.(2)    ",  onSelectGame,    (void*) (CAstroFighterGame::createInstanceSet2),            false},
                                                   {"Astro F.(2) clk",  onSelectGame,    (void*) (CAstroFighterGame::createInstanceClockMasterSet2), false},
+                                                  {"Black Widow    ",  onSelectGame,    (void*) (CGravitarGame::createInstanceBlackWidowSet),       false},
+                                                  {"Gravitar (1)   ",  onSelectGame,    (void*) (CGravitarGame::createInstanceGravitarSet1),        false},
+                                                  {"Gravitar (2)   ",  onSelectGame,    (void*) (CGravitarGame::createInstanceGravitarSet2),        false},
+                                                  {"Gravitar (3)   ",  onSelectGame,    (void*) (CGravitarGame::createInstanceGravitarSet3),        false},
                                                   {"T-777   (5)    ",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceSet5),             false},
                                                   {"T-777   (5) clk",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceClockMasterSet5),  false},
                                                   {"Tempest (1)    ",  onSelectGame,    (void*) (CTempestGame::createInstanceTempestSet1),          false},
