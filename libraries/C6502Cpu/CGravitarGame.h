@@ -57,6 +57,7 @@ class CGravitarGame : public CGravitarBaseGame
         // Different ROM sets supplied.
         //
         CGravitarGame(
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
         );
 

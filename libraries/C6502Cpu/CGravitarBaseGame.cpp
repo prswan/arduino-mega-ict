@@ -114,8 +114,10 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}; // end of list
 
 CGravitarBaseGame::CGravitarBaseGame(
+    const ROM_DATA2N *romData2n,
     const ROM_REGION *romRegion
-) : CGame( romRegion,
+) : CGame( romData2n,
+           romRegion,
            s_ramRegion,
            s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
