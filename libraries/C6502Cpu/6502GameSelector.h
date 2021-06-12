@@ -23,6 +23,8 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include <C6502GenericGame.h>
+#include <CAsteroidsGame.h>
+#include <CAsteroidsDlxGame.h>
 #include <CAstroFighterGame.h>
 #include <CGravitarGame.h>
 #include <CSpaceDuelGame.h>
@@ -36,6 +38,12 @@
 static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Generic 2716   ",  onSelectGeneric, (void*) (C6502GenericGame::createInstance2716),             false},
                                                   {"Generic 2732   ",  onSelectGeneric, (void*) (C6502GenericGame::createInstance2732),             false},
+                                                  {"Asteroids (1)  ",  onSelectGame,    (void*) (CAsteroidsGame::createInstanceAsteroidsSet1),      false},
+                                                  {"Asteroids (2)  ",  onSelectGame,    (void*) (CAsteroidsGame::createInstanceAsteroidsSet2),      false},
+                                                  {"Asteroids (4)  ",  onSelectGame,    (void*) (CAsteroidsGame::createInstanceAsteroidsSet4),      false},
+                                                  {"AsteroidsDlx(1)",  onSelectGame,    (void*) (CAsteroidsDlxGame::createInstanceAstDlxSet1),      false},
+                                                  {"AsteroidsDlx(2)",  onSelectGame,    (void*) (CAsteroidsDlxGame::createInstanceAstDlxSet2),      false},
+                                                  {"AsteroidsDlx(3)",  onSelectGame,    (void*) (CAsteroidsDlxGame::createInstanceAstDlxSet3),      false},
                                                   {"Astro F.(2)    ",  onSelectGame,    (void*) (CAstroFighterGame::createInstanceSet2),            false},
                                                   {"Astro F.(2) clk",  onSelectGame,    (void*) (CAstroFighterGame::createInstanceClockMasterSet2), false},
                                                   {"Black Widow    ",  onSelectGame,    (void*) (CGravitarGame::createInstanceBlackWidowSet),       false},
