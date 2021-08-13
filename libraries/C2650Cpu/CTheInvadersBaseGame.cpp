@@ -86,6 +86,9 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 /* 84 = fire */
 /* 90 = die */
 /* c4 = hit saucer */
+//
+// ...and it appears 0x1 is the sound enable bit
+//
 
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                    "012", "012345"
                                                         {NO_BANK_SWITCH, 0x1E80L, 0x01, 0x00, "CI6", "Snd  1"}, //
@@ -96,6 +99,13 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
                                                         {NO_BANK_SWITCH, 0x1E80L, 0x20, 0x00, "CI6", "Snd  6"}, //
                                                         {NO_BANK_SWITCH, 0x1E80L, 0x08, 0x00, " 19", "SndL 7"}, //
                                                         {NO_BANK_SWITCH, 0x1E80L, 0x10, 0x00, " 19", "SndL 8"}, //
+                                                        // MAME game sound mappping
+                                                        {NO_BANK_SWITCH, 0x1E80L, 0x08+0x01, 0x00, "CI6", "InvHit"}, //
+                                                        {NO_BANK_SWITCH, 0x1E80L, 0x20+0x01, 0x00, "CI6", "ExtrBa"}, //
+                                                        {NO_BANK_SWITCH, 0x1E80L, 0x40+0x01, 0x00, "CI6", "Saucer"}, //
+                                                        {NO_BANK_SWITCH, 0x1E80L, 0x84+0x01, 0x00, "CI6", "Fire  "}, //
+                                                        {NO_BANK_SWITCH, 0x1E80L, 0x90+0x01, 0x00, "CI6", "BseHit"}, //
+                                                        {NO_BANK_SWITCH, 0x1E80L, 0xC4+0x01, 0x00, "CI6", "ScrHit"}, //
                                                         {0}
                                                       }; // end of list
 
