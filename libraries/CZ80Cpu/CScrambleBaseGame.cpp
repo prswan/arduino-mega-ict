@@ -132,7 +132,7 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
                                                         {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x006, 0x01, 0x00,  " 5B", "Flip X"}, // Flip X
                                                         {NO_BANK_SWITCH,                             s_scrambleCtrlOutputBase + 0x007, 0x01, 0x00,  " 5B", "Flip Y"}, // Flip Y
                                                         {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x000, 0xFF, 0x00,  "s1D", "Snd Cm"}, // Sound command
-                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x001, 0x04, 0x00,  "s1D", "Snd In"}, // Sound interrupt
+                                                        {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x001, 0x08, 0x00,  "s1D", "Snd In"}, // Sound interrupt
                                                         {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x001, 0x10, 0x00,  "s1D", "Amp Mt"}, // Amp Mute
                                                         {CScrambleBaseGame::onBankSwitchSetup8255_1, s_scramble8255IoBase1    + 0x002, 0x0F, 0x00,  "s1D", "Prot W"}, // Protection Write
                                                         {0}
