@@ -26,18 +26,30 @@
 #include "C2650Cpu.h"
 #include <DFR_Key.h>
 
+//
+// 2636 PVI Decode
+// ---------------
+//
+// ---------------------------------------------------
+// | Addr | BA9 | BA8 | 1Y0 |  1Y1 | 1Y2 | 1Y3 | PVI
+// ---------------------------------------------------
+// | 1400 |  0  |  0  |  A  |   -  |  -  |  -  | none
+// | 1500 |  0  |  1  |  -  |   -  |  A  |  -  | CSPVI2 - 3E
+// | 1600 |  1  |  0  |  -  |   A  |  -  |  -  | CSPVI1 - 5E
+// | 1700 |  1  |  1  |  -  |   -  |  -  |  A  | CSPVI3 - 2E
+// ---------------------------------------------------
 
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                                   "012", "012345"
                                                   {NO_BANK_SWITCH,                                  0x1C00,      0x1FFF,      1, 0x0F, " 7E", "Prog. "}, // "Program RAM, 2114"
                                                   {NO_BANK_SWITCH,                                  0x1C00,      0x1FFF,      1, 0xF0, " 6E", "Prog. "}, // "Program RAM, 2114"
                                                   {CLaserBattleBaseGame::onBankSwitchBackgroundRam, 0x1800,      0x1BFF,      1, 0x0F, "12F", "Bkgrnd"}, // "Video Background RAM, 2114"
                                                   {CLaserBattleBaseGame::onBankSwitchBackgroundRam, 0x1800,      0x1BFF,      1, 0xF0, "13F", "Bkgrnd"}, // "Video Background RAM, 2114"
-                                                  {NO_BANK_SWITCH,                                  0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                  {NO_BANK_SWITCH,                                  0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                  {NO_BANK_SWITCH,                                  0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                  {NO_BANK_SWITCH,                                  0x1600+0x00, 0x1600+0x2D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
-                                                  {NO_BANK_SWITCH,                                  0x1600+0x40, 0x1600+0x6D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
-                                                  {NO_BANK_SWITCH,                                  0x1600+0x80, 0x1600+0xAD, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                  {NO_BANK_SWITCH,                                  0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 3E", "2636-1"}, // "2636 PVI 2"
+                                                  {NO_BANK_SWITCH,                                  0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 3E", "2636-1"}, // "2636 PVI 2"
+                                                  {NO_BANK_SWITCH,                                  0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 3E", "2636-1"}, // "2636 PVI 2"
+                                                  {NO_BANK_SWITCH,                                  0x1600+0x00, 0x1600+0x2D, 1, 0xFF, " 5E", "2636-2"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                                  0x1600+0x40, 0x1600+0x6D, 1, 0xFF, " 5E", "2636-2"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                                  0x1600+0x80, 0x1600+0xAD, 1, 0xFF, " 5E", "2636-2"}, // "2636 PVI 1"
                                                   {NO_BANK_SWITCH,                                  0x1700+0x00, 0x1700+0x2D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
                                                   {NO_BANK_SWITCH,                                  0x1700+0x40, 0x1700+0x6D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
                                                   {NO_BANK_SWITCH,                                  0x1700+0x80, 0x1700+0xAD, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
@@ -47,12 +59,12 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
 static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                                   "012", "012345"
                                                           {NO_BANK_SWITCH,                                  0x1C00,      0x1FFF,      1, 0xFF, "76E", "Prog. "}, // "Program RAM, 2114, 7E/6E"
                                                           {CLaserBattleBaseGame::onBankSwitchBackgroundRam, 0x1800,      0x1BFF,      1, 0xFF, "1?F", "Bkgrnd"}, // "Video Background RAM, 2114, 12F/13F"
-                                                          {NO_BANK_SWITCH,                                  0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                          {NO_BANK_SWITCH,                                  0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                          {NO_BANK_SWITCH,                                  0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                          {NO_BANK_SWITCH,                                  0x1600+0x00, 0x1600+0x2D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
-                                                          {NO_BANK_SWITCH,                                  0x1600+0x40, 0x1600+0x6D, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
-                                                          {NO_BANK_SWITCH,                                  0x1600+0x80, 0x1600+0xAD, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                                  0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 3E", "2636-1"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                                  0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 3E", "2636-1"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                                  0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 3E", "2636-1"}, // "2636 PVI 2"
+                                                          {NO_BANK_SWITCH,                                  0x1600+0x00, 0x1600+0x2D, 1, 0xFF, " 5E", "2636-2"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                                  0x1600+0x40, 0x1600+0x6D, 1, 0xFF, " 5E", "2636-2"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                                  0x1600+0x80, 0x1600+0xAD, 1, 0xFF, " 5E", "2636-2"}, // "2636 PVI 1"
                                                           {NO_BANK_SWITCH,                                  0x1700+0x00, 0x1700+0x2D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
                                                           {NO_BANK_SWITCH,                                  0x1700+0x40, 0x1700+0x6D, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
                                                           {NO_BANK_SWITCH,                                  0x1700+0x80, 0x1700+0xAD, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
@@ -69,8 +81,8 @@ static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                    
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                                                     "012", "012345"
                                                            {CLaserBattleBaseGame::onBankSwitchEffectRam, 0x1800, 0x19FF, 1, 0x0F, "14F", "Effect"}, // "Video Effect RAM, 2114"
                                                            {CLaserBattleBaseGame::onBankSwitchEffectRam, 0x1800, 0x19FF, 1, 0xF0, "15F", "Effect"}, // "Video Effect RAM, 2114"
-                                                           {NO_BANK_SWITCH,                              0x1500, 0x15FF, 1, 0xFF, " 5E", "2636-1"}, // "2636 PVI 1"
-                                                           {NO_BANK_SWITCH,                              0x1600, 0x16FF, 1, 0xFF, " 3E", "2636-2"}, // "2636 PVI 2"
+                                                           {NO_BANK_SWITCH,                              0x1500, 0x15FF, 1, 0xFF, " 3E", "2636-1"}, // "2636 PVI 2"
+                                                           {NO_BANK_SWITCH,                              0x1600, 0x16FF, 1, 0xFF, " 5E", "2636-2"}, // "2636 PVI 1"
                                                            {NO_BANK_SWITCH,                              0x1700, 0x17FF, 1, 0xFF, " 2E", "2636-3"}, // "2636 PVI 3"
                                                            {0}
                                                          }; // end of list
