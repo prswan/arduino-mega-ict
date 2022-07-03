@@ -42,8 +42,8 @@
 // - In MAME the hardware for Frogger sound is mapped to "Konami Frogger with 1 x AY-8910A" as "frogger_sound_map".
 //
 // - AY-3-8910 Port Address Mask (from MAME)
-//   0x40 - (35) Addr Write
-//   0x80 - (35) Data Read/Write
+//   0x80 - (35) Addr Write
+//   0x40 - (35) Data Read/Write
 //
 // - Filter Address Mask (from schematics)
 //   0x040 - CHA F0

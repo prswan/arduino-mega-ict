@@ -27,6 +27,7 @@
 #include <CCrazyKongGame.h>
 #include <CDambustersGame.h>
 #include <CFitterGame.h>
+#include <CFitterSoundGame.h>
 #include <CFroggerGame.h>
 #include <CGalaxianGame.h>
 #include <CGyrussSoundGame.h>
@@ -61,6 +62,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Dambusters(UK1)",  onSelectGame,    (void*) (CDambustersGame::createInstanceUKSet1),             false},
                                                   {"Fitter    (KD1)",  onSelectGame,    (void*) (CFitterGame::createInstanceKagaDenshiSet1),         false},
                                                   {"Fitter     (T1)",  onSelectGame,    (void*) (CFitterGame::createInstanceTaitoSet1),              false},
+                                                  {"Fitter     S(1)",  onSelectGame,    (void*) (CFitterSoundGame::createInstanceSet1),              false},
                                                   {"Frogger   (SS1)",  onSelectGame,    (void*) (CFroggerGame::createInstanceSegaSet1),              false},
                                                   {"Galaxian   (M1)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet1),                 false},
                                                   {"Galaxian   (M2)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet2),                 false},
