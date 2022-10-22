@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, Paul R. Swan
+// Copyright (c) 2022, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,83 +22,32 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CStarWarsAvgBaseGame_h
-#define CStarWarsAvgBaseGame_h
+#ifndef CCapture_h
+#define CCapture_h
 
-#include "CGame.h"
-#include "CCapture.h"
+#include "ICpu.h"
 
-class CStarWarsAvgBaseGame : public CGame
+
+//
+// Implementation for signal capture extensions
+//
+class CCapture
 {
     public:
 
-        //
-        // CStarWarsAvgBaseGame
-        //
-
-        static PERROR vgRst(
-            void *context
+        CCapture(
+            ICpu *cpu
         );
 
-        static PERROR loadHALT(
-            void *context
+        ~CCapture(
         );
 
-        static PERROR loadVCTR(
-            void *context
-        );
-
-        static PERROR loadSTAT(
-            void *context
-        );
-
-        static PERROR loadSCAL(
-            void *context
-        );
-
-        static PERROR loadCNTR(
-            void *context
-        );
-
-        static PERROR loadAll(
-            void *context
-        );
-
-        static PERROR vgGo(
-            void *context
-        );
-
-        static PERROR capture32(
-            void *context
-        );
-
-        static PERROR rstGoCap32(
-            void *context
-        );
-
-        static PERROR runToHalt(
-            void *context
-        );
-
-    protected:
-
-        CStarWarsAvgBaseGame(
-            const ROM_REGION *romRegion
-        );
-
-        ~CStarWarsAvgBaseGame(
-        );
-
-        static PERROR load(
-            void   *context,
-            UINT8   dataLen,
-            UINT16 *data
+        PERROR capture32(
         );
 
     private:
 
-        CCapture *m_capture;
-
+        ICpu *m_cpu;
 };
 
 #endif

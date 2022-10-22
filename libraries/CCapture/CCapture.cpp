@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, Paul R. Swan
+// Copyright (c) 2022 Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,84 +22,70 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CStarWarsAvgBaseGame_h
-#define CStarWarsAvgBaseGame_h
-
-#include "CGame.h"
 #include "CCapture.h"
+#include "C6809EClockMasterCpu.h"
 
-class CStarWarsAvgBaseGame : public CGame
+#include "PinMap.h"
+
+//
+// External capture input on J14 AUX pin 1.
+//
+static const CONNECTION s_AUX1_i = {1, "AUX1"};
+
+
+CCapture::CCapture(
+    ICpu *cpu
+) : m_cpu(cpu)
 {
-    public:
+}
 
-        //
-        // CStarWarsAvgBaseGame
-        //
 
-        static PERROR vgRst(
-            void *context
-        );
+CCapture::~CCapture(
+)
+{
+}
 
-        static PERROR loadHALT(
-            void *context
-        );
 
-        static PERROR loadVCTR(
-            void *context
-        );
+//
+// Prototype Signal Capture
+// ------------------------
+// Capture the clocked input of aux pin 1 and display the hex result.
+// The 4 hex digits covers 32 clocks.
+//
+PERROR
+CCapture::capture32(
+)
+{
+    C6809EClockMasterCpu *cpu = (C6809EClockMasterCpu *) m_cpu;
+    PERROR error = errorCustom;
+    UINT8 capture[4] = {0,0,0,0};
 
-        static PERROR loadSTAT(
-            void *context
-        );
+    ::pinMode(g_pinMap8Aux[s_AUX1_i.pin], INPUT);
 
-        static PERROR loadSCAL(
-            void *context
-        );
+    for (int byte = 0 ; byte < 4 ; byte++)
+    {
+        for (int bit = 0 ; bit < 8 ; bit++)
+        {
+            cpu->clockPulse();
 
-        static PERROR loadCNTR(
-            void *context
-        );
+            int value = ::digitalRead(g_pinMap8Aux[s_AUX1_i.pin]);
 
-        static PERROR loadAll(
-            void *context
-        );
+            capture[byte] = capture[byte] << 1;
+            if (value == HIGH)
+            {
+                capture[byte] |= 1;
+            }
+        }
+    }
 
-        static PERROR vgGo(
-            void *context
-        );
+    error->code = ERROR_SUCCESS;
+    error->description = "OK: ";
 
-        static PERROR capture32(
-            void *context
-        );
+    for (int byte = 0 ; byte < 4 ; byte++)
+    {
+        STRING_UINT8_HEX(error->description, capture[byte]);
+    }
 
-        static PERROR rstGoCap32(
-            void *context
-        );
-
-        static PERROR runToHalt(
-            void *context
-        );
-
-    protected:
-
-        CStarWarsAvgBaseGame(
-            const ROM_REGION *romRegion
-        );
-
-        ~CStarWarsAvgBaseGame(
-        );
-
-        static PERROR load(
-            void   *context,
-            UINT8   dataLen,
-            UINT16 *data
-        );
-
-    private:
-
-        CCapture *m_capture;
-
-};
-
-#endif
+    return error;
+}
 

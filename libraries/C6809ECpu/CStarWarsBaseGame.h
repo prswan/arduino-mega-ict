@@ -26,6 +26,7 @@
 #define CStarWarsBaseGame_h
 
 #include "CGame.h"
+#include "CCapture.h"
 
 
 class CStarWarsBaseGame : public CGame
@@ -115,19 +116,19 @@ class CStarWarsBaseGame : public CGame
             void   *context
         );
 
-        static PERROR testRepeatLastMatrixProgram(
+        static PERROR repeatLastMatrixProgram(
             void   *context
         );
 
-        static PERROR testRepeatLastDividerProgram(
+        static PERROR repeatLastDividerProgram(
             void   *context
         );
 
-        static PERROR testClockPulse(
+        static PERROR clockPulse(
             void   *context
         );
 
-        static PERROR testCapture(
+        static PERROR capture32(
             void   *context
         );
 
@@ -162,6 +163,8 @@ class CStarWarsBaseGame : public CGame
             UINT16 divisor,
             UINT16 quotient
         );
+
+        CCapture *m_capture;
 
         UINT32 m_clockPulseCount;
         UINT16 m_lastMatrixProgramAddress;

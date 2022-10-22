@@ -145,10 +145,10 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                  
                                                             {CStarWarsBaseGame::test23,                      "DV Test 23"},
                                                             {CStarWarsBaseGame::test24,                      "DV Test 24"},
                                                             {CStarWarsBaseGame::test25,                      "DV Test 25"},
-                                                            {CStarWarsBaseGame::testRepeatLastMatrixProgram, "Repeat MX "},
-                                                            {CStarWarsBaseGame::testRepeatLastDividerProgram,"Repeat DV "},
-                                                            {CStarWarsBaseGame::testClockPulse,              "Clk Pulse "},
-                                                            {CStarWarsBaseGame::testCapture,                 "Capture   "},
+                                                            {CStarWarsBaseGame::repeatLastMatrixProgram,     "Repeat MX "},
+                                                            {CStarWarsBaseGame::repeatLastDividerProgram,    "Repeat DV "},
+                                                            {CStarWarsBaseGame::clockPulse,                  "Clk Pulse "},
+                                                            {CStarWarsBaseGame::capture32,                   "Capture 32"},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -174,12 +174,19 @@ CStarWarsBaseGame::CStarWarsBaseGame(
 
     // The interrupt uses an external ROM vector.
     m_interruptAutoVector = false;
+
+    // Signal capture extension
+    m_capture = new CCapture(m_cpu);
+
 }
 
 
 CStarWarsBaseGame::~CStarWarsBaseGame(
 )
 {
+    delete m_capture;
+    m_capture = (CCapture *) NULL;
+
     delete m_cpu;
     m_cpu = (ICpu *) NULL;
 }
@@ -629,7 +636,7 @@ CStarWarsBaseGame::test25(
 
 
 PERROR
-CStarWarsBaseGame::testRepeatLastMatrixProgram(
+CStarWarsBaseGame::repeatLastMatrixProgram(
     void   *context
 )
 {
@@ -653,7 +660,7 @@ Exit:
 
 
 PERROR
-CStarWarsBaseGame::testRepeatLastDividerProgram(
+CStarWarsBaseGame::repeatLastDividerProgram(
     void   *context
 )
 {
@@ -673,7 +680,7 @@ Exit:
 
 
 PERROR
-CStarWarsBaseGame::testClockPulse(
+CStarWarsBaseGame::clockPulse(
     void   *context
 )
 {
@@ -691,62 +698,15 @@ CStarWarsBaseGame::testClockPulse(
     return error;
 }
 
-//
-// Prototype signal capture
-//
-#include "PinMap.h"
 
-//
-// External capture input on J14 AUX pin 1.
-//
-static const CONNECTION s_AUX1_i = {1, "AUX1"};
-
-//
-// Prototype Signal Capture
-// ------------------------
-// Capture the clocked input of aux pin 1 and display the hex result.
-// The 4 hex digits covers 32 clocks.
-// See StarWarsCaptures.txt for reference results.
-//
-
+// Run 32 clocks and signal capture
 PERROR
-CStarWarsBaseGame::testCapture(
+CStarWarsBaseGame::capture32(
     void   *context
 )
 {
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
-    C6809EClockMasterCpu *cpu = (C6809EClockMasterCpu *) thisGame->m_cpu;
-    PERROR error = errorCustom;
-    UINT8 capture[4] = {0,0,0,0};
 
-    ::pinMode(g_pinMap8Aux[s_AUX1_i.pin], INPUT);
-
-    for (int byte = 0 ; byte < 4 ; byte++)
-    {
-        for (int bit = 0 ; bit < 8 ; bit++)
-        {
-            cpu->clockPulse();
-            thisGame->m_clockPulseCount++;
-
-            int value = ::digitalRead(g_pinMap8Aux[s_AUX1_i.pin]);
-
-            capture[byte] = capture[byte] << 1;
-            if (value == HIGH)
-            {
-                capture[byte] |= 1;
-            }
-        }
-    }
-
-    error->code = ERROR_SUCCESS;
-    error->description = "OK: ";
-
-    for (int byte = 0 ; byte < 4 ; byte++)
-    {
-        STRING_UINT8_HEX(error->description, capture[byte]);
-    }
-
-    return error;
+    return thisGame->m_capture->capture32();
 }
-
 
