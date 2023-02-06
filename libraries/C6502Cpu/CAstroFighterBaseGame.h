@@ -44,10 +44,11 @@ class CAstroFighterBaseGame : public CGame
     protected:
 
         CAstroFighterBaseGame(
-            const bool          clockMaster,
-            const ROM_REGION    *romRegion,
-            const INPUT_REGION  *inputRegion,
-            const OUTPUT_REGION *outputRegion
+            const bool            clockMaster,
+            const ROM_REGION      *romRegion,
+            const INPUT_REGION    *inputRegion,
+            const OUTPUT_REGION   *outputRegion,
+            const CUSTOM_FUNCTION *customFunction
         );
 
         ~CAstroFighterBaseGame(

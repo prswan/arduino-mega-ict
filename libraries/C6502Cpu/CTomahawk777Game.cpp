@@ -90,6 +90,14 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
                                                         {0}
                                                       }; // end of list
 
+//
+// Custom functions implemented for this game.
+//
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
+                                                            {CTomahawk777Game::protectionTest,    "Prot. Tst"},
+                                                            {NO_CUSTOM_FUNCTION}}; // end of list
+
+
 IGame*
 CTomahawk777Game::createInstanceSet5(
 )
@@ -112,8 +120,55 @@ CTomahawk777Game::CTomahawk777Game(
 ) : CAstroFighterBaseGame( clockMaster,
                            romRegion,
                            s_inputRegion,
-                           s_outputRegion )
+                           s_outputRegion,
+                           s_customFunction )
 {
 }
 
+//
+// Custom function for testing the protection hardware.
+//
+// map(0x8007, 0x8007).mirror(0x1ff8).nopr().writeonly().share("tomahawk_prot");
+// map(0xa003, 0xa003).mirror(0x1ff8).r(FUNC(astrof_state::tomahawk_protection_r)).nopw();
+//
+// m_tomahawk_protection(*this, "tomahawk_prot"),
+//
+// uint8_t astrof_state::tomahawk_protection_r()
+// {
+//  /* flip the byte */
+//  return bitswap<8>(*m_tomahawk_protection, 0, 1, 2, 3, 4, 5, 6, 7);
+// }
+//
+//
+PERROR
+CTomahawk777Game::protectionTest(
+    void *context
+)
+{
+    CTomahawk777Game *thisGame = (CTomahawk777Game *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+
+    static const UINT32 protWriteAddress = 0x8007;
+    static const UINT32 protReadAddress  = 0xa003;
+
+    static const UINT8 protWriteData[]   = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
+    static const UINT8 protExpReadData[] = {0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01};
+
+    for (UINT8 count = 0 ; ((count < ARRAYSIZE(protExpReadData)) && !FAILED(error)) ; count++)
+    {
+        const UINT16 expValue = protExpReadData[count];
+        UINT16 recValue = 0;
+
+        // Write the protection data
+        error = cpu->memoryWrite(protWriteAddress, protWriteData[count]);
+
+        // Read back the response
+        error = cpu->memoryRead(protReadAddress, &recValue);
+
+        CHECK_VALUE_UINT8_BREAK(error, "IC7", protReadAddress, expValue, recValue);
+    }
+
+    return error;
+}
 

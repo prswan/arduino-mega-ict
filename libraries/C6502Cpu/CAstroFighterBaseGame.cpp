@@ -83,10 +83,6 @@ static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                    
 //
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 
-//
-// Custom functions implemented for this game.
-//
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}; // end of list
 
 //
 // Notes
@@ -110,17 +106,18 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 //
 
 CAstroFighterBaseGame::CAstroFighterBaseGame(
-    const bool          clockMaster,
-    const ROM_REGION    *romRegion,
-    const INPUT_REGION  *inputRegion,
-    const OUTPUT_REGION *outputRegion
+    const bool            clockMaster,
+    const ROM_REGION      *romRegion,
+    const INPUT_REGION    *inputRegion,
+    const OUTPUT_REGION   *outputRegion,
+    const CUSTOM_FUNCTION *customFunction
 ) : CGame( romRegion,
            s_ramRegion,
            s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            inputRegion,
            outputRegion,
-           s_customFunction,
+           customFunction,
            clockMaster ? CAstroFighterBaseGame::delayFunction : NO_DELAY_FUNCTION )
 {
     //        _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _

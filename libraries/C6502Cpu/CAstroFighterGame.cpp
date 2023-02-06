@@ -83,6 +83,12 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
                                                         {0}
                                                       }; // end of list
 
+//
+// Custom functions implemented for this game.
+//
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}; // end of list
+
+
 IGame*
 CAstroFighterGame::createInstanceSet2(
 )
@@ -105,7 +111,8 @@ CAstroFighterGame::CAstroFighterGame(
 ) : CAstroFighterBaseGame( clockMaster,
                            romRegion,
                            s_inputRegion,
-                           s_outputRegion )
+                           s_outputRegion,
+                           s_customFunction )
 {
 }
 
