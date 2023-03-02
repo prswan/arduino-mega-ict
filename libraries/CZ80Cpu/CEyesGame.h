@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, Paul R. Swan
+// Copyright (c) 2023, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,37 +22,45 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CPuckmanBaseGame_h
-#define CPuckmanBaseGame_h
+#ifndef CEyesGame_h
+#define CEyesGame_h
 
-#include "CGame.h"
+#include "CPuckmanBaseGame.h"
 
-
-class CPuckmanBaseGame : public CGame
+class CEyesGame : public CPuckmanBaseGame
 {
     public:
 
         //
-        // CPuckmanBaseGame
+        // Constructors for this game.
         //
 
-        virtual PERROR interruptCheck(
+        static IGame* createInstanceZacSet1(
         );
 
-    protected:
-
-        CPuckmanBaseGame(
-            const ROM_DATA2N  *romData2n,
-            const ROM_REGION  *romRegion,
-            DataRemapCallback  dataRemapCallback = NO_DATA_REMAP
+        static PERROR onDataRemap(
+            void   *cDambustersBaseGame,
+            UINT32  address,
+            UINT16  dataIn,
+            UINT16 *dataOut
         );
 
-        ~CPuckmanBaseGame(
-        );
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
 
     private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CEyesGame(
+            const ROM_DATA2N *romData2n,
+            const ROM_REGION *romRegion
+        );
 
 };
 
 #endif
+
 

@@ -102,8 +102,9 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 
 
 CPuckmanBaseGame::CPuckmanBaseGame(
-    const ROM_DATA2N *romData2n,
-    const ROM_REGION *romRegion
+    const ROM_DATA2N  *romData2n,
+    const ROM_REGION  *romRegion,
+    DataRemapCallback  dataRemapCallback
 ) : CGame( romData2n,
            romRegion,
            s_ramRegion,
@@ -116,7 +117,7 @@ CPuckmanBaseGame::CPuckmanBaseGame(
     m_cpu = new CZ80ACpu(0,
                          NO_ADDRESS_REMAP,
                          NULL,
-                         NO_DATA_REMAP,
+                         dataRemapCallback,
                          NULL,
                          CZ80ACpu::CYCLE_TYPE_PUCKMAN);
 

@@ -26,6 +26,7 @@
 #include <CBuckRogersGame.h>
 #include <CCrazyKongGame.h>
 #include <CDambustersGame.h>
+#include <CEyesGame.h>
 #include <CFitterGame.h>
 #include <CFitterSoundGame.h>
 #include <CFroggerGame.h>
@@ -60,6 +61,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Crazy K. P2( 1)",  onSelectGame,    (void*) (CCrazyKongGame::createInstancePt2Set1),             false},
                                                   {"Crazy K. P2(Z1)",  onSelectGame,    (void*) (CCrazyKongGame::createInstancePt2ZacSet1),          false},
                                                   {"Dambusters(UK1)",  onSelectGame,    (void*) (CDambustersGame::createInstanceUKSet1),             false},
+                                                  {"Eyes       (Z1)",  onSelectGame,    (void*) (CEyesGame::createInstanceZacSet1),                  false},
                                                   {"Fitter    (KD1)",  onSelectGame,    (void*) (CFitterGame::createInstanceKagaDenshiSet1),         false},
                                                   {"Fitter     (T1)",  onSelectGame,    (void*) (CFitterGame::createInstanceTaitoSet1),              false},
                                                   {"Fitter     S(1)",  onSelectGame,    (void*) (CFitterSoundGame::createInstanceSet1),              false},
