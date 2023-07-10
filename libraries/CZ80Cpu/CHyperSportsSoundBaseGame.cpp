@@ -43,6 +43,11 @@
 // Notes:
 //
 
+// Used for custom functions
+static const UINT32 s_dacAddress        = 0xe000L;
+static const UINT32 s_psgCommandAddress = 0xe001L;
+static const UINT32 s_psgTriggerAddress = 0xe002L;
+
 //
 // RAM region is the same for all games on this board set.
 //
@@ -87,7 +92,9 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
 //
 // Custom functions implemented for this game.
 //
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { // "0123456789"
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                       "0123456789"
+                                                            {CHyperSportsSoundBaseGame::testDAC,     "Test DAC  "},
+                                                            {CHyperSportsSoundBaseGame::testSN76489, "Test 76489"},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -119,6 +126,9 @@ CHyperSportsSoundBaseGame::CHyperSportsSoundBaseGame(
     // There is no direct hardware response of a vector on this platform.
     m_interruptAutoVector = true;
 
+    // Clear the sound generator to silent
+    (void) clearSN76489(m_cpu);
+
 }
 
 
@@ -136,6 +146,103 @@ CHyperSportsSoundBaseGame::interruptCheck(
 )
 {
     PERROR error = errorNotImplemented;
+    return error;
+}
+
+
+//
+// Test the audio output DAC with a simple sawtooth pattern
+//
+PERROR
+CHyperSportsSoundBaseGame::testDAC(
+    void *context
+)
+{
+    CHyperSportsSoundBaseGame *thisGame = (CHyperSportsSoundBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+    UINT32 count;
+
+    // Loop to generate a repeating pattern for a few seconds to hear and see it on the scope.
+    for (UINT32 x = 0 ; x < 1200 ; x++)
+    {
+        // Ramp up
+        for (count = 0 ; count != 250 ; count += 25)
+        {
+            (void) cpu->memoryWrite(s_dacAddress, count);
+        }
+
+        // Ramp down
+        for (count = 250 ; count != 0 ; count -= 25)
+        {
+            (void) cpu->memoryWrite(s_dacAddress, count);
+        }
+    }
+
+    return error;
+}
+
+
+//
+// Test the SN76489 tone generator
+//
+PERROR
+CHyperSportsSoundBaseGame::testSN76489(
+    void *context
+)
+{
+    CHyperSportsSoundBaseGame *thisGame = (CHyperSportsSoundBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+
+    // Channel 0 - Tone - Lo
+    (void) cpu->memoryWrite(s_psgCommandAddress, 0x80);
+    (void) cpu->memoryWrite(s_psgTriggerAddress, 0x00);
+
+    // Channel 0 - Tone - Hi
+    (void) cpu->memoryWrite(s_psgCommandAddress, 0x0F);
+    (void) cpu->memoryWrite(s_psgTriggerAddress, 0x00);
+
+    // Channel 0 - Amplitude
+    (void) cpu->memoryWrite(s_psgCommandAddress, 0x90);
+    (void) cpu->memoryWrite(s_psgTriggerAddress, 0x00);
+
+    // wait 5 seconds
+    delay(5000);
+
+    // Clear back to silent
+    error = thisGame->clearSN76489(cpu);
+
+    return error;
+}
+
+
+//
+// Test the SN76489 tone generator
+//
+PERROR
+CHyperSportsSoundBaseGame::clearSN76489(
+    ICpu *cpu
+)
+{
+    PERROR error = errorSuccess;
+
+    // Channel 0 - Clear
+    (void) cpu->memoryWrite(s_psgCommandAddress, 0x9F);
+    (void) cpu->memoryWrite(s_psgTriggerAddress, 0x00);
+
+    // Channel 1 - Clear
+    (void) cpu->memoryWrite(s_psgCommandAddress, 0xBF);
+    (void) cpu->memoryWrite(s_psgTriggerAddress, 0x00);
+
+    // Channel 2 - Clear
+    (void) cpu->memoryWrite(s_psgCommandAddress, 0xDF);
+    (void) cpu->memoryWrite(s_psgTriggerAddress, 0x00);
+
+    // Channel 3 - Clear
+    (void) cpu->memoryWrite(s_psgCommandAddress, 0xFF);
+    (void) cpu->memoryWrite(s_psgTriggerAddress, 0x00);
+
     return error;
 }
 

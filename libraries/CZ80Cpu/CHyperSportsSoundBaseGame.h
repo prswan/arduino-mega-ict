@@ -39,6 +39,20 @@ class CHyperSportsSoundBaseGame : public CGame
         virtual PERROR interruptCheck(
         );
 
+        //
+        // Custom function to test the audio output DAC with a simple sawtooth pattern
+        //
+        static PERROR testDAC(
+            void *context
+        );
+
+        //
+        // Custom function to test the SN76489 tone generator
+        //
+        static PERROR testSN76489(
+            void *context
+        );
+
     protected:
 
         CHyperSportsSoundBaseGame(
@@ -50,6 +64,10 @@ class CHyperSportsSoundBaseGame : public CGame
         );
 
     private:
+
+        PERROR clearSN76489(
+            ICpu *cpu
+        );
 
 };
 
