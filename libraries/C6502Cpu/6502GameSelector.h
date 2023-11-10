@@ -28,6 +28,7 @@
 #include <CAstroFighterGame.h>
 #include <CGravitarGame.h>
 #include <CSpaceDuelGame.h>
+#include <CSprintGame.h>
 #include <CTempestGame.h>
 #include <CTomahawk777Game.h>
 #include <CVanguardGame.h>
@@ -52,6 +53,9 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Gravitar (3)   ",  onSelectGame,    (void*) (CGravitarGame::createInstanceGravitarSet3),        false},
                                                   {"Space Duel (1) ",  onSelectGame,    (void*) (CSpaceDuelGame::createInstanceSpaceDuelSet1),      false},
                                                   {"Space Duel (2) ",  onSelectGame,    (void*) (CSpaceDuelGame::createInstanceSpaceDuelSet2),      false},
+                                                  {"Sprint 1       ",  onSelectGame,    (void*) (CSprintGame::createInstanceSprint1),               false},
+                                                  {"Sprint 2 (1)   ",  onSelectGame,    (void*) (CSprintGame::createInstanceSprint2),               false},
+                                                  {"Sprint 2 (2)   ",  onSelectGame,    (void*) (CSprintGame::createInstanceSprint2a),              false},
                                                   {"T-777   (5)    ",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceSet5),             false},
                                                   {"T-777   (5) clk",  onSelectGame,    (void*) (CTomahawk777Game::createInstanceClockMasterSet5),  false},
                                                   {"Tempest (1)    ",  onSelectGame,    (void*) (CTempestGame::createInstanceTempestSet1),          false},
