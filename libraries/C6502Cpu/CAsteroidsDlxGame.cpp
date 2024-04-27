@@ -92,16 +92,21 @@ static const ROM_REGION s_romRegionAstDlxSet3[] PROGMEM = { //
 // Asteroids Deluxe Output region
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                    "012", "012345"
-                                                        {NO_BANK_SWITCH, 0x3000, 0xFF, 0x00,  " --", "DMA GO"}, // DMA GO
-                                                        {NO_BANK_SWITCH, 0x3400, 0xFF, 0x00,  " --", "WD CLR"}, // watchdog clear
-                                                        {NO_BANK_SWITCH, 0x3600, 0xFF, 0x00,  " --", "EXPLOS"}, // Explosion Sound
-                                                        {NO_BANK_SWITCH, 0x3C00, 0xFF, 0x00,  " --", "SAUCER"}, // Saucer Sound
-                                                        {NO_BANK_SWITCH, 0x3C01, 0xFF, 0x00,  " --", "SAFIRE"}, // Saucer Fire Sound
-                                                        {NO_BANK_SWITCH, 0x3C02, 0xFF, 0x00,  " --", "SASEL "}, // Saucer Sound Select
-                                                        {NO_BANK_SWITCH, 0x3C03, 0xFF, 0x00,  " --", "THRUST"}, // Ship Thrust Sound
-                                                        {NO_BANK_SWITCH, 0x3C04, 0xFF, 0x00,  " --", "FIRE  "}, // Ship Fire Sound
-                                                        {NO_BANK_SWITCH, 0x3C05, 0xFF, 0x00,  " --", "LIFE  "}, // Life Sound
-                                                        {NO_BANK_SWITCH, 0x3E00, 0xFF, 0x00,  " --", "SNDRST"}, // Noise Reset
+                                                        {NO_BANK_SWITCH, 0x3000, 0xFF, 0x00,  "L5 ", "DMA GO"}, // DMAGO     - Start VG
+                                                        {NO_BANK_SWITCH, 0x3200, 0xFF, 0x00,  "L9 ", "EA ADD"}, // EAADDRL   - Latch EA Address/Data
+                                                        {NO_BANK_SWITCH, 0x3400, 0xFF, 0x00,  "L5 ", "WD CLR"}, // WDCLR     - Watchdog Reset
+                                                        {NO_BANK_SWITCH, 0x3600, 0xFF, 0x00,  "F6 ", "EXPLOS"}, // EXPLODE   - Explosion Sound
+                                                        {NO_BANK_SWITCH, 0x3800, 0xFF, 0x00,  "L5 ", "DMA RS"}, // DMA RESET - 3800 VG reset
+                                                        {NO_BANK_SWITCH, 0x3A00, 0xFF, 0x00,  "P9 ", "EA CTL"}, // EACONTROL - EA control latch
+                                                        {NO_BANK_SWITCH, 0x3C00, 0x80, 0x00,  "M10", "S1 LED"}, // 1-player start LED
+                                                        {NO_BANK_SWITCH, 0x3C01, 0x80, 0x00,  "M10", "S2 LED"}, // 2-player start LED
+                                                        {NO_BANK_SWITCH, 0x3C02, 0x80, 0x00,  "M10", "n/u   "}, // Not used
+                                                        {NO_BANK_SWITCH, 0x3C03, 0x80, 0x00,  "M10", "THRSTE"}, // SHPTHRUSTEN - Ship thrust sound
+                                                        {NO_BANK_SWITCH, 0x3C04, 0x80, 0x00,  "M10", "RAMSEL"}, // RAMSEL      - Bank select
+                                                        {NO_BANK_SWITCH, 0x3C05, 0x80, 0x00,  "M10", "CTR L1"}, // Left coin counter
+                                                        {NO_BANK_SWITCH, 0x3C06, 0x80, 0x00,  "M10", "CTR C1"}, // Center coin counter
+                                                        {NO_BANK_SWITCH, 0x3C07, 0x80, 0x00,  "M10", "CTR R1"}, // Right coin counter
+                                                        {NO_BANK_SWITCH, 0x3E00, 0xFF, 0x00,  "L5 ", "NSERST"}, // NOISERESET - Noise generator reset
                                                         {0}
                                                       }; // end of list
 

@@ -37,12 +37,12 @@
 // RAM region is the same for all versions.
 //
 static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                  "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0x0F, " D2", "Progrm"}, // "program RAM"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0xF0, " E2", "Progrm"}, // "program RAM"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x43FF,      1, 0x0F, " M4", "Vector"}, // "vector RAM"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x43FF,      1, 0xF0, " R4", "Vector"}, // "vector RAM"
-                                                  {NO_BANK_SWITCH, 0x4400,      0x47FF,      1, 0x0F, " N4", "Vector"}, // "vector RAM"
-                                                  {NO_BANK_SWITCH, 0x4400,      0x47FF,      1, 0xF0, " P4", "Vector"}, // "vector RAM"
+                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0x0F, " D2", "Progrm"}, // "program RAM, Delux: L1"
+                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0xF0, " E2", "Progrm"}, // "program RAM, Delux: M1"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x43FF,      1, 0x0F, " M4", "Vector"}, // "vector RAM, Delux M3"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x43FF,      1, 0xF0, " R4", "Vector"}, // "vector RAM, Delux R3"
+                                                  {NO_BANK_SWITCH, 0x4400,      0x47FF,      1, 0x0F, " N4", "Vector"}, // "vector RAM, Delux N3"
+                                                  {NO_BANK_SWITCH, 0x4400,      0x47FF,      1, 0xF0, " P4", "Vector"}, // "vector RAM, Delux P3"
                                                   {0}
                                                 }; // end of list
 
