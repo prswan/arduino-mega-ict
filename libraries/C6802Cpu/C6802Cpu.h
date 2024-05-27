@@ -86,7 +86,8 @@ class C6802Cpu : public ICpu
         PERROR
         waitForInterrupt(
             Interrupt interrupt,
-            UINT16    timeoutInMs
+            bool      active,
+            UINT32    timeoutInMs
         );
 
         virtual

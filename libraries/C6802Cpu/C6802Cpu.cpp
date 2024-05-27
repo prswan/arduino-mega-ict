@@ -156,24 +156,24 @@ C6802Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pins should be connected to GND
-    CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
-    CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND1_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND2_i, LOW);
 
     // The Vcc pins should be high (power is on)
-    CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
-    CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_VCC1_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_VCC2_i, HIGH);
 
     // The /RESET pin should be high, there is no watchdog here
-    CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__RESET_i, HIGH);
 
     // The /HALT pin is pulled high by R27
-    CHECK_VALUE_EXIT(error, s__HALT_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__HALT_i, HIGH);
 
     // The MR pin is pulled high by R31
-    CHECK_VALUE_EXIT(error, s_MR_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_MR_i, HIGH);
 
     // The /NMI pin is pulled high by R1 and should only go low if the test button is pressed
-    CHECK_VALUE_EXIT(error, s__NMI_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s__NMI_i, HIGH);
 
     // The address bus should be uncontended and pulled high
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_o, 0xFFFF);
@@ -182,13 +182,13 @@ C6802Cpu::check(
     // CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);  // Fails on D0???
 
     // The VMA pin should be high
-    CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_VMA_o, HIGH);
 
     // The E pin should be low
-    CHECK_VALUE_EXIT(error, s_E_o, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_E_o, LOW);
 
     // The R/W pin should be high
-    CHECK_VALUE_EXIT(error, s_R_W_o, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_R_W_o, HIGH);
 
 Exit:
 
@@ -326,28 +326,31 @@ Exit:
 PERROR
 C6802Cpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16 timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
     PERROR error = errorSuccess;
     unsigned long startTime = millis();
     unsigned long endTime = startTime + timeoutInMs;
+    int sense = (active ? LOW : HIGH);
     int value = 0;
 
     UINT8 intPin = ((interrupt == NMI) ? (g_pinMap40DIL[s__NMI_i.pin]) :
                                          (g_pinMap40DIL[s__IRQ_i.pin]));
+
     do
     {
         value = ::digitalRead(intPin);
 
-        if (value == LOW)
+        if (value == sense)
         {
             break;
         }
     }
     while (millis() < endTime);
 
-    if (value != LOW)
+    if (value != sense)
     {
         error = errorTimeout;
     }

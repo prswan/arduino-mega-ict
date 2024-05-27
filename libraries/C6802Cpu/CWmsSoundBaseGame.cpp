@@ -49,7 +49,7 @@ static const UINT32 addressPIA1B  = 0x0402;
 //
 // RAM region is the same for all versions.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { 
+static const RAM_REGION s_ramRegion[] PROGMEM = {
     //                                     "012", "012345"
     {NO_BANK_SWITCH, 0x0000, 0x007F, 0xFF, "U11", "RAM   "}, // 6810 RAM
     {0}
@@ -75,13 +75,13 @@ static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} };
 // 0x10  4J3-7 - PB4                                         0x40  PB6 - DSW-1
 // 0x80  4J3-8 - PB7 (W12 Installed)                         0x80  PB7 - 4J3-8 (W12)
 //       4J3-9 - No Connection
-// 
+//
 // 0x40  DSW-1 - PB6
 // 0x20  DSW-2 - PB5 (W4 Removed & W9 Installed)
 //
 // CWmsSoundBaseGame::onBankSwitchSetupPIA1B initialises Bank B of 6821 U10 to be inputs
 //
-static const INPUT_REGION s_inputRegion[] PROGMEM = { 
+static const INPUT_REGION s_inputRegion[] PROGMEM = {
     //                                                              "012", "012345"
     {CWmsSoundBaseGame::onBankSwitchSetupPIA1B, addressPIA1B, 0xFF, "U10", "PB0-7 "},
     {CWmsSoundBaseGame::onBankSwitchSetupPIA1B, addressPIA1B, 0x01, "U10", "PB0   "},
@@ -102,7 +102,7 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = {
 // CWmsSoundBaseGame::onBankSwitchSetupPIA1A initialises Bank A of 6821 U10 to be outputs
 // Better output tests are implememted in the custom functions "Test DAC" and "Test CVSDM"
 //
-static const OUTPUT_REGION s_outputRegion[] PROGMEM = { 
+static const OUTPUT_REGION s_outputRegion[] PROGMEM = {
     //                                                                       "012", "012345"
     {CWmsSoundBaseGame::onBankSwitchSetupPIA1A, addressPIA1A,   0xFF, 0x00,  "U10", "PA0-7 "},
     {CWmsSoundBaseGame::onBankSwitchSetupPIA1A, addressPIA1A,   0x01, 0x00,  "U10", "PA0   "},
@@ -122,7 +122,7 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = {
 //
 // Custom functions implemented for this game.
 //
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { 
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {
     //                                  "0123456789"
     {CWmsSoundBaseGame::soundTestDAC,   "Test DAC  "},
     {CWmsSoundBaseGame::soundTestCVSDM, "Test CVSDM"},
@@ -134,6 +134,7 @@ CWmsSoundBaseGame::CWmsSoundBaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegion,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,
@@ -143,7 +144,7 @@ CWmsSoundBaseGame::CWmsSoundBaseGame(
     m_cpu->idle();
 
     // The sound request interrupt is on /IRQ pin 6
-    m_interrupt = ICpu::INT;
+    m_interrupt = ICpu::IRQ0;
 
     // There is no direct hardware response of a vector on this platform.
     m_interruptAutoVector = true;
@@ -171,24 +172,24 @@ CWmsSoundBaseGame::onBankSwitchSetupPIA1A(
     ICpu              *cpu      = thisGame->m_cpu;
 
     // Set DDR (xxxxx0xx)
-    error = cpu->memoryWrite(addressPIA1A+1, 0x00);     
+    error = cpu->memoryWrite(addressPIA1A+1, 0x00);
 
     if (SUCCESS(error))
     {
         // Set PA0-PA7 as output pins
-        error = cpu->memoryWrite(addressPIA1A, 0xFF); 
+        error = cpu->memoryWrite(addressPIA1A, 0xFF);
     }
 
     if (SUCCESS(error))
     {
         // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Set CA2 speech data output low (xx110xxx)
-        error = cpu->memoryWrite(addressPIA1A+1, 0x34);    
+        error = cpu->memoryWrite(addressPIA1A+1, 0x34);
     }
 
     if (SUCCESS(error))
     {
         // Set PA0-PA7 outputs low
-        error = cpu->memoryWrite(addressPIA1A, 0x00); 
+        error = cpu->memoryWrite(addressPIA1A, 0x00);
     }
 
     return error;
@@ -208,18 +209,18 @@ CWmsSoundBaseGame::onBankSwitchSetupPIA1B(
     ICpu              *cpu      = thisGame->m_cpu;
 
     // Set DDR (xxxxx0xx)
-    error = cpu->memoryWrite(addressPIA1B+1, 0x00);     
+    error = cpu->memoryWrite(addressPIA1B+1, 0x00);
 
     if (SUCCESS(error))
     {
         // Set PB0-PB7 as input pins
-        error = cpu->memoryWrite(addressPIA1B, 0x00); 
+        error = cpu->memoryWrite(addressPIA1B, 0x00);
     }
 
     if (SUCCESS(error))
     {
         // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Set CB2 speech clock output low (xx110xxx)
-        error = cpu->memoryWrite(addressPIA1B+1, 0x37); 
+        error = cpu->memoryWrite(addressPIA1B+1, 0x37);
     }
 
     return error;
@@ -227,7 +228,7 @@ CWmsSoundBaseGame::onBankSwitchSetupPIA1B(
 
 
 //
-// This is used to test /IRQ: 6802 CPU U9 Pin 4 is pulled low by 6821 PIA U10 /IRQA Pin 37 or /IRQB Pin 38  
+// This is used to test /IRQ: 6802 CPU U9 Pin 4 is pulled low by 6821 PIA U10 /IRQA Pin 37 or /IRQB Pin 38
 // This is triggered by 6821 PIA U10 CB1 Pin 18 being pulled high when a sound input is triggered through 4068 U6
 //
 // To run the test initiate it and then ground one of the sound input lines on 4J3 pins 2-5 or 7 before the 5 second timer expires
@@ -249,15 +250,15 @@ CWmsSoundBaseGame::interruptCheck(
     m_cpu->memoryRead(0xF800, 0x00);
     m_cpu->memoryRead(addressPIA1B+1, 0x00);
 
-    error = m_cpu->waitForInterrupt(m_interrupt, 5000);
+    error = m_cpu->waitForInterrupt(m_interrupt, true, 5000);
 
-    if (SUCCESS(error)) 
+    if (SUCCESS(error))
     {
         // Deselect PIA and read PR to release /IRQ
         m_cpu->memoryRead(0xF800, 0x00);
         m_cpu->memoryRead(addressPIA1B, 0x00);
 
-        error = m_cpu->waitForInterrupt(m_interrupt, 0);
+        error = m_cpu->waitForInterrupt(m_interrupt, true, 0);
 
         if (SUCCESS(error))
         {
@@ -290,24 +291,24 @@ CWmsSoundBaseGame::soundTestDAC(
     // Firstly initialse PIA1A in case the output test hasn't been run
 
     // Set DDR (xxxxx0xx)
-    error = cpu->memoryWrite(addressPIA1A+1, 0x00);     
+    error = cpu->memoryWrite(addressPIA1A+1, 0x00);
 
     if (SUCCESS(error))
     {
         // Set PA0-PA7 as output pins
-        error = cpu->memoryWrite(addressPIA1A, 0xFF); 
+        error = cpu->memoryWrite(addressPIA1A, 0xFF);
     }
 
     if (SUCCESS(error))
     {
         // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Set CA2 output low (xx110xxx)
-        error = cpu->memoryWrite(addressPIA1A+1, 0x34);    
+        error = cpu->memoryWrite(addressPIA1A+1, 0x34);
     }
 
     if (SUCCESS(error))
     {
         // Set PA0-PA7 outputs low
-        error = cpu->memoryWrite(addressPIA1A, 0x00); 
+        error = cpu->memoryWrite(addressPIA1A, 0x00);
     }
 
     if (SUCCESS(error))
@@ -376,14 +377,14 @@ CWmsSoundBaseGame::soundTestCVSDM(
     errorCustom->code = ERROR_SUCCESS;
     errorCustom->description = "CVSDM Tested!";
 
-    // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Set CA2 speech data output low (xx110xxx) 
+    // Disable CA1 (xxxxxx00), Set PR (xxxxx1xx), Set CA2 speech data output low (xx110xxx)
     error = cpu->memoryWrite(addressPIA1A+1, 0x34);
 
     if (SUCCESS(error))
     {
         // Enable CB1 low > high IRQ (xxxxxx11), Set PR (xxxxx1xx), Set CB2 speech clock output low (xx110xxx)
         error = cpu->memoryWrite(addressPIA1B+1, 0x37);
-    }  
+    }
 
     if (SUCCESS(error))
     {
@@ -399,14 +400,14 @@ CWmsSoundBaseGame::soundTestCVSDM(
             for (int loop = 0; loop < loops; loop++)
             {
                 // CB2 speech clock low
-                cpu->memoryWrite(addressPIA1B+1, 0x3F); 
+                cpu->memoryWrite(addressPIA1B+1, 0x3F);
 
                 // CA2 speech data high
-                if (direction == 0) cpu->memoryWrite(addressPIA1A+1, 0x3C);   
+                if (direction == 0) cpu->memoryWrite(addressPIA1A+1, 0x3C);
 
-                // CA2 speech data low       
-                if (direction == change[step]) cpu->memoryWrite(addressPIA1A+1, 0x34);                   
-                
+                // CA2 speech data low
+                if (direction == change[step]) cpu->memoryWrite(addressPIA1A+1, 0x34);
+
                 // CB2 speech clock high
                 cpu->memoryWrite(addressPIA1B+1, 0x37);
 
