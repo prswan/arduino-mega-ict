@@ -32,6 +32,11 @@ class CScrambleBaseGame : public CGame
 {
     public:
 
+        typedef enum {
+            SCRAMBLE,
+            HUSTLER_SCRAMBLE
+        } Base;
+
         //
         // CScrambleBaseGame
         //
@@ -47,14 +52,50 @@ class CScrambleBaseGame : public CGame
             void *cScrambleBaseGame
         );
 
+        //
+        // Custom function to clear the video display to blank.
+        //
+        static PERROR clearBk(
+            void *context
+        );
+
+        static PERROR clearObj(
+            void *context
+        );
+
     protected:
 
         CScrambleBaseGame(
+            const Base base,
+            const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
+        );
+
+        CScrambleBaseGame(
+            const ROM_DATA2N *romData2n,
+            const ROM_REGION *romRegion,
+            const RAM_REGION *ramRegion,
+            const RAM_REGION *ramRegionByteOnly,
+            const RAM_REGION *ramRegionWriteOnly,
+            const INPUT_REGION  *inputRegion,
+            const OUTPUT_REGION *outputRegion,
+            UINT32 intMaskWriteAddress,
+            UINT32 i8255WriteBaseAddress0,
+            UINT32 i8255WriteBaseAddress1
         );
 
         ~CScrambleBaseGame(
         );
+
+    private:
+
+        //
+        // These are used internally and vary between platforms.
+        //
+        UINT32 m_intMaskWriteAddress;
+        UINT32 m_8255WriteBaseAddress0;
+        UINT32 m_8255WriteBaseAddress1;
+
 };
 
 #endif

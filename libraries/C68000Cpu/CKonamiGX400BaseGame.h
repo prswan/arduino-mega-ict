@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Paul R. Swan
+// Copyright (c) 2017, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,40 +22,33 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CZ80GenericGame_h
-#define CZ80GenericGame_h
+#ifndef CKonamiGX400BaseGame_h
+#define CKonamiGX400BaseGame_h
 
-#include "CGenericBaseGame.h"
+#include "CGame.h"
 
-class CZ80GenericGame : public CGenericBaseGame
+
+class CKonamiGX400BaseGame : public CGame
 {
     public:
 
         //
-        // Constructors for this game.
+        // CKonamiGX400BaseGame
         //
 
-        static IGame* createInstance2716(
+        virtual PERROR interruptCheck(
         );
 
-        static IGame* createInstance2732(
+    protected:
+
+        CKonamiGX400BaseGame(
+            const ROM_REGION *romRegion
         );
 
-        //
-        // IGame Interface - wholly implemented in the Base game.
-        //
-
-    private:
-
-        //
-        // Different ROM sizes selected
-        //
-        CZ80GenericGame(
-            RomSize romSize
+        ~CKonamiGX400BaseGame(
         );
 
 };
 
 #endif
-
 

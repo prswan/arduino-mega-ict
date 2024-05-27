@@ -54,20 +54,35 @@
 //
 // RAM region is the same for all games on this board set.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                     "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 0x0F, " 7P", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 0xF0, " 7N", "Prog. "}, // "Program RAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x5800, 0x58FF, 0x0F, " 4F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
-                                                  {NO_BANK_SWITCH, 0x5800, 0x58FF, 0xF0, " 5F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                        "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0x0F, " 7P", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0xF0, " 7N", "Prog. "}, // "Program RAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x5800, 0x58FF, 1, 0x0F, " 4F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
+                                                  {NO_BANK_SWITCH, 0x5800, 0x58FF, 1, 0xF0, " 5F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used."
                                                   //
                                                   // See note above about access restrictions w.r.t HBLANK & WAIT.
                                                   // These regions are access with special support in the CZ80Cpu triggered via address 0x10xxxx.
                                                   //
-                                                  //                                         "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x105000, 0x1053FF, 0x0F, " 3H", "BkVRam"}, // "Background VRAM, 2114"
-                                                  {NO_BANK_SWITCH, 0x105000, 0x1053FF, 0xF0, " 3F", "BkVRam"}, // "Background VRAM, 2114"
+                                                  //                                            "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x105000, 0x1053FF, 1, 0x0F, " 3H", "BkVRam"}, // "Background VRAM, 2114"
+                                                  {NO_BANK_SWITCH, 0x105000, 0x1053FF, 1, 0xF0, " 3F", "BkVRam"}, // "Background VRAM, 2114"
                                                   {0}
                                                 }; // end of list
+
+//
+// RAM region is the same for all games on this board set.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                        "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x4000, 0x43FF, 1, 0xFF, "7PN", "Prog. "}, // "Program RAM, 2114, 7P/7N"
+                                                          {NO_BANK_SWITCH, 0x5800, 0x58FF, 1, 0xFF, "45F", "ObjRam"}, // "Object RAM, 2101, 256 Bytes used., 4F/5F"
+                                                          //
+                                                          // See note above about access restrictions w.r.t HBLANK & WAIT.
+                                                          // These regions are access with special support in the CZ80Cpu triggered via address 0x10xxxx.
+                                                          //
+                                                          //                                            "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x105000, 0x1053FF, 1, 0xFF, "3HF", "BkVRam"}, // "Background VRAM, 2114, 3H/3F"
+                                                          {0}
+                                                        }; // end of list
 
 //
 // No write-only RAM on this platform. Yay!
@@ -83,7 +98,7 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
                                                       {NO_BANK_SWITCH, 0x6800L, 0xC0,  " 9C", "DIPSW1"}, // Read DIP switches (IN1)
                                                       {NO_BANK_SWITCH, 0x6800L, 0x2F,  " 9F", "IN SW1"}, // Read Inputs (IN1)
                                                       {NO_BANK_SWITCH, 0x7000L, 0x0F,  " 9C", "DIPSW "}, // Read DIP switches (IN2)
-                                                      {NO_BANK_SWITCH, 0x7800L, 0x00,  " 8L", "WD Res"}, // Watchdog reset
+                                                      {NO_BANK_SWITCH, 0x7800L, 0xFF,  " 8L", "WD Res"}, // Watchdog reset
                                                       {0}
                                                     }; // end of list
 
@@ -132,9 +147,12 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                  
 
 
 CGalaxianBaseGame::CGalaxianBaseGame(
-    const ROM_REGION    *romRegion
-) : CGame( romRegion,
+    const ROM_DATA2N *romData2n,
+    const ROM_REGION *romRegion
+) : CGame( romData2n,
+           romRegion,
            s_ramRegion,
+           s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,
@@ -177,6 +195,7 @@ CGalaxianBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x7001L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         1000);
         if (FAILED(error))
         {
@@ -187,6 +206,7 @@ CGalaxianBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x7001L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {
@@ -202,6 +222,7 @@ CGalaxianBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x7001L, 0x01);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         0);
         if (SUCCESS(error))
         {
@@ -217,6 +238,7 @@ CGalaxianBaseGame::interruptCheck(
         m_cpu->memoryWrite(0x7001L, 0x00);
 
         error = m_cpu->waitForInterrupt(m_interrupt,
+                                        true,
                                         1000);
         if (SUCCESS(error))
         {
@@ -302,7 +324,7 @@ CGalaxianBaseGame::shellMissileTest(
             cpu->memoryWrite(intEnable, 0x00);
             cpu->memoryWrite(intEnable, 0x01);
 
-            error = cpu->waitForInterrupt(thisGame->m_interrupt, 1000);
+            error = cpu->waitForInterrupt(thisGame->m_interrupt, true, 1000);
             if (FAILED(error))
             {
                 break;

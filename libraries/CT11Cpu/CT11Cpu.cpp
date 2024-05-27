@@ -44,31 +44,23 @@
 // Control Pins
 //
 
-static const CONNECTION s_BGND_i     = {  8, "BGND"     };
+static const CONNECTION s_BGND_i    = {  8, "BGND"     };
 
-static const CONNECTION s__BCLR_o    = { 18, "_BCLR"    };
-static const CONNECTION s_PUP_i      = { 19, "PUP"      };
-static const CONNECTION s_GND_i      = { 20, "GND"      };
-static const CONNECTION s_COUT_o     = { 21, "COUT"     };
-static const CONNECTION s_XTL1_i     = { 22, "XTL1"     };
-static const CONNECTION s_XTL0_i     = { 23, "XTL0"     };
-static const CONNECTION s_SEL1_o     = { 24, "SEL1"     };
-static const CONNECTION s_SEL0_o     = { 25, "SEL0"     };
-static const CONNECTION s_READY_i    = { 26, "READY"    };
-static const CONNECTION s_R_WHB_o    = { 27, "R_WHB"    };
-static const CONNECTION s_R_WLB_o    = { 28, "R_WLB"    };
-static const CONNECTION s__RAS_o     = { 29, "_RAS"     };
-static const CONNECTION s__CAS_o     = { 30, "_CAS"     };
-static const CONNECTION s_PI_o       = { 31, "PI"       };
-static const CONNECTION s_AI10_DMR_i = { 32, "A10_DMR"  };
-static const CONNECTION s_AI11_CP3_i = { 33, "A11_CP3"  };
-static const CONNECTION s_AI12_CP2_i = { 34, "A12_CP2"  };
-static const CONNECTION s_AI13_CP1_i = { 35, "A13_CP1"  };
-static const CONNECTION s_AI14_CP0_i = { 36, "A14_CP0"  };
-static const CONNECTION s_AI15_VEC_i = { 37, "A15_VEC"  };
-static const CONNECTION s_AI16_PF_i  = { 38, "A16_PF"   };
-static const CONNECTION s_AI17_HLT_i = { 39, "A17_HLT"  };
-static const CONNECTION s_Vcc_i      = { 40, "Vcc"      };
+static const CONNECTION s__BCLR_o   = { 18, "_BCLR"    };
+static const CONNECTION s_PUP_i     = { 19, "PUP"      };
+static const CONNECTION s_GND_i     = { 20, "GND"      };
+static const CONNECTION s_COUT_o    = { 21, "COUT"     };
+static const CONNECTION s_XTL1_i    = { 22, "XTL1"     };
+static const CONNECTION s_XTL0_i    = { 23, "XTL0"     };
+static const CONNECTION s_SEL1_o    = { 24, "SEL1"     };
+static const CONNECTION s_SEL0_o    = { 25, "SEL0"     };
+static const CONNECTION s_READY_i   = { 26, "READY"    };
+static const CONNECTION s_R_WHB_o   = { 27, "R_WHB"    };
+static const CONNECTION s_R_WLB_o   = { 28, "R_WLB"    };
+static const CONNECTION s__RAS_o    = { 29, "_RAS"     };
+static const CONNECTION s__CAS_o    = { 30, "_CAS"     };
+static const CONNECTION s_PI_o      = { 31, "PI"       };
+static const CONNECTION s_Vcc_i     = { 40, "Vcc"      };
 
 
 //
@@ -93,6 +85,18 @@ static const CONNECTION s_DALLo_iot[] = { {17, "DAL0" },
                                           {10, "DAL7" } }; // Lower 8 of 16 bits
 
 //
+// The AI pins represented as an 8-bit bus
+//
+static const CONNECTION s_AI_io[] = { {32, "AI0_DMR" },
+                                      {33, "AI1_CP3" },
+                                      {34, "AI2_CP2" },
+                                      {35, "AI3_CP1" },
+                                      {36, "AI4_CP0" },
+                                      {37, "AI5_VEC" },
+                                      {38, "AI6_PF " },
+                                      {39, "AI7_HLT" } };
+
+//
 // Address flag for 16-bit selection
 //
 static const UINT32 s_16BitAddress = 0x01000000;
@@ -110,6 +114,7 @@ CT11Cpu::CT11Cpu(
     m_addressRemapCallbackContext(addressRemapCallbackContext),
     m_busDALHi(g_pinMap40DIL, s_DALHi_iot,  ARRAYSIZE(s_DALHi_iot)),
     m_busDALLo(g_pinMap40DIL, s_DALLo_iot,  ARRAYSIZE(s_DALLo_iot)),
+    m_busAI(g_pinMap40DIL, s_AI_io,  ARRAYSIZE(s_AI_io)),
     m_pinPI(g_pinMap40DIL, &s_PI_o),
     m_pinSEL0(g_pinMap40DIL, &s_SEL0_o),
     m_pinSEL1(g_pinMap40DIL, &s_SEL1_o),
@@ -167,20 +172,12 @@ CT11Cpu::idle(
     m_pinPI.digitalWrite(LOW);
     m_pinPI.pinMode(OUTPUT);
 
-    pinMode(g_pinMap40DIL[s_AI10_DMR_i.pin], INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_AI11_CP3_i.pin], INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_AI12_CP2_i.pin], INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_AI13_CP1_i.pin], INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_AI14_CP0_i.pin], INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_AI15_VEC_i.pin], INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_AI16_PF_i.pin],  INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s_AI17_HLT_i.pin], INPUT_PULLUP);
-
     pinMode(g_pinMap40DIL[s_Vcc_i.pin],             INPUT);
 
     // Use the pullup input as the float to detect shorts to ground.
     m_busDALHi.pinMode(INPUT_PULLUP);
     m_busDALLo.pinMode(INPUT_PULLUP);
+    m_busAI.pinMode(INPUT_PULLUP);
 
     return errorSuccess;
 }
@@ -213,17 +210,17 @@ CT11Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_BGND_i, LOW);
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_BGND_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // The power-up (reset) pin should be low.
-    CHECK_VALUE_EXIT(error, s_PUP_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_PUP_i, LOW);
 
     // The READY input is not supported and it should be HIGH (ready)
-    CHECK_VALUE_EXIT(error, s_READY_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_READY_i, HIGH);
 
     // Loop to detect a clock by sampling and detecting both high and lows.
     {
@@ -246,11 +243,11 @@ CT11Cpu::check(
 
         if (loCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_XTL1_i, LOW);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_XTL1_i, LOW);
         }
         else if (hiCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_XTL1_i, HIGH);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_XTL1_i, HIGH);
         }
     }
 
@@ -269,13 +266,17 @@ CT11Cpu::check(
 
     // Perform the ASPI cycle to read in the control pin state on the AI lines.
     {
+        UINT16 ai = 0;
+
         m_pin_CAS.digitalWriteLOW();
         m_pinPI.digitalWriteHIGH();
 
-        CHECK_VALUE_EXIT(error, s_AI10_DMR_i, HIGH);
-        CHECK_VALUE_EXIT(error, s_AI15_VEC_i, HIGH);
-        CHECK_VALUE_EXIT(error, s_AI16_PF_i,  HIGH);
-        CHECK_VALUE_EXIT(error, s_AI17_HLT_i, HIGH);
+        m_busAI.digitalRead(&ai);
+
+        CHECK_LITERAL_VALUE_EXIT(error, s_AI_io[0], (ai & 0x01), 0x01); // DMR Hi
+        CHECK_LITERAL_VALUE_EXIT(error, s_AI_io[5], (ai & 0x20), 0x20); // VEC Hi
+        CHECK_LITERAL_VALUE_EXIT(error, s_AI_io[6], (ai & 0x40), 0x40); // PF Hi
+        CHECK_LITERAL_VALUE_EXIT(error, s_AI_io[7], (ai & 0x80), 0x80); // HLT Hi
 
         m_pin_CAS.digitalWriteHIGH();
         m_pinPI.digitalWriteLOW();
@@ -324,6 +325,7 @@ PERROR
 CT11Cpu::memoryReadWrite(
     UINT32 address,
     UINT16 *data,
+    UINT8  *ai,
     bool   read
 )
 {
@@ -334,8 +336,12 @@ CT11Cpu::memoryReadWrite(
     // Before processing anything, perform any address remapping.
     if (m_addressRemapCallback)
     {
-        address = m_addressRemapCallback(m_addressRemapCallbackContext,
-                                         address);
+        error = m_addressRemapCallback(m_addressRemapCallbackContext,
+                                       address, &address);
+        if (FAILED(error))
+        {
+            return error;
+        }
     }
 
     bool lo      = ((address & 1) == 0) ? true : false;
@@ -345,8 +351,8 @@ CT11Cpu::memoryReadWrite(
     UINT32 physicalAddress = address & 0xFFFE; // A0 not used
 
     //
-    // To be implemented and it might be awkward since it uses
-    // clock stretching rather than READY. Why?
+    // This is implemented in the address remap callback so we
+    // should never see it here.
     //
     if (vSync)
     {
@@ -420,6 +426,15 @@ CT11Cpu::memoryReadWrite(
     m_pinCOUT.digitalWriteHIGH();
     m_pinCOUT.digitalWriteLOW();
 
+    // Read AI if requested
+    if (ai != NULL)
+    {
+        UINT16 ai16 = 0;
+
+        m_busAI.digitalRead(&ai16);
+        *ai = (UINT8) ai16;
+    }
+
     // Read in the data
     if (read)
     {
@@ -467,8 +482,6 @@ CT11Cpu::memoryReadWrite(
         }
     }
 
-Exit:
-
     if (interruptsDisabled)
     {
         interrupts();
@@ -486,7 +499,7 @@ CT11Cpu::memoryRead(
     UINT16  *data
 )
 {
-    return memoryReadWrite(address, data, true);
+    return memoryReadWrite(address, data, (UINT8*) NULL, true);
 }
 
 
@@ -496,19 +509,72 @@ CT11Cpu::memoryWrite(
     UINT16 data
 )
 {
-    return memoryReadWrite(address, &data, false);
+    return memoryReadWrite(address, &data, (UINT8*) NULL, false);
 }
 
 
 PERROR
 CT11Cpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
-    PERROR error = errorNotImplemented;
+    PERROR error     = errorSuccess;
+    UINT16 aiBitMask = 0;
+    bool   triggered = false;
+
+    switch (interrupt)
+    {
+        case IRQ3 : { aiBitMask = 0x02; break; } // AI1_CP3
+        case IRQ2 : { aiBitMask = 0x04; break; } // AI2_CP2
+        case IRQ1 : { aiBitMask = 0x08; break; } // AI3_CP1
+        case IRQ0 : { aiBitMask = 0x10; break; } // AI4_CP0
+        case HALT : { aiBitMask = 0x80; break; } // AI7_HLT
+
+        default :
+        {
+            error = errorNotImplemented;
+            goto Exit;;
+        }
+    }
+
+    {
+        unsigned long startTime = millis();
+        unsigned long endTime   = startTime + timeoutInMs;
+        UINT8 value = (active ? 0 : aiBitMask);
+
+        do
+        {
+            UINT32 address = 0xFFFE;
+            UINT16 data    = 0;
+            UINT8  ai      = 0;
+
+            error = memoryReadWrite(address, &data, &ai, true);
+            if (FAILED(error))
+            {
+                goto Exit;
+            }
+
+            if ((ai & aiBitMask) == value)
+            {
+                triggered = true;
+                break;
+            }
+        }
+        while (millis() < endTime);
+
+        if (!triggered)
+        {
+            error = errorTimeout;
+        }
+    }
+
+Exit:
+
     return error;
 }
+
 
 //
 // TBD.

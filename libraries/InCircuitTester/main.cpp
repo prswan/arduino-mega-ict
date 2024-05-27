@@ -25,6 +25,7 @@
 #include "main.h"
 
 #include "Arduino.h"
+#include <MemoryFree.h>
 #include <LiquidCrystal.h>
 #include <DFR_Key.h>
 #include <CGameCallback.h>
@@ -61,6 +62,11 @@ static SELECTOR *s_gameSelector;
 static int s_currentSelection;
 
 //
+// When true causes the soak test to run as soon as a game is selected.
+//
+bool s_runSoakTest;
+
+//
 // When set (none-zero) causes the select to repeat the selection callback
 // for the set number of seconds.
 //
@@ -75,6 +81,7 @@ bool s_repeatIgnoreError;
 // The selector used for the general tester configuration options.
 //
 static const SELECTOR s_configSelector[] PROGMEM = {//0123456789abcde
+                                                    {"- Soak Test    ",  onSelectConfig, (void*) (&s_runSoakTest),           false},
                                                     {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),   false},
                                                     {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),     false},
                                                     { 0, 0 }
@@ -126,6 +133,22 @@ onSelectConfig(
         errorCustom->code = ERROR_SUCCESS;
     }
 
+    if (context == (void *) &s_runSoakTest)
+    {
+        if (s_runSoakTest == false)
+        {
+            s_runSoakTest = true;
+            errorCustom->description = "OK: Soak Test";
+        }
+        else
+        {
+            s_runSoakTest = false;
+            errorCustom->description = "OK: Manual";
+        }
+
+        errorCustom->code = ERROR_SUCCESS;
+    }
+
     return error;
 }
 
@@ -144,20 +167,39 @@ onSelectGameCallback(
     PERROR error = errorSuccess;
     GameConstructor gameConstructor = (GameConstructor) context;
 
+    // Assign the new selector for the game
+    s_currentSelector  = selector;
+    s_currentSelection = 0;
+
+    // Free the game selector memory before we construct the game.
+    if (s_gameSelector != NULL)
+    {
+        free(s_gameSelector);
+        s_gameSelector = NULL;
+    }
+
     if (CGameCallback::game != NULL)
     {
         delete CGameCallback::game;
         CGameCallback::game = (IGame *) NULL;
     }
 
-    //
-    // Assign a new game and reset the selector & selection.
-    //
-
+    // Construct the game object
     CGameCallback::game = (IGame *) gameConstructor();
 
-    s_currentSelector  = selector;
-    s_currentSelection = 0;
+    // After game construction check the free memory
+    {
+        String description = " ";
+
+        description += freeMemory();
+        description += "b free";
+
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(description);
+
+        delay(1000);
+    }
 
     return error;
 }
@@ -172,9 +214,19 @@ onSelectGame(
     int  key
 )
 {
-    return onSelectGameCallback(context,
-                                key,
-                                CGameCallback::selectorGame);
+    PERROR error = errorNotImplemented;
+
+    error = onSelectGameCallback(context,
+                                 key,
+                                 CGameCallback::selectorGame);
+
+    if (SUCCESS(error) && s_runSoakTest)
+    {
+        error = onSelectSoakTest(context,
+                                 key);
+    }
+
+    return error;
 }
 
 //
@@ -191,6 +243,90 @@ onSelectGeneric(
                                 key,
                                 CGameCallback::selectorGeneric);
 }
+
+//
+// Handler for the soak test select callback that will run the soak test
+// for the current game forever (if no error occurs).
+//
+PERROR
+onSelectSoakTest(
+    void *context,
+    int  key
+)
+{
+    PERROR error = errorNotImplemented;
+    const SELECTOR *selector = CGameCallback::selectorSoakTest;
+    int numSelections = 0;
+    int selection = 0;
+    int loop = 1;
+
+    //
+    // Count up how many selections were provided.
+    //
+    while(selector[numSelections].function != NULL)
+    {
+        numSelections++;
+    }
+
+    //
+    // Loop to execute selections in random order forever.
+    //
+    do
+    {
+        String status = "* ";
+
+        //
+        // The random function seems to be averse to selecting 0
+        // so this adjusts the range to skew a bit more towards 0
+        //
+        selection = random(numSelections + 1);
+        if (selection != 0)
+        {
+            selection--;
+        }
+
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(selector[selection].description);
+
+        lcd.setCursor(0, 1);
+        status += loop;
+        lcd.print(status);
+
+        error = selector[selection].function(
+                   selector[selection].context,
+                   SELECT_KEY );
+
+        //
+        // Some games may not implement all the selections so account for
+        // not implemented errors as benign.
+        //
+        if (error == errorNotImplemented)
+        {
+            error = errorSuccess;
+        }
+
+        //
+        // The reset of the seed based on the loop count is done because the
+        // tests reset the random seed so on exit the result of "random" could
+        // select the same test again and cause the soak test to get stuck
+        // running one selection.
+        //
+        randomSeed(loop++);
+    }
+    while (SUCCESS(error));
+
+    //
+    // If we get an error, leave the selector set and parked at the failing
+    // test.
+    //
+
+    s_currentSelector  = selector;
+    s_currentSelection = selection;
+
+    return error;
+}
+
 
 void mainSetup(
     const SELECTOR *gameSelector

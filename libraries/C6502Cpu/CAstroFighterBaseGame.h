@@ -36,13 +36,19 @@ class CAstroFighterBaseGame : public CGame
         // CAstroFighterBaseGame
         //
 
+        static PERROR delayFunction(
+            void *context,
+            unsigned long ms
+        );
+
     protected:
 
         CAstroFighterBaseGame(
-            const bool          clockMaster,
-            const ROM_REGION    *romRegion,
-            const INPUT_REGION  *inputRegion,
-            const OUTPUT_REGION *outputRegion
+            const bool            clockMaster,
+            const ROM_REGION      *romRegion,
+            const INPUT_REGION    *inputRegion,
+            const OUTPUT_REGION   *outputRegion,
+            const CUSTOM_FUNCTION *customFunction
         );
 
         ~CAstroFighterBaseGame(

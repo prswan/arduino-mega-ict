@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "C6809EGenericGame.h"
-#include "C6809ECpu.h"
+#include "C6809EClockMasterCpu.h"
 
 //
 // See the base game cpp comments for details about this platform.
@@ -45,7 +45,7 @@ C6809EGenericGame::createInstance2732(
 
 C6809EGenericGame::C6809EGenericGame(
     RomSize romSize
-) : CGenericBaseGame( new C6809ECpu(0), romSize )
+) : CGenericBaseGame( new C6809EClockMasterCpu(), romSize )
 {
 }
 

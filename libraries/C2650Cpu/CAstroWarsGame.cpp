@@ -25,17 +25,17 @@
 #include "CAstroWarsGame.h"
 
 
-//                                        01   02   04   08   10   20   40   80  100  200
-static const UINT8 s_romData2n__8H[] = {0x01,0x20,0x05,0x00,0x00,0x00,0x59,0x4F,0xC2,0x25};
-static const UINT8 s_romData2n_10H[] = {0xCD,0x14,0xE6,0x2E,0x1C,0x45,0x44,0x63,0x00,0x08};
-static const UINT8 s_romData2n_11H[] = {0x7D,0x7C,0xEB,0xEB,0xEB,0x04,0x06,0x38,0xFF,0xC2};
-static const UINT8 s_romData2n_13H[] = {0x02,0x98,0x06,0xE4,0x1F,0xC1,0xD2,0x14,0x14,0x48};
-static const UINT8 s_romData2n__8I[] = {0x63,0x9A,0x04,0x42,0x7A,0x1F,0x01,0x07,0x1B,0x77};
-static const UINT8 s_romData2n_10I[] = {0x00,0x00,0xFC,0x00,0x54,0x5E,0x05,0x60,0x8C,0x04};
-static const UINT8 s_romData2n_11I[] = {0x14,0xF4,0x98,0xB1,0x06,0x1A,0x80,0x14,0xE4,0x9E};
-static const UINT8 s_romData2n_13I[] = {0xFB,0xFB,0xFB,0xF9,0xF2,0xF6,0xF9,0x8A,0x0F,0xFB};
-static const UINT8 s_romData2n_11L[] = {0xE5,0x0B,0x02,0x28,0xEE,0xDE,0xE4,0xE4,0x02,0xD0};
-static const UINT8 s_romData2n_13L[] = {0x14,0x9F,0x03,0x08,0x6D,0x04,0xFF,0xF4,0x75,0xA9};
+//                                         01   02   04   08   10   20   40   80  100  200
+static const UINT16 s_romData2n__8H[] = {0x01,0x20,0x05,0x00,0x00,0x00,0x59,0x4F,0xC2,0x25};
+static const UINT16 s_romData2n_10H[] = {0xCD,0x14,0xE6,0x2E,0x1C,0x45,0x44,0x63,0x00,0x08};
+static const UINT16 s_romData2n_11H[] = {0x7D,0x7C,0xEB,0xEB,0xEB,0x04,0x06,0x38,0xFF,0xC2};
+static const UINT16 s_romData2n_13H[] = {0x02,0x98,0x06,0xE4,0x1F,0xC1,0xD2,0x14,0x14,0x48};
+static const UINT16 s_romData2n__8I[] = {0x63,0x9A,0x04,0x42,0x7A,0x1F,0x01,0x07,0x1B,0x77};
+static const UINT16 s_romData2n_10I[] = {0x00,0x00,0xFC,0x00,0x54,0x5E,0x05,0x60,0x8C,0x04};
+static const UINT16 s_romData2n_11I[] = {0x14,0xF4,0x98,0xB1,0x06,0x1A,0x80,0x14,0xE4,0x9E};
+static const UINT16 s_romData2n_13I[] = {0xFB,0xFB,0xFB,0xF9,0xF2,0xF6,0xF9,0x8A,0x0F,0xFB};
+static const UINT16 s_romData2n_11L[] = {0xE5,0x0B,0x02,0x28,0xEE,0xDE,0xE4,0xE4,0x02,0xD0};
+static const UINT16 s_romData2n_13L[] = {0x14,0x9F,0x03,0x08,0x6D,0x04,0xFF,0xF4,0x75,0xA9};
 
 //
 // Not yet found a board that matches this set from MAME.
@@ -56,7 +56,7 @@ static const ROM_REGION s_romRegion[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0x040
 // Found on one board, a two byte difference in ROM 13I at offset 0x0200->0x201
 // "03" designation.
 //
-static const UINT8 s_romData2nSet2_13I[] = {0xFB,0xFB,0xFB,0xF9,0xF2,0xF6,0xF9,0x8A,0x0F,0xE4};
+static const UINT16 s_romData2nSet2_13I[] = {0xFB,0xFB,0xFB,0xF9,0xF2,0xF6,0xF9,0x8A,0x0F,0xE4};
 
 static const ROM_REGION s_romRegionSet2[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0x0400, s_romData2n__8H,     0xb0ec246c, " 8H"},
                                                       {NO_BANK_SWITCH, 0x0400, 0x0400, s_romData2n_10H,     0x090d360f, "10H"},
@@ -91,16 +91,16 @@ static const ROM_REGION s_romRegionSet3[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0
 // The set is mostly completely different from all the prior known sets.
 //
 //                                             01   02   04   08   10   20   40   80  100  200
-static const UINT8 s_romData2nSet02__8H[] = {0x00,0xf1,0x05,0x00,0x00,0x00,0x0a,0xd1,0xbb,0x1c};//
-static const UINT8 s_romData2nSet02_10H[] = {0x54,0xe6,0x1c,0x01,0xf1,0xe5,0xcf,0x03,0xcf,0x0f};//
-static const UINT8 s_romData2nSet02_11H[] = {0xe4,0xe3,0xf2,0xe5,0xeb,0xeb,0x03,0x12,0xcf,0x5a};//
-static const UINT8 s_romData2nSet02_13H[] = {0x14,0x54,0xd9,0x17,0x14,0x01,0x54,0xdf,0x0d,0x14};//
-static const UINT8 s_romData2nSet02__8I[] = {0x0f,0x74,0x14,0x44,0xe3,0x01,0x1c,0x20,0x99,0xd0};//
-static const UINT8 s_romData2nSet02_10I[] = {0x00,0x00,0xFC,0x00,0x54,0x5E,0x05,0x60,0x8C,0x04};//
-static const UINT8 s_romData2nSet02_11I[] = {0x1b,0x1a,0x08,0x9a,0x10,0xb3,0x04,0xb2,0x1a,0x23};//
-static const UINT8 s_romData2nSet02_13I[] = {0xf2,0xf2,0xf2,0x6c,0xf6,0x69,0x00,0x3b,0xf8,0x08};//
-static const UINT8 s_romData2nSet02_11L[] = {0x4d,0xcf,0xae,0x09,0x53,0xbb,0x94,0x1a,0x24,0xab};//
-static const UINT8 s_romData2nSet02_13L[] = {0x14,0x5f,0x04,0x94,0x99,0xff,0x00,0x03,0x66,0xcc};//
+static const UINT16 s_romData2nSet02__8H[] = {0x00,0xf1,0x05,0x00,0x00,0x00,0x0a,0xd1,0xbb,0x1c};//
+static const UINT16 s_romData2nSet02_10H[] = {0x54,0xe6,0x1c,0x01,0xf1,0xe5,0xcf,0x03,0xcf,0x0f};//
+static const UINT16 s_romData2nSet02_11H[] = {0xe4,0xe3,0xf2,0xe5,0xeb,0xeb,0x03,0x12,0xcf,0x5a};//
+static const UINT16 s_romData2nSet02_13H[] = {0x14,0x54,0xd9,0x17,0x14,0x01,0x54,0xdf,0x0d,0x14};//
+static const UINT16 s_romData2nSet02__8I[] = {0x0f,0x74,0x14,0x44,0xe3,0x01,0x1c,0x20,0x99,0xd0};//
+static const UINT16 s_romData2nSet02_10I[] = {0x00,0x00,0xFC,0x00,0x54,0x5E,0x05,0x60,0x8C,0x04};//
+static const UINT16 s_romData2nSet02_11I[] = {0x1b,0x1a,0x08,0x9a,0x10,0xb3,0x04,0xb2,0x1a,0x23};//
+static const UINT16 s_romData2nSet02_13I[] = {0xf2,0xf2,0xf2,0x6c,0xf6,0x69,0x00,0x3b,0xf8,0x08};//
+static const UINT16 s_romData2nSet02_11L[] = {0x4d,0xcf,0xae,0x09,0x53,0xbb,0x94,0x1a,0x24,0xab};//
+static const UINT16 s_romData2nSet02_13L[] = {0x14,0x5f,0x04,0x94,0x99,0xff,0x00,0x03,0x66,0xcc};//
 
 static const ROM_REGION s_romRegionSet02[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 0x0400, s_romData2nSet02__8H, 0x73D45B59, " 8H"},
                                                        {NO_BANK_SWITCH, 0x0400, 0x0400, s_romData2nSet02_10H, 0x01C471CF, "10H"},
@@ -114,17 +114,40 @@ static const ROM_REGION s_romRegionSet02[] PROGMEM = { {NO_BANK_SWITCH, 0x0000, 
                                                        {NO_BANK_SWITCH, 0x3000, 0x0400, s_romData2nSet02_13L, 0xBE0356C2, "13L"},
                                                        {0} }; // end of list
 
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                       "012", "012345"
-                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      0x0F, "13F", "Prog. "}, // "Program RAM, 2112, 13F"
-                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      0xF0, "13G", "Prog. "}, // "Program RAM, 2112, 13G"
-                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1CFF,      0x0F, " 3F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 3F"
-                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1CFF,      0xF0, " 2F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 2F"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      0x0F, " 2C", "Char. "}, // "Video Character RAM, 2114, FLAG=Hi"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      0xF0, " 1C", "Char. "}, // "Video Character RAM, 2114, FLAG=Hi"
-                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      0x0F, " 3C", "Colour"}, // "Colour RAM, 2114, FLAG=Lo"
-                                                  {NO_BANK_SWITCH,                         0x1500+0x4E, 0x1500+0x6D, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1  8F Scratch RAM "
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                                          "012", "012345"
+                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0x0F, "13F", "Prog. "}, // "Program RAM, 2112, 13F"
+                                                  {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0xF0, "13G", "Prog. "}, // "Program RAM, 2112, 13G"
+                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1CFF,      1, 0x0F, " 3F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 3F"
+                                                  {NO_BANK_SWITCH,                         0x1C00,      0x1CFF,      1, 0xF0, " 2F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 2F"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0x0F, " 2C", "Char. "}, // "Video Character RAM, 2114, FLAG=Hi"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0xF0, " 1C", "Char. "}, // "Video Character RAM, 2114, FLAG=Hi"
+                                                  {CAstroWarsBaseGame::onBankSwitchFlagLo, 0x1800,      0x1BFF,      1, 0x0F, " 3C", "Colour"}, // "Colour RAM, 2114, FLAG=Lo"
+                                                  {NO_BANK_SWITCH,                         0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                         0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                  {NO_BANK_SWITCH,                         0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
                                                   {0}
                                                 }; // end of list
+
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                                          "012", "012345"
+                                                          {NO_BANK_SWITCH,                         0x1400,      0x14FF,      1, 0xFF, "13?", "Prog. "}, // "Program RAM, 2112, 13F/13G"
+                                                          {NO_BANK_SWITCH,                         0x1C00,      0x1CFF,      1, 0xFF, "23F", "Shell "}, // "Bullet (SHELL) RAM, 2101, 2F/3F"
+                                                          {CAstroWarsBaseGame::onBankSwitchFlagHi, 0x1800,      0x1BFF,      1, 0xFF, "12C", "Char. "}, // "Video Character RAM, 2114, FLAG=Hi, 2C/1C"
+                                                          {NO_BANK_SWITCH,                         0x1500+0x00, 0x1500+0x2D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                         0x1500+0x40, 0x1500+0x6D, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                          {NO_BANK_SWITCH,                         0x1500+0x80, 0x1500+0xAD, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                          {0}
+                                                        }; // end of list
+
+//
+// This region allows the PVI to be initialized.
+// If the PVI is not initialized, the screen ends up all white such that no
+// other graphics can be seen.
+//
+
+static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { //                                         "012", "012345"
+                                                           {NO_BANK_SWITCH,  0x1500, 0x15FF, 1, 0xFF, " 8F", "2636-1"}, // "2636 PVI 1"
+                                                           {0}
+                                                         }; // end of list
 
 //
 // Input region is the same for all versions.
@@ -190,6 +213,8 @@ CAstroWarsGame::CAstroWarsGame(
     const ROM_REGION *romRegion
 ) : CAstroWarsBaseGame( romRegion,
                         s_ramRegion,
+                        s_ramRegionByteOnly,
+                        s_ramRegionWriteOnly,
                         s_inputRegion,
                         s_outputRegion )
 {

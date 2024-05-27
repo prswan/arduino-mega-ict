@@ -26,6 +26,7 @@
 #define CStarWarsBaseGame_h
 
 #include "CGame.h"
+#include "CCapture.h"
 
 
 class CStarWarsBaseGame : public CGame
@@ -35,6 +36,9 @@ class CStarWarsBaseGame : public CGame
         //
         // CStarWarsBaseGame
         //
+
+        virtual PERROR interruptCheck(
+        );
 
         static PERROR onBankSwitchMPAGE0(
             void *cStarWarsBaseGame
@@ -112,15 +116,19 @@ class CStarWarsBaseGame : public CGame
             void   *context
         );
 
-        static PERROR testRepeatLastMatrixProgram(
+        static PERROR repeatLastMatrixProgram(
             void   *context
         );
 
-        static PERROR testClockPulse(
+        static PERROR repeatLastDividerProgram(
             void   *context
         );
 
-        static PERROR testCapture(
+        static PERROR clockPulse(
+            void   *context
+        );
+
+        static PERROR capture32(
             void   *context
         );
 
@@ -156,8 +164,13 @@ class CStarWarsBaseGame : public CGame
             UINT16 quotient
         );
 
+        CCapture *m_capture;
+
         UINT32 m_clockPulseCount;
         UINT16 m_lastMatrixProgramAddress;
+
+        UINT16 m_lastDivisorDataHi;
+        UINT16 m_lastDivisorDataLo;
 
 };
 

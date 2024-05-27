@@ -23,7 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CStarWarsBaseGame.h"
-#include "C6809ECpu.h"
+#include "C6809EClockMasterCpu.h"
 
 //
 // Notes
@@ -80,9 +80,9 @@ static const UINT32 c_ADCSTART2_A = 0x46C2; // ADC start channel 2
 //
 // RAM region is the same for all versions.
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x4800,      0x4FFF,      0xFF, "2FH", "Prog. "}, // "Program RAM, 6116, CPU"
-                                                  {NO_BANK_SWITCH, c_MBRAM_A,   0x5FFF,      0xFF, "5FH", "MB AB "}, // "Matrix RAM 2x6116, 16-bit, CPU"
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                  "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x4800,      0x4FFF,      1, 0xFF, "2FH", "Prog. "}, // "Program RAM, 6116, CPU"
+                                                  {NO_BANK_SWITCH, c_MBRAM_A,   0x5FFF,      1, 0xFF, "5FH", "MB AB "}, // "Matrix RAM 2x6116, 16-bit, CPU"
                                                   {0}
                                                 }; // end of list
 
@@ -105,9 +105,9 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = { //                        
 // Output region is the same for all versions.
 //
 static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                                                "012", "012345"
-                                                        {NO_BANK_SWITCH, c_ADCSTART0_A, 0x00,      0x00,  "9K ", "ADCS0 "}, // ADC start channel 0 (pitch,  J)
-                                                        {NO_BANK_SWITCH, c_ADCSTART1_A, 0x00,      0x00,  "9K ", "ADCS1 "}, // ADC start channel 0 (yaw,    K)
-                                                        {NO_BANK_SWITCH, c_ADCSTART2_A, 0x00,      0x00,  "9K ", "ADCS2 "}, // ADC start channel 0 (thrust, 9)
+                                                        {NO_BANK_SWITCH, c_ADCSTART0_A, 0xFF,      0x00,  "9K ", "ADCS0 "}, // ADC start channel 0 (pitch,  J)
+                                                        {NO_BANK_SWITCH, c_ADCSTART1_A, 0xFF,      0x00,  "9K ", "ADCS1 "}, // ADC start channel 0 (yaw,    K)
+                                                        {NO_BANK_SWITCH, c_ADCSTART2_A, 0xFF,      0x00,  "9K ", "ADCS2 "}, // ADC start channel 0 (thrust, 9)
                                                         {NO_BANK_SWITCH, c_MPAGE_A,     c_MPAGE_D, 0x00,  "9LM", "MPAGE "}, // MPAGE ROM bank switch
                                                         {NO_BANK_SWITCH, c_MW0_A,       0xFF,      0x00,  "   ", "MW0-PA"}, // MW0 - MP Address MPA2-MPA9, run
                                                         {NO_BANK_SWITCH, c_MW1_A,       0x01,      0x00,  "3D ", "MW1-BI"}, // MW1 - MP Block Index BIC8
@@ -145,9 +145,10 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                  
                                                             {CStarWarsBaseGame::test23,                      "DV Test 23"},
                                                             {CStarWarsBaseGame::test24,                      "DV Test 24"},
                                                             {CStarWarsBaseGame::test25,                      "DV Test 25"},
-                                                            {CStarWarsBaseGame::testRepeatLastMatrixProgram, "Repeat MX "},
-                                                            {CStarWarsBaseGame::testClockPulse,              "Clk Pulse "},
-                                                            {CStarWarsBaseGame::testCapture,                 "Capture   "},
+                                                            {CStarWarsBaseGame::repeatLastMatrixProgram,     "Repeat MX "},
+                                                            {CStarWarsBaseGame::repeatLastDividerProgram,    "Repeat DV "},
+                                                            {CStarWarsBaseGame::clockPulse,                  "Clk Pulse "},
+                                                            {CStarWarsBaseGame::capture32,                   "Capture 32"},
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -155,29 +156,50 @@ CStarWarsBaseGame::CStarWarsBaseGame(
     const ROM_REGION    *romRegion
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegion, // It's all Byte wide
            s_ramRegionWriteOnly,
            s_inputRegion,
            s_outputRegion,
            s_customFunction ),
     m_clockPulseCount(0),
-    m_lastMatrixProgramAddress(0)
+    m_lastMatrixProgramAddress(0),
+    m_lastDivisorDataHi(0),
+    m_lastDivisorDataLo(0)
 {
-    m_cpu = new C6809ECpu(0);
+    m_cpu = new C6809EClockMasterCpu();
     m_cpu->idle();
 
     // A timer is on the INT pin (vector game thus no VBALNK).
-    m_interrupt = ICpu::INT;
+    m_interrupt = ICpu::IRQ0;
 
     // The interrupt uses an external ROM vector.
     m_interruptAutoVector = false;
+
+    // Signal capture extension
+    m_capture = new CCapture(m_cpu);
+
 }
 
 
 CStarWarsBaseGame::~CStarWarsBaseGame(
 )
 {
+    delete m_capture;
+    m_capture = (CCapture *) NULL;
+
     delete m_cpu;
     m_cpu = (ICpu *) NULL;
+}
+
+
+//
+// TBD.
+//
+PERROR
+CStarWarsBaseGame::interruptCheck(
+)
+{
+    return errorNotImplemented;
 }
 
 
@@ -329,6 +351,11 @@ CStarWarsBaseGame::testDivider(
     // Load divisor
     CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRH_A, (divisor >> 8) & 0xFF);
     CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRL_A, (divisor >> 0) & 0xFF);
+
+    // Keep the trigger information for step & capture testing
+    thisGame->m_lastDivisorDataHi = (divisor >> 8) & 0xFF;
+    thisGame->m_lastDivisorDataLo = (divisor >> 0) & 0xFF;
+
     thisGame->m_clockPulseCount = 0;
 
     // Wait for a few clocks.
@@ -364,8 +391,8 @@ CStarWarsBaseGame::testADC(
 )
 {
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
-    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
-    PERROR error = errorCustom;
+    C6809EClockMasterCpu *cpu = (C6809EClockMasterCpu *) thisGame->m_cpu;
+    PERROR error = errorSuccess;
     UINT16 data[4] = {0,0,0,0};
 
     for (UINT32 channel = 0 ; channel < 4 ; channel++)
@@ -388,6 +415,7 @@ CStarWarsBaseGame::testADC(
         CHECK_CPU_READ_EXIT(error, cpu, c_ADC_A, &data[channel]);
     }
 
+    error = errorCustom;
     error->code = ERROR_SUCCESS;
     error->description = "OK: ";
 
@@ -608,7 +636,7 @@ CStarWarsBaseGame::test25(
 
 
 PERROR
-CStarWarsBaseGame::testRepeatLastMatrixProgram(
+CStarWarsBaseGame::repeatLastMatrixProgram(
     void   *context
 )
 {
@@ -632,12 +660,32 @@ Exit:
 
 
 PERROR
-CStarWarsBaseGame::testClockPulse(
+CStarWarsBaseGame::repeatLastDividerProgram(
     void   *context
 )
 {
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
-    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+
+    // Load divisor
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRH_A, thisGame->m_lastDivisorDataHi);
+    CHECK_CPU_WRITE_EXIT(error, cpu, c_DVSRL_A, thisGame->m_lastDivisorDataLo);
+
+    thisGame->m_clockPulseCount = 0;
+
+Exit:
+    return error;
+}
+
+
+PERROR
+CStarWarsBaseGame::clockPulse(
+    void   *context
+)
+{
+    CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
+    C6809EClockMasterCpu *cpu = (C6809EClockMasterCpu *) thisGame->m_cpu;
     PERROR error = errorCustom;
 
     cpu->clockPulse();
@@ -650,62 +698,15 @@ CStarWarsBaseGame::testClockPulse(
     return error;
 }
 
-//
-// Prototype signal capture
-//
-#include "PinMap.h"
 
-//
-// External capture input on J14 AUX pin 1.
-//
-static const CONNECTION s_AUX1_i = {1, "AUX1"};
-
-//
-// Prototype Signal Capture
-// ------------------------
-// Capture the clocked input of aux pin 1 and display the hex result.
-// The 4 hex digits covers 32 clocks.
-// See StarWarsCaptures.txt for reference results.
-//
-
+// Run 32 clocks and signal capture
 PERROR
-CStarWarsBaseGame::testCapture(
+CStarWarsBaseGame::capture32(
     void   *context
 )
 {
     CStarWarsBaseGame *thisGame = (CStarWarsBaseGame *) context;
-    C6809ECpu *cpu = (C6809ECpu *) thisGame->m_cpu;
-    PERROR error = errorCustom;
-    UINT8 capture[4] = {0,0,0,0};
 
-    ::pinMode(g_pinMap8Aux[s_AUX1_i.pin], INPUT);
-
-    for (int byte = 0 ; byte < 4 ; byte++)
-    {
-        for (int bit = 0 ; bit < 8 ; bit++)
-        {
-            cpu->clockPulse();
-            thisGame->m_clockPulseCount++;
-
-            int value = ::digitalRead(g_pinMap8Aux[s_AUX1_i.pin]);
-
-            capture[byte] = capture[byte] << 1;
-            if (value == HIGH)
-            {
-                capture[byte] |= 1;
-            }
-        }
-    }
-
-    error->code = ERROR_SUCCESS;
-    error->description = "OK: ";
-
-    for (int byte = 0 ; byte < 4 ; byte++)
-    {
-        STRING_UINT8_HEX(error->description, capture[byte]);
-    }
-
-    return error;
+    return thisGame->m_capture->capture32();
 }
-
 

@@ -45,7 +45,7 @@ C6502GenericGame::createInstance2732(
 
 C6502GenericGame::C6502GenericGame(
     RomSize romSize
-) : CGenericBaseGame( new C6502Cpu(), romSize )
+) : CGenericBaseGame( new C6502Cpu(true), romSize )
 {
 }
 

@@ -59,6 +59,12 @@ class IGame
         ) = 0;
 
         // Performs a check of all the accessible RAM
+        // Based on the read/write random access pattern
+        //
+        virtual PERROR ramCheckAllRandomAccess(
+        ) = 0;
+
+        // Performs a check of all the accessible RAM
         // Based on the write-all & read-all pattern.
         //
         virtual PERROR ramCheckAllChipSelect(
@@ -95,6 +101,20 @@ class IGame
         // Performs a check of the specified ram
         //
         virtual PERROR ramCheck(
+            int key
+        ) = 0;
+
+        //
+        // Performs a check of the specified ram
+        //
+        virtual PERROR ramCheckRandomAccess(
+            int key
+        ) = 0;
+
+        //
+        // Performs a stuck address check of the specified ram
+        //
+        virtual PERROR ramCheckAddress(
             int key
         ) = 0;
 

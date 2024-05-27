@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2016, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,17 +22,14 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef C6809ECpu_h
-#define C6809ECpu_h
+#ifndef C8080DedicatedCpu_h
+#define C8080DedicatedCpu_h
 
 #include "Arduino.h"
 #include "ICpu.h"
-#include "CBus.h"
-#include "CFast8BitBus.h"
-#include "CFastPin.h"
 
 
-class C6809ECpu : public ICpu
+class C8080DedicatedCpu : public ICpu
 {
     public:
 
@@ -40,45 +37,39 @@ class C6809ECpu : public ICpu
         // Constructor
         //
 
-        C6809ECpu(
-            UINT8 QLoToDInClockPulses
+        C8080DedicatedCpu(
         );
 
         // ICpu Interface
         //
 
-        virtual
-        PERROR
-        idle(
+        virtual PERROR idle(
         );
 
-        virtual
-        PERROR
-        check(
+        virtual PERROR check(
         );
 
-        virtual
-        UINT8
-        dataBusWidth(
+        virtual UINT8 dataBusWidth(
             UINT32 address
         );
 
-        virtual
-        UINT8
-        dataAccessWidth(
+        virtual UINT8 dataAccessWidth(
             UINT32 address
         );
 
-        virtual
-        PERROR
-        memoryRead(
+        //
+        // 8080 Address Space:
+        // 0x00000 -> 0x0FFFF - Memory Mapped Data
+        // 0x10000 -> 0x1FFFF - Input/Output Ports
+        //
+        // READY synchronization is always enabled.
+        //
+        virtual PERROR memoryRead(
             UINT32 address,
             UINT16 *data
         );
 
-        virtual
-        PERROR
-        memoryWrite(
+        virtual PERROR memoryWrite(
             UINT32 address,
             UINT16 data
         );
@@ -87,7 +78,8 @@ class C6809ECpu : public ICpu
         PERROR
         waitForInterrupt(
             Interrupt interrupt,
-            UINT16    timeoutInMs
+            bool      active,
+            UINT32    timeoutInMs
         );
 
         virtual
@@ -97,34 +89,18 @@ class C6809ECpu : public ICpu
         );
 
         //
-        // C6809ECpu Interface
+        // C8080DedicatedCpu Interface
         //
 
+    private:
+
         void
-        clockPulse(
-        );
-
-    private:
-
-        PERROR
-        memoryReadWrite(
+        outputAddressAndStatus(
             UINT32 address,
-            UINT16 *data,
-            int    readWrite
+            bool   read
         );
 
     private:
-
-        UINT8         m_QLoToDInClockPulses;
-
-        CBus          m_busA;
-        CFast8BitBus  m_busD;
-
-        CFastPin      m_pinRW;
-        CFastPin      m_pinE;
-        CFastPin      m_pinQ;
-
-        CFastPin      m_pinClock;
 
 };
 

@@ -35,8 +35,8 @@ static const CONNECTION s_Clock_o    = {  8, "Clock"    };
 
 
 C6502ClockMasterCpu::C6502ClockMasterCpu(
-    UINT8 CLK2oHiToDInClockPulses
-) : m_CLK2oHiToDInClockPulses(CLK2oHiToDInClockPulses),
+    bool dataBusCheck
+) : m_dataBusCheck(dataBusCheck),
     m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinCLK0i(g_pinMap40DIL, &s_CLK0i_i),
@@ -108,20 +108,20 @@ C6502ClockMasterCpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
-    CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND1_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND2_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
-
-    // Nothing should be driving wait states.
-    CHECK_VALUE_EXIT(error, s_RDY_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
 
     // The data bus should be uncontended and pulled high.
-    CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
+    if (m_dataBusCheck)
+    {
+        CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
+    }
 
     // Loop to detect that reset clears
     // On exit the reset pin should be high (no reset).
@@ -139,24 +139,32 @@ C6502ClockMasterCpu::check(
             clockPulse();
         }
     }
-    CHECK_VALUE_EXIT(error, s_RES_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RES_i, HIGH);
 
     // Loop to detect a clock by sampling and detecting both high and lows.
     {
         UINT16 hiCount = 0;
         UINT16 loCount = 0;
+        UINT16 rdyHiCount = 0;
 
         for (int i = 0 ; i < 0x400 ; i++)
         {
-            int value = m_pinCLK0i.digitalRead();
+            int clk = m_pinCLK0i.digitalRead();
 
-            if (value == LOW)
+            if (clk == LOW)
             {
                 loCount++;
             }
             else
             {
                 hiCount++;
+            }
+
+            int rdy = m_pinRDY.digitalRead();
+
+            if (rdy == HIGH)
+            {
+                rdyHiCount++;
             }
 
             clockPulse();
@@ -169,6 +177,11 @@ C6502ClockMasterCpu::check(
         else if (hiCount == 0)
         {
             CHECK_PIN_VALUE_EXIT(error, m_pinCLK0i, s_CLK0i_i, HIGH);
+        }
+
+        if (rdyHiCount == 0)
+        {
+            CHECK_PIN_VALUE_EXIT(error, m_pinRDY, s_RDY_i, HIGH);
         }
     }
 
@@ -214,6 +227,10 @@ C6502ClockMasterCpu::memoryReadWrite(
     PERROR error = errorSuccess;
     bool interruptsDisabled = false;
 
+    // Critical timing section
+    noInterrupts();
+    interruptsDisabled = true;
+
     //
     // Phase 0 - Initial State
     // - Wait for CLK2 Lo
@@ -248,55 +265,55 @@ C6502ClockMasterCpu::memoryReadWrite(
     }
 
     //
-    // Currently no support for RDY delayed cycles.
-    // It only works for reads making it of little use in practice.
-    //
-    CHECK_VALUE_EXIT(error, s_RDY_i, HIGH);
-
-    // Critical timing section
-    noInterrupts();
-    interruptsDisabled = true;
-
-    //
     // Phase 1
-    // - Wait for CLK2 Hi
+    // - Wait for CLK2 Hi & RDY
     //
-    for (int x = 0 ; x < 100 ; x++)
     {
-        if (m_valueCLK2o == HIGH)
-        {
-            break;
-        }
-        clockPulse();
-    }
-    CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
+        int rdy = HIGH;
 
-    //
-    // Wait data based on master clock
-    //
-    // If this is incorrect (too long) such that CLK2o returns
-    // low then we flag this as a bus error.
-    //
-    for (int x = 0 ; x < m_CLK2oHiToDInClockPulses ; x++)
-    {
-        if (m_valueCLK2o == LOW)
+        for (int wait = 0 ; wait < 5 ; wait++)
         {
-            break;
-        }
-        clockPulse();
-    }
-    CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
+            for (int low = 0 ; low < 100 ; low++)
+            {
+                if (m_valueCLK2o == HIGH)
+                {
+                    break;
+                }
 
-    //
-    // D-Read.
-    //
-    if (readWrite == HIGH)
-    {
-        m_busD.digitalRead(data);
+                rdy = m_pinRDY.digitalRead();
+
+                clockPulse();
+            }
+            CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
+
+            // Check for wait state due to RDY (as used by Vanguard)
+            if ((readWrite == LOW) || (rdy == HIGH))
+            {
+                break;
+            }
+            else
+            {
+                // Read and RDY is not asserted, wait
+                for (int high = 0 ; high < 100 ; high++)
+                {
+                    if (m_valueCLK2o == LOW)
+                    {
+                        break;
+                    }
+                    clockPulse();
+                }
+                CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, LOW);
+            }
+        }
+
+        // Reconfirm we're in the right state
+        CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, HIGH);
+        CHECK_LITERAL_VALUE_EXIT(error, s_RDY_i, rdy, HIGH);
     }
 
     //
     // Phase 0 - Back to Initial State
+    // - Wait for data based on master clock
     // - Wait for CLK2 Lo to complete the cycle.
     //
     for (int x = 0 ; x < 100 ; x++)
@@ -305,6 +322,13 @@ C6502ClockMasterCpu::memoryReadWrite(
         {
             break;
         }
+
+        // D-Read.
+        if (readWrite == HIGH)
+        {
+            m_busD.digitalRead(data);
+        }
+
         clockPulse();
     }
     CHECK_LITERAL_VALUE_EXIT(error, s_CLK2o_o, m_valueCLK2o, LOW);
@@ -349,7 +373,8 @@ C6502ClockMasterCpu::memoryWrite(
 PERROR
 C6502ClockMasterCpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInClockPulses
 )
 {
     return errorNotImplemented;

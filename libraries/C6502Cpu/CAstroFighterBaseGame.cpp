@@ -33,9 +33,9 @@
 // *** NOTE: Due the synchronous nature of the bus cycles on this platform Clock Master 'clk' form is needed
 //           for reliable memory testing!
 //
-static const RAM_REGION s_ramRegion[] PROGMEM = { //                                               "012", "012345"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0x0F, "r2M", "Prog. "}, // "Program RAM, 2114, ROM PCB 2M"
-                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      0xF0, "r2F", "Prog. "}, // "Program RAM, 2114, ROM PCB 2F"
+static const RAM_REGION s_ramRegion[] PROGMEM = { //                                                  "012", "012345"
+                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0x0F, "r2M", "Prog. "}, // "Program RAM, 2114, ROM PCB 2M"
+                                                  {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0xF0, "r2F", "Prog. "}, // "Program RAM, 2114, ROM PCB 2F"
                                                   //
                                                   // *** NOTE: 0x4000-0x5FFF is 8K of DRAM ***
                                                   //
@@ -47,40 +47,42 @@ static const RAM_REGION s_ramRegion[] PROGMEM = { //                            
                                                   // Split into two halves seems to work OK with ITT 4116 (single block testing yielded a
                                                   // consistent single bit error in the test).
                                                   //
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x01, "c2T", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x02, "c2M", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x04, "c2F", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x08, "c2E", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x10, "c2D", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x20, "c2C", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x40, "c2B", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0x80, "c2A", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x01, "c2T", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x02, "c2M", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x04, "c2F", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x08, "c2E", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x10, "c2D", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x20, "c2C", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x40, "c2B", "V.DRAM"}, // "Video RAM, lower"
+                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0x80, "c2A", "V.DRAM"}, // "Video RAM, lower"
                                                   //
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x01, "c1T", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x02, "c1M", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x04, "c1F", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x08, "c1E", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x10, "c1D", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x20, "c1C", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x40, "c1B", "V.DRAM"}, // "Video RAM, upper"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0x80, "c1A", "V.DRAM"}, // "Video RAM, upper"
-                                                  //
-                                                  // Duplicate entries to ease reliability testing of the DRAM byte-wide
-                                                  //
-                                                  {NO_BANK_SWITCH, 0x4000,      0x4FFF,      0xFF, "2AT", "V.DRAM"}, // "Video RAM, lower"
-                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      0xFF, "1AT", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x01, "c1T", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x02, "c1M", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x04, "c1F", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x08, "c1E", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x10, "c1D", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x20, "c1C", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x40, "c1B", "V.DRAM"}, // "Video RAM, upper"
+                                                  {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0x80, "c1A", "V.DRAM"}, // "Video RAM, upper"
                                                   {0}
                                                 }; // end of list
+
+//
+// RAM region is the same for all games on this board set.
+// This description is used for the byte-wide intensive random access memory test.
+//
+static const RAM_REGION s_ramRegionByteOnly[] PROGMEM = { //                                                  "012", "012345"
+                                                          {NO_BANK_SWITCH, 0x0000,      0x03FF,      1, 0xFF, "2MF", "Prog. "}, // "Program RAM, 2114, ROM PCB 2M/2F"
+                                                          {NO_BANK_SWITCH, 0x4000,      0x4FFF,      1, 0xFF, "2AT", "V.DRAM"}, // "Video RAM, lower"
+                                                          {NO_BANK_SWITCH, 0x5000,      0x5FFF,      1, 0xFF, "1AT", "V.DRAM"}, // "Video RAM, upper"
+                                                          {0}
+                                                        }; // end of list
 
 //
 // No write-only RAM on this platform. Yay!
 //
 static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 
-//
-// Custom functions implemented for this game.
-//
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}; // end of list
 
 //
 // Notes
@@ -104,16 +106,19 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 //
 
 CAstroFighterBaseGame::CAstroFighterBaseGame(
-    const bool          clockMaster,
-    const ROM_REGION    *romRegion,
-    const INPUT_REGION  *inputRegion,
-    const OUTPUT_REGION *outputRegion
+    const bool            clockMaster,
+    const ROM_REGION      *romRegion,
+    const INPUT_REGION    *inputRegion,
+    const OUTPUT_REGION   *outputRegion,
+    const CUSTOM_FUNCTION *customFunction
 ) : CGame( romRegion,
            s_ramRegion,
+           s_ramRegionByteOnly,
            s_ramRegionWriteOnly,
            inputRegion,
            outputRegion,
-           s_customFunction )
+           customFunction,
+           clockMaster ? CAstroFighterBaseGame::delayFunction : NO_DELAY_FUNCTION )
 {
     //        _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _   _
     // XTAL    \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/
@@ -143,20 +148,25 @@ CAstroFighterBaseGame::CAstroFighterBaseGame(
 
     if (clockMaster)
     {
-        m_cpu = new C6502ClockMasterCpu(7);
+        m_cpu = new C6502ClockMasterCpu(false);
     }
     else
     {
-        m_cpu = new C6502Cpu();
+        m_cpu = new C6502Cpu(false);
     }
 
     m_cpu->idle();
 
-    // VBLANK is on the INT pin.
-    m_interrupt = ICpu::INT;
+    // VBLANK is on the INT pin (==IRQ0).
+    m_interrupt = ICpu::IRQ0;
 
     // The interrupt is based on an internal vector
     m_interruptAutoVector = true;
+
+    // Clear the sound latch to quiet the sound hardware
+    m_cpu->memoryWrite(0x8006L, 0);
+    m_cpu->memoryWrite(0x8007L, 0);
+
 }
 
 
@@ -165,5 +175,33 @@ CAstroFighterBaseGame::~CAstroFighterBaseGame(
 {
     delete m_cpu;
     m_cpu = (ICpu *) NULL;
+}
+
+
+PERROR CAstroFighterBaseGame::delayFunction(
+    void *context,
+    unsigned long ms
+)
+{
+    C6502ClockMasterCpu *cpu = (C6502ClockMasterCpu *) context;
+    PERROR error = errorSuccess;
+    UINT16 data;
+
+    unsigned long startTime = millis();
+    unsigned long endTime   = startTime + ms;
+
+    // This *should* be aligned
+    while (millis() < endTime)
+    {
+        for (int x = 0 ; x < 64 ; x++)
+        {
+            cpu->clockPulse();
+        }
+    }
+
+    // This is to bring clock alignment back to the start of a cycle
+    error = cpu->memoryRead(0xFFFF, &data);
+
+    return error;
 }
 

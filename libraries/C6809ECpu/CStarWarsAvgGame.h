@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Paul R. Swan
+// Copyright (c) 2018, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,30 +22,37 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#include "CZ80GenericGame.h"
-#include "CZ80Cpu.h"
+#ifndef CStarWarsAvgGame_h
+#define CStarWarsAvgGame_h
 
-//
-// See the base game cpp comments for details about this platform.
-//
+#include "CStarWarsAvgBaseGame.h"
 
-IGame*
-CZ80GenericGame::createInstance2716(
-)
+class CStarWarsAvgGame : public CStarWarsAvgBaseGame
 {
-    return (new CZ80GenericGame(I2716));
-}
+    public:
 
-IGame*
-CZ80GenericGame::createInstance2732(
-)
-{
-    return (new CZ80GenericGame(I2732));
-}
+        //
+        // Constructors for this game.
+        //
 
-CZ80GenericGame::CZ80GenericGame(
-    RomSize romSize
-) : CGenericBaseGame( new CZ80Cpu(), romSize )
-{
-}
+        static IGame* createInstance(
+        );
+
+        //
+        // IGame Interface - wholly implemented in the Base game.
+        //
+
+    private:
+
+        //
+        // Different ROM sets supplied.
+        //
+        CStarWarsAvgGame(
+            const ROM_REGION *romRegion
+        );
+
+};
+
+#endif
+
 

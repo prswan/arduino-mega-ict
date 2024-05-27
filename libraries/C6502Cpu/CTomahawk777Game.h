@@ -45,6 +45,13 @@ class CTomahawk777Game : public CAstroFighterBaseGame
         // IGame Interface - wholly implemented in the Base game.
         //
 
+        //
+        // Custom function for testing the protection hardware.
+        //
+        static PERROR protectionTest(
+            void *context
+        );
+
     private:
 
         //

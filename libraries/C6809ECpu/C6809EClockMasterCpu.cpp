@@ -24,84 +24,31 @@
 //
 #include "Arduino.h"
 #include "Error.h"
-#include "C6809ECpu.h"
+#include "C6809EClockMasterCpu.h"
+#include "C6809EPinOut.h"
 #include "PinMap.h"
 
 
 //
-// Pin prefixes
-//
-// _ - active low
-//
-// Pin suffixes
-//
-// i - input
-// o - output
-// t - tri-state
-//
-
-//
-// Control Pins
-//
-static const CONNECTION s_GND_i      = {  1, "GND"      };
-static const CONNECTION s__NMI_i     = {  2, "_NMI"     };
-static const CONNECTION s__IRQ_i     = {  3, "_IRQ"     };
-static const CONNECTION s__FIRQ_i    = {  4, "_FIRQ"    };
-static const CONNECTION s_BS_o       = {  5, "BS"       };
-static const CONNECTION s_BA_o       = {  6, "BA"       };
-static const CONNECTION s_VCC_i      = {  7, "Vcc"      };
-static const CONNECTION s_RW_o       = { 32, "RW"       };
-static const CONNECTION s_BUSY_o     = { 33, "BUSY"     };
-static const CONNECTION s_E_i        = { 34, "E"        };
-static const CONNECTION s_Q_i        = { 35, "Q"        };
-static const CONNECTION s_AVMA_o     = { 36, "AVMA"     };
-static const CONNECTION s__RESET_i   = { 37, "_RESET"   };
-static const CONNECTION s_LIC_o      = { 38, "LIC"      };
-static const CONNECTION s_TSC_i      = { 39, "TSC"      };
-static const CONNECTION s__HALT_i    = { 40, "_HALT"    };
-
-//
 // External master clock on J14 AUX pin 8 (next to the 2-pin GND pin).
 //
-static const CONNECTION s_Clock_o    = {  8, "Clock"    };
+static const CONNECTION s_Clock_o = {  8, "Clock"    };
 
 //
-// Bus pins
+// The number of clock pulses to issue before declaring a timeout
+// waiting to transitions on the E & Q phase clocks.
 //
-static const CONNECTION s_A_ot[]   = { { 8, "A0"  },
-                                       { 9, "A1"  },
-                                       {10, "A2"  },
-                                       {11, "A3"  },
-                                       {12, "A4"  },
-                                       {13, "A5"  },
-                                       {14, "A6"  },
-                                       {15, "A7"  },
-                                       {16, "A8"  },
-                                       {17, "A9"  },
-                                       {18, "A10" },
-                                       {19, "A11" },
-                                       {20, "A12" },
-                                       {21, "A13" },
-                                       {22, "A14" },
-                                       {23, "A15" } }; // 16 bits
+static const int s_EqTimeout = 512;
 
-static const CONNECTION s_D_iot[] = { {31, "D0" },
-                                      {30, "D1" },
-                                      {29, "D2" },
-                                      {28, "D3" },
-                                      {27, "D4" },
-                                      {26, "D5" },
-                                      {25, "D6" },
-                                      {24, "D7" } }; // 8 bits.
 
-C6809ECpu::C6809ECpu(
-    UINT8 QLoToDInClockPulses
-) : m_QLoToDInClockPulses(QLoToDInClockPulses),
-    m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
-    m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
-    m_pinRW(g_pinMap40DIL, &s_RW_o),
-    m_pinE(g_pinMap40DIL, &s_E_i),
-    m_pinQ(g_pinMap40DIL, &s_Q_i),
+C6809EClockMasterCpu::C6809EClockMasterCpu(const C6809EPinOut *pinOut
+) : m_pinOut(pinOut),
+    m_busA(g_pinMap40DIL, pinOut->m_A_ot,  ARRAYSIZE(pinOut->m_A_ot)),
+    m_busD(g_pinMap40DIL, pinOut->m_D_iot, ARRAYSIZE(pinOut->m_D_iot)),
+    m_pinBA(g_pinMap40DIL, &pinOut->m_BA_o),
+    m_pinRW(g_pinMap40DIL, &pinOut->m_RW_o),
+    m_pinE(g_pinMap40DIL, &pinOut->m_E_i),
+    m_pinQ(g_pinMap40DIL, &pinOut->m_Q_i),
     m_pinClock(g_pinMap8Aux, &s_Clock_o)
 {
 };
@@ -109,33 +56,49 @@ C6809ECpu::C6809ECpu(
 //
 // The idle function sets up the pins into the correct direction (input/output)
 // and idle state ready for the next bus cycle.
+// Some pins are not defined for some packages.
 //
 PERROR
-C6809ECpu::idle(
+C6809EClockMasterCpu::idle(
 )
 {
-    pinMode(g_pinMap40DIL[s_GND_i.pin],    INPUT_PULLUP);
-    pinMode(g_pinMap40DIL[s__NMI_i.pin],          INPUT);
-    pinMode(g_pinMap40DIL[s__IRQ_i.pin],          INPUT);
-    pinMode(g_pinMap40DIL[s__FIRQ_i.pin],         INPUT);
+    if (m_pinOut->m_GND_i.pin != 0)
+    {
+        pinMode(g_pinMap40DIL[m_pinOut->m_GND_i.pin], INPUT_PULLUP);
+    }
 
-    digitalWrite(g_pinMap40DIL[s_BS_o.pin],         LOW);
-    pinMode(g_pinMap40DIL[s_BS_o.pin],           OUTPUT);
-    digitalWrite(g_pinMap40DIL[s_BA_o.pin],         LOW);
-    pinMode(g_pinMap40DIL[s_BA_o.pin],           OUTPUT);
+    pinMode(g_pinMap40DIL[m_pinOut->m__NMI_i.pin],           INPUT);
+    pinMode(g_pinMap40DIL[m_pinOut->m__IRQ_i.pin],           INPUT);
+    pinMode(g_pinMap40DIL[m_pinOut->m__FIRQ_i.pin],          INPUT);
 
-    pinMode(g_pinMap40DIL[s_VCC_i.pin],           INPUT);
+    if (m_pinOut->m_BS_o.pin != 0)
+    {
+        digitalWrite(g_pinMap40DIL[m_pinOut->m_BS_o.pin],      LOW);
+        pinMode(g_pinMap40DIL[m_pinOut->m_BS_o.pin],        OUTPUT);
+    }
 
-    digitalWrite(g_pinMap40DIL[s_AVMA_o.pin],      HIGH);
-    pinMode(g_pinMap40DIL[s_AVMA_o.pin],         OUTPUT);
+    pinMode(g_pinMap40DIL[m_pinOut->m_VCC_i.pin],            INPUT);
 
-    pinMode(g_pinMap40DIL[s__RESET_i.pin],        INPUT);
+    if (m_pinOut->m_AVMA_o.pin != 0)
+    {
+        digitalWrite(g_pinMap40DIL[m_pinOut->m_AVMA_o.pin],   HIGH);
+        pinMode(g_pinMap40DIL[m_pinOut->m_AVMA_o.pin],      OUTPUT);
+    }
 
-    digitalWrite(g_pinMap40DIL[s_LIC_o.pin],       HIGH);
-    pinMode(g_pinMap40DIL[s_LIC_o.pin],          OUTPUT);
+    pinMode(g_pinMap40DIL[m_pinOut->m__RESET_i.pin],         INPUT);
 
-    pinMode(g_pinMap40DIL[s_TSC_i.pin],           INPUT);
-    pinMode(g_pinMap40DIL[s__HALT_i.pin],         INPUT);
+    if (m_pinOut->m_LIC_o.pin != 0)
+    {
+        digitalWrite(g_pinMap40DIL[m_pinOut->m_LIC_o.pin],    HIGH);
+        pinMode(g_pinMap40DIL[m_pinOut->m_LIC_o.pin],       OUTPUT);
+    }
+
+    pinMode(g_pinMap40DIL[m_pinOut->m_TSC_i.pin],     INPUT_PULLUP);
+
+    if (m_pinOut->m__HALT_i.pin != 0)
+    {
+        pinMode(g_pinMap40DIL[m_pinOut->m__HALT_i.pin],      INPUT);
+    }
 
     // Start with pulled high to verify the bus is floating.
     m_busA.pinMode(INPUT_PULLUP);
@@ -143,8 +106,12 @@ C6809ECpu::idle(
     // Start with pulled high to verify the bus is floating.
     m_busD.pinMode(INPUT_PULLUP);
 
+    // Set the BA pin to output high for idle state
+    m_pinBA.digitalWriteHIGH();
+    m_pinBA.pinMode(OUTPUT);
+
     // Set the RW pin to output high for read
-    m_pinRW.digitalWriteLOW();
+    m_pinRW.digitalWriteHIGH();
     m_pinRW.pinMode(OUTPUT);
 
     // Set the fast E & Q pins to input
@@ -167,30 +134,36 @@ C6809ECpu::idle(
 // to idle state.
 //
 PERROR
-C6809ECpu::check(
+C6809EClockMasterCpu::check(
 )
 {
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND_i, LOW);
+    if (m_pinOut->m_GND_i.pin != 0)
+    {
+        CHECK_VALUE_EXIT(error, g_pinMap40DIL, m_pinOut->m_GND_i, LOW);
+    }
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_VCC_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, m_pinOut->m_VCC_i, HIGH);
 
     // The halt pin should be high (running).
-    CHECK_VALUE_EXIT(error, s__HALT_i, HIGH);
+    if (m_pinOut->m__HALT_i.pin != 0)
+    {
+        CHECK_VALUE_EXIT(error, g_pinMap40DIL, m_pinOut->m__HALT_i, HIGH);
+    }
 
     // In everything we'll be testing, TSC is pulled low.
-    CHECK_VALUE_EXIT(error, s_TSC_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, m_pinOut->m_TSC_i, LOW);
 
     // The address bus should be uncontended and pulled high.
-    CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
+    CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, m_pinOut->m_A_ot, 0xFFFF);
 
     // The data bus should be uncontended and pulled high.
     // We can't do this because on Star Wars the idle bus is a read of 0xFFFF == 0x61.
     //
-    //CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
+    // CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
 
     // Loop to detect that reset clears
     // On Star Wars this ~0x40000 (262,144) clocks.
@@ -199,7 +172,7 @@ C6809ECpu::check(
     {
         for (UINT32 i = 0 ; i < 0x41000 ; i++)
         {
-            int value = ::digitalRead(g_pinMap40DIL[s__RESET_i.pin]);
+            int value = ::digitalRead(g_pinMap40DIL[m_pinOut->m__RESET_i.pin]);
 
             if (value == HIGH)
             {
@@ -210,14 +183,14 @@ C6809ECpu::check(
             m_pinClock.digitalWriteLOW();
         }
     }
-    CHECK_VALUE_EXIT(error, s__RESET_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, m_pinOut->m__RESET_i, HIGH);
 
     // Loop to detect E & Q by sampling and detecting both high and lows.
     {
         int hiECount = 0, loECount = 0;
         int hiQCount = 0, loQCount = 0;
 
-        for (int i = 0 ; i < 1000 ; i++)
+        for (int i = 0 ; i < s_EqTimeout ; i++)
         {
             int valueE = m_pinE.digitalRead();
             int valueQ = m_pinQ.digitalRead();
@@ -231,22 +204,22 @@ C6809ECpu::check(
 
         if (loECount == 0)
         {
-            CHECK_PIN_VALUE_EXIT(error, m_pinE, s_E_i, LOW);
+            CHECK_PIN_VALUE_EXIT(error, m_pinE, m_pinOut->m_E_i, LOW);
         }
 
         if (hiECount == 0)
         {
-            CHECK_PIN_VALUE_EXIT(error, m_pinE, s_E_i, HIGH);
+            CHECK_PIN_VALUE_EXIT(error, m_pinE, m_pinOut->m_E_i, HIGH);
         }
 
         if (loQCount == 0)
         {
-            CHECK_PIN_VALUE_EXIT(error, m_pinQ, s_Q_i, LOW);
+            CHECK_PIN_VALUE_EXIT(error, m_pinQ, m_pinOut->m_Q_i, LOW);
         }
 
         if (hiQCount == 0)
         {
-            CHECK_PIN_VALUE_EXIT(error, m_pinQ, s_Q_i, HIGH);
+            CHECK_PIN_VALUE_EXIT(error, m_pinQ, m_pinOut->m_Q_i, HIGH);
         }
     }
 
@@ -256,7 +229,7 @@ Exit:
 
 
 UINT8
-C6809ECpu::dataBusWidth(
+C6809EClockMasterCpu::dataBusWidth(
     UINT32 address
 )
 {
@@ -265,7 +238,7 @@ C6809ECpu::dataBusWidth(
 
 
 UINT8
-C6809ECpu::dataAccessWidth(
+C6809EClockMasterCpu::dataAccessWidth(
     UINT32 address
 )
 {
@@ -274,7 +247,7 @@ C6809ECpu::dataAccessWidth(
 
 
 PERROR
-C6809ECpu::memoryReadWrite(
+C6809EClockMasterCpu::memoryReadWrite(
     UINT32 address,
     UINT16 *data,
     int    readWrite
@@ -284,13 +257,18 @@ C6809ECpu::memoryReadWrite(
     bool interruptsDisabled = false;
     int valueE;
     int valueQ;
+    UINT16 dataN[2] = {0};
+
+    // Critical timing section
+    noInterrupts();
+    interruptsDisabled = true;
 
     //
     // Phase 0 - Initial State
     // - Wait for E-Lo, Q-Lo
     // - E-falling
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueE = m_pinE.digitalRead();
         valueQ = m_pinQ.digitalRead();
@@ -304,15 +282,17 @@ C6809ECpu::memoryReadWrite(
         m_pinClock.digitalWriteHIGH();
         m_pinClock.digitalWriteLOW();
     }
-    CHECK_LITERAL_VALUE_EXIT(error, s_E_i, valueE, LOW);
-    CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, LOW);
+    CHECK_LITERAL_VALUE_EXIT(error, m_pinOut->m_E_i, valueE, LOW);
+    CHECK_LITERAL_VALUE_EXIT(error, m_pinOut->m_Q_i, valueQ, LOW);
 
     //
     // Phase 0 Actions
     // - Drive RW, A, BA, BS onto the bus.
     //
     m_busA.pinMode(OUTPUT);
-    m_busA.digitalWrite(address);
+    m_busA.digitalWrite(address & 0xFFFF);
+
+    m_pinBA.digitalWriteLOW();
 
     //
     // Driving D on write is due in Phase 1 however
@@ -327,16 +307,12 @@ C6809ECpu::memoryReadWrite(
         m_busD.digitalWrite(*data);
     }
 
-    // Critical timing section
-    noInterrupts();
-    interruptsDisabled = true;
-
     //
     // Phase 1
     // - Wait for E-Lo, Q-Hi
     // - Q-rising
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueQ = m_pinQ.digitalRead();
 
@@ -348,8 +324,8 @@ C6809ECpu::memoryReadWrite(
         m_pinClock.digitalWriteHIGH();
         m_pinClock.digitalWriteLOW();
     }
-    CHECK_PIN_VALUE_EXIT(error, m_pinE, s_E_i, LOW);
-    CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, HIGH);
+    CHECK_PIN_VALUE_EXIT(error, m_pinE, m_pinOut->m_E_i, LOW);
+    CHECK_LITERAL_VALUE_EXIT(error, m_pinOut->m_Q_i, valueQ, HIGH);
 
     //
     // Phase 1 Actions
@@ -361,7 +337,7 @@ C6809ECpu::memoryReadWrite(
     // - Wait for E-Hi, Q-Hi
     // - E-rising
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueE = m_pinE.digitalRead();
 
@@ -373,8 +349,8 @@ C6809ECpu::memoryReadWrite(
         m_pinClock.digitalWriteHIGH();
         m_pinClock.digitalWriteLOW();
     }
-    CHECK_LITERAL_VALUE_EXIT(error, s_E_i, valueE, HIGH);
-    CHECK_PIN_VALUE_EXIT(error, m_pinQ, s_Q_i, HIGH);
+    CHECK_LITERAL_VALUE_EXIT(error, m_pinOut->m_E_i, valueE, HIGH);
+    CHECK_PIN_VALUE_EXIT(error, m_pinQ, m_pinOut->m_Q_i, HIGH);
 
     //
     // Phase 2 Actions
@@ -386,7 +362,7 @@ C6809ECpu::memoryReadWrite(
     // - Wait for E-Hi, Q-Lo
     // - Q-falling
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueQ = m_pinQ.digitalRead();
 
@@ -398,44 +374,15 @@ C6809ECpu::memoryReadWrite(
         m_pinClock.digitalWriteHIGH();
         m_pinClock.digitalWriteLOW();
     }
-    CHECK_PIN_VALUE_EXIT(error, m_pinE, s_E_i, HIGH);
-    CHECK_LITERAL_VALUE_EXIT(error, s_Q_i, valueQ, LOW);
-
-    //
-    // Wait for data based on master clock
-    //
-    // If this is incorrect (too long) such that E returns
-    // low then we flag this as a bus error.
-    //
-    for (int x = 0 ; x < m_QLoToDInClockPulses ; x++)
-    {
-        valueE = m_pinE.digitalRead();
-
-        if (valueE == LOW)
-        {
-            break;
-        }
-
-        m_pinClock.digitalWriteHIGH();
-        m_pinClock.digitalWriteLOW();
-    }
-    CHECK_LITERAL_VALUE_EXIT(error, s_E_i, valueE, HIGH);
-
-    //
-    // Phase 3 Actions
-    // - D read
-    //
-    if (readWrite == HIGH)
-    {
-        m_busD.digitalRead(data);
-    }
+    CHECK_PIN_VALUE_EXIT(error, m_pinE, m_pinOut->m_E_i, HIGH);
+    CHECK_LITERAL_VALUE_EXIT(error, m_pinOut->m_Q_i, valueQ, LOW);
 
     //
     // Phase 0 (Initial State)
     // - Wait for E-Lo, Q-Lo
     // - E-falling
     //
-    for (int x = 0 ; x < 100 ; x++)
+    for (int x = 0 ; x < s_EqTimeout ; x++)
     {
         valueE = m_pinE.digitalRead();
 
@@ -444,16 +391,49 @@ C6809ECpu::memoryReadWrite(
             break;
         }
 
+        //
+        // Since data-in is latched on the falling edge of E we
+        // read in the data before every clock pulse so we have
+        // the latest data before E transitions.
+        //
+        // A short history of the data read is kept for games
+        // that don't hold data until E transitions
+        // (a timing  violation)
+        //
+        if (readWrite == HIGH)
+        {
+            dataN[0] = dataN[1];
+            m_busD.digitalRead(&dataN[1]);
+        }
+
         m_pinClock.digitalWriteHIGH();
         m_pinClock.digitalWriteLOW();
     }
-    CHECK_LITERAL_VALUE_EXIT(error, s_E_i, valueE, LOW);
-    CHECK_PIN_VALUE_EXIT(error, m_pinQ, s_Q_i, LOW);
+    CHECK_LITERAL_VALUE_EXIT(error, m_pinOut->m_E_i, valueE, LOW);
+    CHECK_PIN_VALUE_EXIT(error, m_pinQ, m_pinOut->m_Q_i, LOW);
+
+    if (readWrite == HIGH)
+    {
+        if (address & 0x100000)
+        {
+            // Use the data from the N-1 clock transition
+            *data = dataN[0];
+        }
+        else
+        {
+            // Use the bus data from the last clock transition
+            *data = dataN[1];
+        }
+    }
 
     //
     // Phase 0 Actions
+    // - Set BA & address to idle 0xFFFF
     // - On writes, tri-state D
     //
+
+    m_pinBA.digitalWriteHIGH();
+    m_busA.digitalWrite(0xFFFF);
 
     if (readWrite == LOW)
     {
@@ -470,8 +450,9 @@ Exit:
     return error;
 }
 
+
 PERROR
-C6809ECpu::memoryRead(
+C6809EClockMasterCpu::memoryRead(
     UINT32 address,
     UINT16 *data
 )
@@ -479,8 +460,9 @@ C6809ECpu::memoryRead(
     return memoryReadWrite(address, data, HIGH);
 }
 
+
 PERROR
-C6809ECpu::memoryWrite(
+C6809EClockMasterCpu::memoryWrite(
     UINT32 address,
     UINT16 data
 )
@@ -490,17 +472,65 @@ C6809ECpu::memoryWrite(
 
 
 PERROR
-C6809ECpu::waitForInterrupt(
+C6809EClockMasterCpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16 timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
-    return errorNotImplemented;
+    PERROR error = errorSuccess;
+    unsigned long startTime = millis();
+    unsigned long endTime = startTime + timeoutInMs;
+    int sense = (active ? LOW : HIGH);
+    int value = 0;
+    UINT8 intPin = 0;
+
+    switch (interrupt)
+    {
+        case RESET : {intPin = g_pinMap40DIL[m_pinOut->m__RESET_i.pin] ; break;}
+        case NMI   : {intPin = g_pinMap40DIL[m_pinOut->m__NMI_i.pin]   ; break;}
+        case IRQ0  : {intPin = g_pinMap40DIL[m_pinOut->m__FIRQ_i.pin]  ; break;}
+        case IRQ1  : {intPin = g_pinMap40DIL[m_pinOut->m__IRQ_i.pin]   ; break;}
+
+        default    : {return errorNotImplemented;}
+    }
+
+    do
+    {
+        value = ::digitalRead(intPin);
+
+        if (value == sense)
+        {
+            break;
+        }
+
+        //
+        // Since this is clock mastering we need to run the system
+        // on whilst waiting for the interrupt. Using an idle read
+        // to do this keeps the bus cycle clock alignment.
+        //
+        {
+            UINT32 address = 0xFFFF;
+            UINT16 data = 0;
+
+            memoryReadWrite(address, &data, HIGH);
+        }
+    }
+    while (millis() < endTime);
+
+    if (value != sense)
+    {
+        error = errorTimeout;
+    }
+
+Exit:
+
+    return error;
 }
 
 
 PERROR
-C6809ECpu::acknowledgeInterrupt(
+C6809EClockMasterCpu::acknowledgeInterrupt(
     UINT16 *response
 )
 {
@@ -511,7 +541,7 @@ C6809ECpu::acknowledgeInterrupt(
 // Pulse the clock pin high.
 //
 void
-C6809ECpu::clockPulse(
+C6809EClockMasterCpu::clockPulse(
 )
 {
     m_pinClock.digitalWriteHIGH();

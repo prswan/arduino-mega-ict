@@ -108,7 +108,7 @@ CIoCheck::output(
     //
     if (outputRegion->bankSwitch != NO_BANK_SWITCH)
     {
-        error = outputRegion->bankSwitch( (void *) this );
+        error = outputRegion->bankSwitch(m_bankSwitchContext);
     }
 
     if (SUCCESS(error))

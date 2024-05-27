@@ -38,9 +38,10 @@ CFast8BitBus::CFast8BitBus(
 
         m_decodedPinMap[i] = pin;
 
-        m_physicalPinMask[i]         = digitalPinToBitMask(pin);
-        m_physicalPortRegisterIn[i]  = portInputRegister(digitalPinToPort(pin));
-        m_physicalPortRegisterOut[i] = portOutputRegister(digitalPinToPort(pin));
+        m_physicalPinMask[i]          = digitalPinToBitMask(pin);
+        m_physicalPortRegisterIn[i]   = portInputRegister(digitalPinToPort(pin));
+        m_physicalPortRegisterOut[i]  = portOutputRegister(digitalPinToPort(pin));
+        m_physicalPortRegisterMode[i] = portModeRegister(digitalPinToPort(pin));
     }
 };
 
@@ -56,9 +57,42 @@ CFast8BitBus::pinMode(
         m_pinModeSet     = true;
         m_currentPinMode = mode;
 
-        for (UINT8 i = 0 ; i < s_dataBusSize ; i++)
+        for (UINT8 i = 0 ; i < s_dataBusSize; i++)
         {
-            ::pinMode(m_decodedPinMap[i], mode);
+            UINT8 rawMode = *(m_physicalPortRegisterMode[i]);
+
+            if (mode == OUTPUT)
+            {
+                // Set the bit with an OR mask.
+                rawMode |=  (m_physicalPinMask[i]);
+
+                *(m_physicalPortRegisterMode[i]) = rawMode;
+            }
+            else
+            {
+                // Clear with bit with an AND invert mask.
+                rawMode &= ~(m_physicalPinMask[i]);
+
+                *(m_physicalPortRegisterMode[i]) = rawMode;
+
+                // Also set the output pullup control
+                {
+                    UINT8 rawOut = *(m_physicalPortRegisterOut[i]);
+
+                    if (mode == INPUT_PULLUP)
+                    {
+                        // Set the bit with an OR mask.
+                        rawOut |=  (m_physicalPinMask[i]);
+                    }
+                    else
+                    {
+                        // Clear with bit with an AND invert mask.
+                        rawOut &= ~(m_physicalPinMask[i]);
+                    }
+
+                    *(m_physicalPortRegisterOut[i])  = rawOut;
+                }
+            }
         }
     }
 };
@@ -94,25 +128,27 @@ CFast8BitBus::digitalRead(
     UINT16  *value
 )
 {
-    UINT8 rawBit0 = *(m_physicalPortRegisterIn[0]);
-    UINT8 rawBit1 = *(m_physicalPortRegisterIn[1]);
-    UINT8 rawBit2 = *(m_physicalPortRegisterIn[2]);
-    UINT8 rawBit3 = *(m_physicalPortRegisterIn[3]);
-    UINT8 rawBit4 = *(m_physicalPortRegisterIn[4]);
-    UINT8 rawBit5 = *(m_physicalPortRegisterIn[5]);
-    UINT8 rawBit6 = *(m_physicalPortRegisterIn[6]);
-    UINT8 rawBit7 = *(m_physicalPortRegisterIn[7]);
-
     UINT16 localValue = 0;
 
-    localValue |= ((rawBit0 & m_physicalPinMask[0]) ? (1 << 0) : 0);
-    localValue |= ((rawBit1 & m_physicalPinMask[1]) ? (1 << 1) : 0);
-    localValue |= ((rawBit2 & m_physicalPinMask[2]) ? (1 << 2) : 0);
-    localValue |= ((rawBit3 & m_physicalPinMask[3]) ? (1 << 3) : 0);
-    localValue |= ((rawBit4 & m_physicalPinMask[4]) ? (1 << 4) : 0);
-    localValue |= ((rawBit5 & m_physicalPinMask[5]) ? (1 << 5) : 0);
-    localValue |= ((rawBit6 & m_physicalPinMask[6]) ? (1 << 6) : 0);
-    localValue |= ((rawBit7 & m_physicalPinMask[7]) ? (1 << 7) : 0);
+    for (UINT8 i = 0 ; i < s_dataBusSize; i++)
+    {
+        UINT8 rawIn = *(m_physicalPortRegisterIn[i]);
+
+        if (rawIn & m_physicalPinMask[i])
+        {
+            // Set the bit with an OR mask.
+            localValue |=  (1 << i);
+        }
+        else
+        {
+            //
+            // Clear with bit with an AND invert mask.
+            // This is redundant but left in code to keep
+            // the execution time more stable on the scope.
+            //
+            localValue &= ~(1 << i);
+        }
+    }
 
     *value = localValue;
 }

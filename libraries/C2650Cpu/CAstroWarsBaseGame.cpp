@@ -26,10 +26,6 @@
 #include "C2650Cpu.h"
 #include <DFR_Key.h>
 
-//
-// No write-only RAM on this platform. Yay!
-//
-static const RAM_REGION s_ramRegionWriteOnly[] PROGMEM = { {0} }; // end of list
 
 //
 // Custom functions implemented for this game.
@@ -40,11 +36,14 @@ static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {{NO_CUSTOM_FUNCTION}}
 CAstroWarsBaseGame::CAstroWarsBaseGame(
     const ROM_REGION    *romRegion,
     const RAM_REGION    *ramRegion,
+    const RAM_REGION    *ramRegionByteOnly,
+    const RAM_REGION    *ramRegionWriteOnly,
     const INPUT_REGION  *inputRegion,
     const OUTPUT_REGION *outputRegion
 ) : CGame( romRegion,
            ramRegion,
-           s_ramRegionWriteOnly,
+           ramRegionByteOnly,
+           ramRegionWriteOnly,
            inputRegion,
            outputRegion,
            s_customFunction )
@@ -53,7 +52,7 @@ CAstroWarsBaseGame::CAstroWarsBaseGame(
     m_cpu->idle();
 
     // There is only a single interrupt pin on the 2650.
-    m_interrupt = ICpu::INT;
+    m_interrupt = ICpu::IRQ0;
 
     // The interrupt uses an external hardware vector.
     m_interruptAutoVector = false;

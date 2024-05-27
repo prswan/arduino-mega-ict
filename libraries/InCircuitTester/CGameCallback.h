@@ -50,6 +50,11 @@ class CGameCallback
         static const SELECTOR *selectorGeneric;
 
         //
+        // This is the selector object array for the UI for soak test use.
+        //
+        static const SELECTOR *selectorSoakTest;
+
+        //
         // The game object to use.
         //
         static IGame *game;
@@ -74,6 +79,11 @@ class CGameCallback
         );
 
         static PERROR onSelectRamCheckAll(
+            void *iGame,
+            int  key
+        );
+
+        static PERROR onSelectRamCheckAllRA(
             void *iGame,
             int  key
         );
@@ -104,6 +114,16 @@ class CGameCallback
         );
 
         static PERROR onSelectRamCheck(
+            void *iGame,
+            int  key
+        );
+
+        static PERROR onSelectRamCheckRA(
+            void *iGame,
+            int  key
+        );
+
+        static PERROR onSelectRamCheckAd(
             void *iGame,
             int  key
         );

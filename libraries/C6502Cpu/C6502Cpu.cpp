@@ -30,7 +30,9 @@
 
 
 C6502Cpu::C6502Cpu(
-) : m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
+    bool dataBusCheck
+) : m_dataBusCheck(dataBusCheck),
+    m_busA(g_pinMap40DIL, s_A_ot,  ARRAYSIZE(s_A_ot)),
     m_busD(g_pinMap40DIL, s_D_iot, ARRAYSIZE(s_D_iot)),
     m_pinCLK1o(g_pinMap40DIL, &s_CLK1o_o),
     m_pinCLK2o(g_pinMap40DIL, &s_CLK2o_o)
@@ -95,23 +97,26 @@ C6502Cpu::check(
     PERROR error = errorSuccess;
 
     // The ground pin (with pullup) should be connected to GND (LOW)
-    CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
-    CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND1_i, LOW);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_GND2_i, LOW);
 
     // The Vcc pin should be high (power is on).
-    CHECK_VALUE_EXIT(error, s_Vcc_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_Vcc_i, HIGH);
 
     // The reset pin should be high (no reset).
-    CHECK_VALUE_EXIT(error, s_RES_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RES_i, HIGH);
 
     // Nothing should be driving wait states.
-    CHECK_VALUE_EXIT(error, s_RDY_i, HIGH);
+    CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_RDY_i, HIGH);
 
     // The address bus should be uncontended and pulled high.
     CHECK_BUS_VALUE_UINT16_EXIT(error, m_busA, s_A_ot, 0xFFFF);
 
     // The data bus should be uncontended and pulled high.
-    CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
+    if (m_dataBusCheck)
+    {
+        CHECK_BUS_VALUE_UINT8_EXIT(error, m_busD, s_D_iot, 0xFF);
+    }
 
     // Loop to detect a clock by sampling and detecting both high and lows.
     {
@@ -134,11 +139,11 @@ C6502Cpu::check(
 
         if (loCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_CLK0i_i, LOW);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK0i_i, LOW);
         }
         else if (hiCount == 0)
         {
-            CHECK_VALUE_EXIT(error, s_CLK0i_i, HIGH);
+            CHECK_VALUE_EXIT(error, g_pinMap40DIL, s_CLK0i_i, HIGH);
         }
     }
 
@@ -258,12 +263,14 @@ Exit:
 PERROR
 C6502Cpu::waitForInterrupt(
     Interrupt interrupt,
-    UINT16    timeoutInMs
+    bool      active,
+    UINT32    timeoutInMs
 )
 {
     PERROR error = errorSuccess;
     unsigned long startTime = millis();
     unsigned long endTime = startTime + timeoutInMs;
+    int sense = (active ? LOW : HIGH);
     int value = 0;
 
     UINT8 intPin = ((interrupt == NMI) ? (g_pinMap40DIL[s__NMI_i.pin]) :
@@ -273,14 +280,14 @@ C6502Cpu::waitForInterrupt(
     {
         value = ::digitalRead(intPin);
 
-        if (value == LOW)
+        if (value == sense)
         {
             break;
         }
     }
     while (millis() < endTime);
 
-    if (value != LOW)
+    if (value != sense)
     {
         error = errorTimeout;
     }

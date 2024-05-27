@@ -41,6 +41,7 @@ class C6502Cpu : public ICpu
         //
 
         C6502Cpu(
+            bool dataBusCheck
         );
 
         // ICpu Interface
@@ -90,7 +91,8 @@ class C6502Cpu : public ICpu
         PERROR
         waitForInterrupt(
             Interrupt interrupt,
-            UINT16    timeoutInMs
+            bool      active,
+            UINT32    timeoutInMs
         );
 
         virtual
@@ -104,6 +106,8 @@ class C6502Cpu : public ICpu
         //
 
     private:
+
+        bool          m_dataBusCheck;
 
         CBus          m_busA;
         CFast8BitBus  m_busD;

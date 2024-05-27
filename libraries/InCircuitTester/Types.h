@@ -31,8 +31,6 @@
 // System wide definitions
 //
 
-#define NULL ((void*)(0))
-
 #define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
 
 //                     "0123456789ABCDEF"
@@ -82,7 +80,6 @@ typedef struct _ERROR {
 //
 typedef PERROR (*SelectorCallback)(void *context, int key);
 
-
 //
 // This is used as the callback for any bank switching.
 //
@@ -97,12 +94,23 @@ typedef PERROR (*BankSwitchCallback)(void *context);
 // This is used as the callback for address remapping.
 // The remapped address is returned based on the supplied address.
 //
-typedef UINT32 (*AddressRemapCallback)(void *context, UINT32 address);
+typedef PERROR (*AddressRemapCallback)(void *context, UINT32 addressIn, UINT32 *addressOut);
 
 //
 // Setting for the address remap callback that none is required.
 //
 #define NO_ADDRESS_REMAP ((AddressRemapCallback) (NULL))
+
+//
+// This is used as the callback for data bit remapping.
+// The remapped data is returned based on the supplied address.
+//
+typedef PERROR (*DataRemapCallback)(void *context, UINT32 address, UINT16 dataIn, UINT16 *dataOut);
+
+//
+// Setting for the data remap callback that none is required.
+//
+#define NO_DATA_REMAP ((DataRemapCallback) (NULL))
 
 //
 // This is used as the callback for external interrupt setup/enable.
@@ -133,6 +141,18 @@ typedef PERROR (*CustomFunctionCallback)(void *context);
 // Setting for the custom function that indicates none.
 //
 #define NO_CUSTOM_FUNCTION ((CustomFunctionCallback) (NULL))
+
+//
+// This is used for the delay function implementation.
+// The context supplied an ICpu object.
+//
+typedef PERROR (*DelayFunctionCallback)(void *context, unsigned long ms);
+
+//
+// Setting for the custom function that indicates none.
+//
+#define NO_DELAY_FUNCTION ((DelayFunctionCallback) (NULL))
+
 
 //
 // This is used to construct an object.
@@ -166,6 +186,16 @@ typedef struct _CONNECTION {
 
 } CONNECTION, *PCONNECTION;
 
+//
+// Table of data2n records that are linked in the ROM_REGION below.
+// The table is provided to allow data2n records to be in PROGMEM
+// and allocated into program RAM on use.
+//
+typedef struct _ROM_DATA2N {
+
+    const UINT16 data2n[18];
+
+} ROM_DATA2N, *PROM_DATA2N;
 
 //
 // ROM region definition for one device, sample data and it's complete CRC.
@@ -175,16 +205,16 @@ typedef struct _CONNECTION {
 //  - 0x0400 bytes (max address 0x3FF) has 10 data samples.
 //  - 0x1000 bytes (max address 0xFFF) has 12 data samples.
 //
-// NOTE: ROM Regions only support 8-bit data access. I know of no games
-//       this era that used ROMS that were 16-bit access only.
-//
+// ROM Regions support 8-bit & 16-bit data access.
+//
+
 
 typedef struct _ROM_REGION {
 
     BankSwitchCallback bankSwitch;  // NULL if no bank switch is needed.
     UINT32             start;
     UINT32             length;
-    const UINT8        *data2n;
+    const UINT16       *data2n;
     UINT32             crc;
     CHAR               location[4]; // 3 characters
 
@@ -194,12 +224,22 @@ typedef struct _ROM_REGION {
 //
 // RAM region definition for one device (maskable)
 //
+// step
+//   Step use to support interleaved memory arrangements e.g.
+//    - 8-bit access to 8-bit memories on an 8-bit bus then step == 1
+//    - 2 x 8-bit RAMS configured as a 16-bit word on an 8-bit bus then step == 2
+//    - 4 x 8-bit RAMS configured as a 32-bit word on an 8-bit bus then step == 4
+//
+//    - 16-bit access to 16-bit memories on an 16-bit bus then step == 1
+//    - 2 x 16-bit RAMS configured as a 32-bit word on an 16-bit bus then step == 2
+//
 
 typedef struct _RAM_REGION {
 
     BankSwitchCallback bankSwitch;     // NULL if no bank switch is needed.
     UINT32             start;
     UINT32             end;
+    UINT8              step;           // See note above
     UINT16             mask;
     CHAR               location[4];    // 3 characters
     CHAR               description[7]; // 6 characters
@@ -263,7 +303,7 @@ typedef struct _INTERRUPT_DEFINITION {
 
     ExternalIntSetupCallback externalIntSetup; // NULL if no external interrupt setup is needed.
     ExternalIntAckCallback   externalIntAck;   // NULL if no external interrupt acknowledge is needed.
-    UINT8                    type;             // 0 - NMI, 1 - INT, 2 - INTx, ICpu specific.
+    UINT8                    type;             // ICpu::Interrupt
     UINT8                    response;         // The vector, 0 if there is no external hardware vector.
     CHAR                     location[4];      // 3 characters
     CHAR                     description[7];   // 6 characters
@@ -316,6 +356,40 @@ typedef struct _INTERRUPT_DEFINITION {
             string += " " + String(value16, HEX);             \
         }                                                     \
     }                                                         \
+
+//
+// Macro to format a UINT32 24-bit hex value into a string with leading zeros.
+// The Arduino String library does not appear to have an option to do this.
+//
+
+#define STRING_UINT32_24_HEX(string, value)                  \
+    {                                                        \
+        if (value <= 0xF)                                    \
+        {                                                    \
+            string += " 00000" + String(value, HEX);         \
+        }                                                    \
+        else if (value <= 0xFF)                              \
+        {                                                    \
+            string += " 0000" + String(value, HEX);          \
+        }                                                    \
+        else if (value <= 0xFFF)                             \
+        {                                                    \
+            string += " 000" + String(value, HEX);           \
+        }                                                    \
+        else if (value <= 0xFFFF)                            \
+        {                                                    \
+            string += " 00" + String(value, HEX);            \
+        }                                                    \
+        else if (value <= 0xFFFFF)                           \
+        {                                                    \
+            string += " 0" + String(value, HEX);             \
+        }                                                    \
+        else                                                 \
+        {                                                    \
+            string += " " + String((value & 0xFFFFFF), HEX); \
+        }                                                    \
+    }                                                        \
+
 
 //
 // Macro to format a UINT32 hex value into a string with leading zeros.
@@ -383,6 +457,40 @@ typedef struct _INTERRUPT_DEFINITION {
     }                                                                       \
 
 //
+// Macro to check a boolean value and exit with an error if it's wrong.
+//
+#define CHECK_BOOL_VALUE_EXIT(error, message, recValue, expValue)               \
+        {                                                                       \
+            if (recValue != expValue)                                           \
+            {                                                                   \
+                error = errorCustom;                                            \
+                error->code = ERROR_FAILED;                                     \
+                error->description = "E:";                                      \
+                error->description += message;                                  \
+                error->description += (expValue) ? " Hi" : " Lo";               \
+                error->description += (recValue) ? " Hi" : " Lo";               \
+                goto Exit;                                                      \
+            }                                                                   \
+        }                                                                       \
+
+//
+// Macro to check an 8-bit value and exit with an error if it's wrong.
+//
+#define CHECK_UINT8_VALUE_EXIT(error, message, recValue, expValue)              \
+        {                                                                       \
+            if (recValue != expValue)                                           \
+            {                                                                   \
+                error = errorCustom;                                            \
+                error->code = ERROR_FAILED;                                     \
+                error->description = "E:";                                      \
+                error->description += message;                                  \
+                STRING_UINT8_HEX(error->description, expValue);                 \
+                STRING_UINT8_HEX(error->description, recValue);                 \
+                goto Exit;                                                      \
+            }                                                                   \
+        }                                                                       \
+
+//
 // Macro to check a 16-bit value and exit with an error if it's wrong.
 //
 #define CHECK_UINT16_VALUE_EXIT(error, message, recValue, expValue)         \
@@ -420,9 +528,9 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to check a single pin value and exit with an error if it's wrong.
 //
-#define CHECK_VALUE_EXIT(error, connection, expValue)                       \
+#define CHECK_VALUE_EXIT(error, pinMap, connection, expValue)               \
     {                                                                       \
-        int recValue = digitalRead(g_pinMap40DIL[connection.pin]);          \
+        int recValue = digitalRead(pinMap[connection.pin]);                 \
         CHECK_LITERAL_VALUE_EXIT(error, connection, recValue, expValue);    \
     }                                                                       \
 
@@ -430,9 +538,9 @@ typedef struct _INTERRUPT_DEFINITION {
 // Macro to check a single pin value and exit with an error if it's wrong.
 // CFastPin version.
 //
-#define CHECK_PIN_VALUE_EXIT(error, pin, connection, expValue)         \
+#define CHECK_PIN_VALUE_EXIT(error, pin, connection, expValue)              \
     {                                                                       \
-        int recValue = pin.digitalRead();      \
+        int recValue = pin.digitalRead();                                   \
         CHECK_LITERAL_VALUE_EXIT(error, connection, recValue, expValue);    \
     }                                                                       \
 
@@ -518,13 +626,13 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to load a string with an 8-bit region summary.
 // 0123456789adcdef
-//  1800 0F 11D
+//  001800 0F 11D
 //
-#define STRING_REGION8_SUMMARY(error, start, mask, location)    \
+#define STRING_REGION8_SUMMARY(error, start, mask, location)   \
     {                                                          \
         error->code = ERROR_SUCCESS;                           \
         error->description = "";                               \
-        STRING_UINT16_HEX(error->description, start);          \
+        STRING_UINT32_24_HEX(error->description, start);       \
         error->description += " ";                             \
         STRING_UINT8_HEX(error->description, mask);            \
         error->description += " ";                             \
@@ -534,13 +642,13 @@ typedef struct _INTERRUPT_DEFINITION {
 //
 // Macro to load a string with an 16-bit region summary.
 // 0123456789adcdef
-//  1800 0F0F 11D
+//  001800 0F0F 11D
 //
 #define STRING_REGION16_SUMMARY(error, start, mask, location)  \
     {                                                          \
         error->code = ERROR_SUCCESS;                           \
         error->description = "";                               \
-        STRING_UINT16_HEX(error->description, start);          \
+        STRING_UINT32_24_HEX(error->description, start);       \
         error->description += " ";                             \
         STRING_UINT16_HEX(error->description, mask);           \
         error->description += " ";                             \

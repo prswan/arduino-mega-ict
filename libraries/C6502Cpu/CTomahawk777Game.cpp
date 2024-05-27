@@ -26,15 +26,15 @@
 
 
 //                                       01   02   04   08   10   20   40   80  100  200
-static const UINT8 s_romData2n_C5[] = {0xA2,0xFF,0xD8,0x20,0xDC,0x16,0x06,0xA9,0x08,0x20}; // 8
-static const UINT8 s_romData2n_D4[] = {0xA0,0xFF,0x13,0xA9,0x08,0x3F,0xA0,0xF8,0x85,0xE2}; // 7
-static const UINT8 s_romData2n_F4[] = {0xB5,0xB8,0x69,0x90,0xA9,0x73,0xA0,0xE4,0xFF,0x42}; // 6
-static const UINT8 s_romData2n_D5[] = {0xFB,0x04,0x2C,0x7C,0xE7,0x85,0x3B,0x29,0x04,0x85}; // 5
-static const UINT8 s_romData2n_F5[] = {0x60,0xA9,0x85,0xBD,0x1D,0x40,0xA5,0xA6,0x90,0x85}; // 4
-static const UINT8 s_romData2n_H4[] = {0xA2,0x0E,0x86,0xEF,0x4D,0xFF,0xDC,0xE8,0x85,0x8D}; // 3
-static const UINT8 s_romData2n_K4[] = {0xB1,0xB9,0xC9,0x57,0x97,0x94,0x03,0x10,0x02,0x00}; // 2
-static const UINT8 s_romData2n_H5[] = {0x38,0x68,0x20,0x7C,0x54,0x48,0x00,0x05,0x06,0x00}; // 1
-static const UINT8 s_romData2n_K5[] = {0x20,0x10,0x20,0x6D,0x60,0x02,0x06,0x00,0x40,0x18}; // 0
+static const UINT16 s_romData2n_C5[] = {0xA2,0xFF,0xD8,0x20,0xDC,0x16,0x06,0xA9,0x08,0x20}; // 8
+static const UINT16 s_romData2n_D4[] = {0xA0,0xFF,0x13,0xA9,0x08,0x3F,0xA0,0xF8,0x85,0xE2}; // 7
+static const UINT16 s_romData2n_F4[] = {0xB5,0xB8,0x69,0x90,0xA9,0x73,0xA0,0xE4,0xFF,0x42}; // 6
+static const UINT16 s_romData2n_D5[] = {0xFB,0x04,0x2C,0x7C,0xE7,0x85,0x3B,0x29,0x04,0x85}; // 5
+static const UINT16 s_romData2n_F5[] = {0x60,0xA9,0x85,0xBD,0x1D,0x40,0xA5,0xA6,0x90,0x85}; // 4
+static const UINT16 s_romData2n_H4[] = {0xA2,0x0E,0x86,0xEF,0x4D,0xFF,0xDC,0xE8,0x85,0x8D}; // 3
+static const UINT16 s_romData2n_K4[] = {0xB1,0xB9,0xC9,0x57,0x97,0x94,0x03,0x10,0x02,0x00}; // 2
+static const UINT16 s_romData2n_H5[] = {0x38,0x68,0x20,0x7C,0x54,0x48,0x00,0x05,0x06,0x00}; // 1
+static const UINT16 s_romData2n_K5[] = {0x20,0x10,0x20,0x6D,0x60,0x02,0x06,0x00,0x40,0x18}; // 0
 
 //
 // Later Set 5 from MAME.
@@ -57,7 +57,7 @@ static const ROM_REGION s_romRegionSet5[] PROGMEM = { //
 static const INPUT_REGION s_inputRegion[] PROGMEM = { //                               "012", "012345"
                                                       {NO_BANK_SWITCH, 0xA000L, 0xFF,  "???", "IN    "}, // Inputs
                                                       {NO_BANK_SWITCH, 0xA001L, 0xFF,  "???", "DSW   "}, // Dip switch
-                                                      {NO_BANK_SWITCH, 0xA002L, 0xFF,  "???", "IrqClr"}, // Interupt clear
+                                                      {NO_BANK_SWITCH, 0xA002L, 0xFF,  "???", "IrqClr"}, // Interrupt clear
                                                       {NO_BANK_SWITCH, 0xA003L, 0xFF,  "???", "Prot. "}, // Protection read
                                                       {0}
                                                     }; // end of list
@@ -73,10 +73,30 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
                                                         {NO_BANK_SWITCH, 0x8005L, 0x02, 0x00,  "c2C", "Out1  "}, // Video control #2 - D1 - Out 1.
                                                         {NO_BANK_SWITCH, 0x8005L, 0x04, 0x00,  "c2C", "ClrSel"}, // Video control #2 - D2 - Colour select.
                                                         {NO_BANK_SWITCH, 0x8005L, 0x08, 0x00,  "c2C", "Red on"}, // Video control #2 - D3 - Red screen
-                                                        {NO_BANK_SWITCH, 0x8006L, 0xFF, 0x00,  "???", "Sound "}, // Sound control
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x01, 0x80,  "???", "Sonar "}, // Sound - Sonar
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x02, 0x80,  "???", "UFO Ex"}, // Sound - UFO Explosion
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x04, 0x80,  "???", "Morse "}, // Sound - Morse code
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x08, 0x80,  "???", "Sh Mis"}, // Sound - Ship Missile
+                                                        //
+                                                        // On my PCB the UFO sound generator is present & working but not connected
+                                                        // to the sound output mixer and thus not present in the game.
+                                                        // The missing resistor appears to be a factory omission.
+                                                        //
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x10, 0x80,  "???", "UFO   "}, // Sound - UFO
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x20, 0x80,  "???", "UFO UW"}, // Sound - UFO Under Water
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x40, 0x80,  "???", "Exp   "}, // Sound - Explosion
+                                                        {NO_BANK_SWITCH, 0x8006L, 0x80, 0x00,  "???", "Snd On"}, // Sound mute
                                                         {NO_BANK_SWITCH, 0x8007L, 0xFF, 0x00,  "???", "Prot. "}, // Protection write
                                                         {0}
                                                       }; // end of list
+
+//
+// Custom functions implemented for this game.
+//
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
+                                                            {CTomahawk777Game::protectionTest,    "Prot. Tst"},
+                                                            {NO_CUSTOM_FUNCTION}}; // end of list
+
 
 IGame*
 CTomahawk777Game::createInstanceSet5(
@@ -100,8 +120,55 @@ CTomahawk777Game::CTomahawk777Game(
 ) : CAstroFighterBaseGame( clockMaster,
                            romRegion,
                            s_inputRegion,
-                           s_outputRegion )
+                           s_outputRegion,
+                           s_customFunction )
 {
 }
 
+//
+// Custom function for testing the protection hardware.
+//
+// map(0x8007, 0x8007).mirror(0x1ff8).nopr().writeonly().share("tomahawk_prot");
+// map(0xa003, 0xa003).mirror(0x1ff8).r(FUNC(astrof_state::tomahawk_protection_r)).nopw();
+//
+// m_tomahawk_protection(*this, "tomahawk_prot"),
+//
+// uint8_t astrof_state::tomahawk_protection_r()
+// {
+//  /* flip the byte */
+//  return bitswap<8>(*m_tomahawk_protection, 0, 1, 2, 3, 4, 5, 6, 7);
+// }
+//
+//
+PERROR
+CTomahawk777Game::protectionTest(
+    void *context
+)
+{
+    CTomahawk777Game *thisGame = (CTomahawk777Game *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+
+    static const UINT32 protWriteAddress = 0x8007;
+    static const UINT32 protReadAddress  = 0xa003;
+
+    static const UINT8 protWriteData[]   = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
+    static const UINT8 protExpReadData[] = {0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01};
+
+    for (UINT8 count = 0 ; ((count < ARRAYSIZE(protExpReadData)) && !FAILED(error)) ; count++)
+    {
+        const UINT16 expValue = protExpReadData[count];
+        UINT16 recValue = 0;
+
+        // Write the protection data
+        error = cpu->memoryWrite(protWriteAddress, protWriteData[count]);
+
+        // Read back the response
+        error = cpu->memoryRead(protReadAddress, &recValue);
+
+        CHECK_VALUE_UINT8_BREAK(error, "IC7", protReadAddress, expValue, recValue);
+    }
+
+    return error;
+}
 

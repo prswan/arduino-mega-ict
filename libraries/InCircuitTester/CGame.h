@@ -51,6 +51,9 @@ class CGame : public IGame
         virtual PERROR ramCheckAllChipSelect(
         );
 
+        virtual PERROR ramCheckAllRandomAccess(
+        );
+
         virtual PERROR interruptCheck(
         );
 
@@ -67,6 +70,14 @@ class CGame : public IGame
         );
 
         virtual PERROR ramCheck(
+            int key
+        );
+
+        virtual PERROR ramCheckRandomAccess(
+            int key
+        );
+
+        virtual PERROR ramCheckAddress(
             int key
         );
 
@@ -114,6 +125,10 @@ class CGame : public IGame
             int key
         );
 
+        virtual PERROR onRamByteKeyMove(
+            int key
+        );
+
         virtual PERROR onCustomKeyMove(
             int key
         );
@@ -127,27 +142,121 @@ class CGame : public IGame
         //
 
         CGame(
-            const ROM_REGION      *romRegion,
-            const RAM_REGION      *ramRegion,
-            const RAM_REGION      *ramRegionWriteOnly,
-            const INPUT_REGION    *inputRegion,
-            const OUTPUT_REGION   *outputRegion,
-            const CUSTOM_FUNCTION *customFunction
+            const ROM_DATA2N            *romData2n,
+            const ROM_REGION            *romRegion,
+            const RAM_REGION            *ramRegion,
+            const RAM_REGION            *ramRegionByteOnly,
+            const RAM_REGION            *ramRegionWriteOnly,
+            const INPUT_REGION          *inputRegion,
+            const OUTPUT_REGION         *outputRegion,
+            const CUSTOM_FUNCTION       *customFunction,
+            const DelayFunctionCallback  delayFunction = NO_DELAY_FUNCTION
+
+        );
+
+        // Legacy constructor for games with ROM data2n already in SRAM.
+        CGame(
+            const ROM_REGION            *romRegion,
+            const RAM_REGION            *ramRegion,
+            const RAM_REGION            *ramRegionByteOnly,
+            const RAM_REGION            *ramRegionWriteOnly,
+            const INPUT_REGION          *inputRegion,
+            const OUTPUT_REGION         *outputRegion,
+            const CUSTOM_FUNCTION       *customFunction,
+            const DelayFunctionCallback  delayFunction = NO_DELAY_FUNCTION
         );
 
         ~CGame();
+
+        // Factored out common constructor
+        void constructor(
+            const ROM_DATA2N            *romData2n,
+            const ROM_REGION            *romRegion,
+            const RAM_REGION            *ramRegion,
+            const RAM_REGION            *ramRegionByteOnly,
+            const RAM_REGION            *ramRegionWriteOnly,
+            const INPUT_REGION          *inputRegion,
+            const OUTPUT_REGION         *outputRegion,
+            const CUSTOM_FUNCTION       *customFunction,
+            const DelayFunctionCallback  delayFunction
+        );
+
+        //
+        // These utilities allocate the associated region and perform a
+        // PROGMEM copy from the supplied PROGMEM constant into it.
+        //
+        ROM_DATA2N* mallocProgMem(
+            const ROM_DATA2N *romData2n,
+            ROM_REGION *romRegion
+        );
+
+        ROM_REGION* mallocProgMem(
+            const ROM_REGION *romRegion
+        );
+
+        RAM_REGION* mallocProgMem(
+            const RAM_REGION *ramRegion
+        );
+
+        INPUT_REGION* mallocProgMem(
+            const INPUT_REGION *inputRegion
+        );
+
+        OUTPUT_REGION* mallocProgMem(
+            const OUTPUT_REGION *outputRegion
+        );
+
+        CUSTOM_FUNCTION* mallocProgMem(
+            const CUSTOM_FUNCTION *customFunction
+        );
+
+        //
+        // These utilities add a simple address offset to the supplied
+        // region to allow the whole address space to be dynamically moved.
+        //
+
+        void addAddressOffset(
+            RAM_REGION *ramRegion,
+            UINT32 offset
+        );
+
+        void addAddressOffset(
+            INPUT_REGION *inputRegion,
+            UINT32 offset
+        );
+
+        void addAddressOffset(
+            OUTPUT_REGION *outputRegion,
+            UINT32 offset
+        );
+
+        //
+        // Default implementation of the delay function that just
+        // uses the built-in function.
+        //
+        static PERROR delayFunction(
+            void *context,
+            unsigned long ms
+        );
 
         //
         // These are filled in by the derived concrete game and are SRAM copies
         // of the supplied PROGMEM source data.
         //
 
+        ROM_DATA2N      *m_romData2n;
         ROM_REGION      *m_romRegion;
         RAM_REGION      *m_ramRegion;
+        RAM_REGION      *m_ramRegionByteOnly;
         RAM_REGION      *m_ramRegionWriteOnly;
         INPUT_REGION    *m_inputRegion;
         OUTPUT_REGION   *m_outputRegion;
         CUSTOM_FUNCTION *m_customFunction;
+
+        //
+        // The delay function to use for some tests
+        //
+        DelayFunctionCallback m_delayFunction;
 
         //
         // The applicable processor for this game.
@@ -175,6 +284,7 @@ class CGame : public IGame
         //
         int  m_RomReadRegion;
         int  m_RamWriteReadRegion;
+        int  m_RamWriteReadByteRegion;
         int  m_inputReadRegion;
         int  m_outputWriteRegion;
         bool m_outputWriteRegionOn;
