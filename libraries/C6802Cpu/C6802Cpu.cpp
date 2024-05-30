@@ -221,20 +221,7 @@ C6802Cpu::memoryRead(
 )
 {
     PERROR error = errorSuccess;
-    bool interruptsDisabled = false;
     UINT16 data16 = 0;
-    *data = 0;
-
-    // The ground pins (with pullup) should be connected to GND (LOW)
-    // CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
-    // CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
-
-    // The Vcc pins should be high
-    // CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
-    // CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
-
-    // The VMA pin should be high
-    // CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
 
     // Enable the address bus and set the value
     m_busA.pinMode(OUTPUT);
@@ -242,28 +229,23 @@ C6802Cpu::memoryRead(
 
     // Set up a read cycle
     m_pinR_W.digitalWrite(HIGH);
-    // CHECK_VALUE_EXIT(error, s_R_W_o, HIGH);
-
-    // pulse the clock to high
-    m_pinE.digitalWrite(HIGH);
-    // CHECK_VALUE_EXIT(error, s_E_o, HIGH);
 
     // Critical timing section
     noInterrupts();
-    interruptsDisabled = true;
+
+    // pulse the clock to high
+    m_pinE.digitalWrite(HIGH);
 
     // Set the databus to input and read data
     m_busD.pinMode(INPUT);
     m_busD.digitalRead(&data16);
-    *data = data16;
-
-Exit:
 
     // pulse the clock to low
     m_pinE.digitalWrite(LOW);
 
-    // re-enable interrupts
-    if (interruptsDisabled) interrupts();
+    interrupts();
+
+    *data = data16;
 
     return error;
 }
@@ -276,18 +258,6 @@ C6802Cpu::memoryWrite(
 )
 {
     PERROR error = errorSuccess;
-    bool interruptsDisabled = false;
-
-    // The ground pins (with pullup) should be connected to GND (LOW)
-    // CHECK_VALUE_EXIT(error, s_GND1_i, LOW);
-    // CHECK_VALUE_EXIT(error, s_GND2_i, LOW);
-
-    // The Vcc pins should be high
-    // CHECK_VALUE_EXIT(error, s_VCC1_i, HIGH);
-    // CHECK_VALUE_EXIT(error, s_VCC2_i, HIGH);
-
-    // The VMA pin should be high
-    // CHECK_VALUE_EXIT(error, s_VMA_o, HIGH);
 
     // Enable the address bus and set the value
     m_busA.pinMode(OUTPUT);
@@ -295,27 +265,23 @@ C6802Cpu::memoryWrite(
 
     // Set up a write cycle
     m_pinR_W.digitalWrite(LOW);
-    // CHECK_VALUE_EXIT(error, s_R_W_o, LOW);
-
-    // pulse the clock to high
-    m_pinE.digitalWrite(HIGH);
-    // CHECK_VALUE_EXIT(error, s_E_o, HIGH);
 
     // Critical timing section
     noInterrupts();
-    interruptsDisabled = true;
+
+    // pulse the clock to high
+    m_pinE.digitalWrite(HIGH);
 
     // Set the databus to output and write data
     m_busD.pinMode(OUTPUT);
     m_busD.digitalWrite(data);
 
-Exit:
+    // pulse the clock to low
+    m_pinE.digitalWrite(LOW);
 
-    // re-enable interrupts
-    if (interruptsDisabled) interrupts();
+    interrupts();
 
     // Go back to read mode
-    m_pinE.digitalWrite(LOW);
     m_pinR_W.digitalWrite(HIGH);
     m_busD.pinMode(INPUT);
 
