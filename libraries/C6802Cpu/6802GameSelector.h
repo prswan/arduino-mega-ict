@@ -23,6 +23,7 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include <C6802GenericGame.h>
+#include <CCatnMouseSoundGame.h>
 #include <CMoneyMoneySoundGame.h>
 #include <CWmsSoundGame.h>
 
@@ -32,6 +33,7 @@
 static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Generic 2716   ",  onSelectGeneric, (void*) (C6802GenericGame::createInstance2716),              false},
                                                   {"Generic 2732   ",  onSelectGeneric, (void*) (C6802GenericGame::createInstance2732),              false},
+                                                  {"Cat'n Mouse (S)",  onSelectGame,    (void*) (CCatnMouseSoundGame::createInstanceSet1),          false},
                                                   {"Money Money (S)",  onSelectGame,    (void*) (CMoneyMoneySoundGame::createInstanceSet1),          false},
                                                   {"Defender       ",  onSelectGame,    (void*) (CWmsSoundGame::createInstanceDefenderSound),        false},
                                                   {"Stargate       ",  onSelectGame,    (void*) (CWmsSoundGame::createInstanceStargateSound),        false},
