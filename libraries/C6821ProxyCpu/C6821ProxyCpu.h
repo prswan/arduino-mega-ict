@@ -22,49 +22,85 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CCatnMouseSoundBaseGame_h
-#define CCatnMouseSoundBaseGame_h
+#ifndef C6821ProxyCpu_h
+#define C6821ProxyCpu_h
 
-#include "CGame.h"
-#include "C6821ProxyCpu.h"
-#include "CAY38910.h"
+#include "Arduino.h"
+#include "ICpu.h"
 
 
-class CCatnMouseSoundBaseGame : public CGame
+class C6821ProxyCpu : public ICpu
 {
     public:
 
         //
-        // CCatnMouseBaseGame
+        // Constructor
         //
 
-        virtual PERROR interruptCheck(
+        C6821ProxyCpu(
+            ICpu  *cpu,
+            UINT32 address,
+            UINT8  portIdle
         );
 
-        static PERROR ayIdle(
-            void *cScrambleSoundBaseGame
+        // ICpu Interface
+        //
+
+        virtual
+        PERROR
+        idle(
         );
 
-        static PERROR ayCheck(
-            void *cScrambleSoundBaseGame
+        virtual
+        PERROR
+        check(
         );
 
-    protected:
-
-        CCatnMouseSoundBaseGame(
-            const ROM_DATA2N *romData2n,
-            const ROM_REGION *romRegion
+        virtual
+        UINT8
+        dataBusWidth(
+            UINT32 address
         );
 
-        ~CCatnMouseSoundBaseGame(
+        virtual
+        UINT8
+        dataAccessWidth(
+            UINT32 address
+        );
+
+        virtual
+        PERROR
+        memoryRead(
+            UINT32 address,
+            UINT16 *data
+        );
+
+        virtual
+        PERROR
+        memoryWrite(
+            UINT32 address,
+            UINT16 data
+        );
+
+        virtual
+        PERROR
+        waitForInterrupt(
+            Interrupt interrupt,
+            bool      active,
+            UINT32    timeoutInMs
+        );
+
+        virtual
+        PERROR
+        acknowledgeInterrupt(
+            UINT16 *response
         );
 
     private:
 
-        C6821ProxyCpu *m_6821ProxyCpu;
-        CAY38910      *m_ay[2];
-
+        ICpu  *m_cpu;
+        UINT32 m_address;
+        UINT8  m_portIdle;
 };
 
 #endif
-
