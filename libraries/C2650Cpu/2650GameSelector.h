@@ -25,6 +25,7 @@
 #include <C2650GenericGame.h>
 #include <CAstroWarsGame.h>
 #include <CCatnMouseGame.h>
+#include <CCvsGame.h>
 #include <CGalaxiaGame.h>
 #include <CQuasarGame.h>
 #include <CTheInvadersGame.h>
@@ -45,6 +46,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Galaxia     (2)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet2),     false},
                                                   {"Galaxia     (3)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet3),     false},
                                                   {"Galaxia     (4)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet4),     false},
+                                                  {"Hunchbck CVS(1)",  onSelectGame,    (void*) (CCvsGame::createInstanceHunchbackSet1),false},
                                                   {"Quasar      (1)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet1),      false},
                                                   {"Quasar      (2)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet2),      false},
                                                   {"Quasar      (3)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet3),      false},
