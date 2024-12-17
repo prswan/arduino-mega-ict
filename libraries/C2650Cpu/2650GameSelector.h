@@ -26,6 +26,7 @@
 #include <CAstroWarsGame.h>
 #include <CCatnMouseGame.h>
 #include <CCvsGame.h>
+#include <CCvsSoundGame.h>
 #include <CGalaxiaGame.h>
 #include <CQuasarGame.h>
 #include <CTheInvadersGame.h>
@@ -34,23 +35,24 @@
 // The initial selector to select the game to test.
 //
 static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
-                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C2650GenericGame::createInstance2716), false},
-                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C2650GenericGame::createInstance2732), false},
-                                                  {"Astro Wars  (1)",  onSelectGame,    (void*) (CAstroWarsGame::createInstance),       false},
-                                                  {"Astro Wars  (2)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet2),   false},
-                                                  {"Astro Wars  (3)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet3),   false},
-                                                  {"Astro Wars (02)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet02),  false},
-                                                  {"CantnMouse (01)",  onSelectGame,    (void*) (CCatnMouseGame::createInstanceSet01),  false},
-                                                  {"CantnMouse (02)",  onSelectGame,    (void*) (CCatnMouseGame::createInstanceSet02),  false},
-                                                  {"Galaxia     (1)",  onSelectGame,    (void*) (CGalaxiaGame::createInstance),         false},
-                                                  {"Galaxia     (2)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet2),     false},
-                                                  {"Galaxia     (3)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet3),     false},
-                                                  {"Galaxia     (4)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet4),     false},
-                                                  {"Hunchbck CVS(1)",  onSelectGame,    (void*) (CCvsGame::createInstanceHunchbackSet1),false},
-                                                  {"Quasar      (1)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet1),      false},
-                                                  {"Quasar      (2)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet2),      false},
-                                                  {"Quasar      (3)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet3),      false},
-                                                  {"The Invaders(1)",  onSelectGame,    (void*) (CTheInvadersGame::createInstanceSet1), false},
+                                                  {"Generic 2716   ",  onSelectGeneric, (void*) (C2650GenericGame::createInstance2716),      false},
+                                                  {"Generic 2732   ",  onSelectGeneric, (void*) (C2650GenericGame::createInstance2732),      false},
+                                                  {"Astro Wars  (1)",  onSelectGame,    (void*) (CAstroWarsGame::createInstance),            false},
+                                                  {"Astro Wars  (2)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet2),        false},
+                                                  {"Astro Wars  (3)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet3),        false},
+                                                  {"Astro Wars (02)",  onSelectGame,    (void*) (CAstroWarsGame::createInstanceSet02),       false},
+                                                  {"CantnMouse (01)",  onSelectGame,    (void*) (CCatnMouseGame::createInstanceSet01),       false},
+                                                  {"CantnMouse (02)",  onSelectGame,    (void*) (CCatnMouseGame::createInstanceSet02),       false},
+                                                  {"Galaxia     (1)",  onSelectGame,    (void*) (CGalaxiaGame::createInstance),              false},
+                                                  {"Galaxia     (2)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet2),          false},
+                                                  {"Galaxia     (3)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet3),          false},
+                                                  {"Galaxia     (4)",  onSelectGame,    (void*) (CGalaxiaGame::createInstanceSet4),          false},
+                                                  {"Hnchbk CVS  (1)",  onSelectGame,    (void*) (CCvsGame::createInstanceHunchbackSet1),     false},
+                                                  {"Hnchbk CVS (S1)",  onSelectGame,    (void*) (CCvsSoundGame::createInstanceHunchbackSet1),false},
+                                                  {"Quasar      (1)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet1),           false},
+                                                  {"Quasar      (2)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet2),           false},
+                                                  {"Quasar      (3)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet3),           false},
+                                                  {"The Invaders(1)",  onSelectGame,    (void*) (CTheInvadersGame::createInstanceSet1),      false},
                                                   { 0, 0 }
                                                  };
 
