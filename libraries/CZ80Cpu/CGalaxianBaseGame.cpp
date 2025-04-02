@@ -143,6 +143,7 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
                                                             {CGalaxianBaseGame::clearVideo,       "Clear Vid."},
                                                             {CGalaxianBaseGame::shellMissileTest, "Shell Mis."},
+                                                            {CGalaxianBaseGame::romWriteTest,     "ROM Write "}, // Uniwars investigation
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -349,6 +350,34 @@ CGalaxianBaseGame::shellMissileTest(
                                         position + (2 * projectile));
             }
         }
+    }
+
+    return error;
+}
+
+
+//
+// From Jackson: When the WARP screen occurs the game constantly writes 00 to address 0006
+//
+PERROR
+CGalaxianBaseGame::romWriteTest(
+    void *context
+)
+{
+    CGalaxianBaseGame *thisGame = (CGalaxianBaseGame *) context;
+    ICpu *cpu = thisGame->m_cpu;
+    PERROR error = errorSuccess;
+    UINT32 count;
+
+    static const UINT32 romAddress   = 0x0006;
+    static const UINT16 romData      = 0x00;
+
+    //
+    // Clear the background RAM to a blank character.
+    //
+    for (count = 0 ; count < 1000 ; count++)
+    {
+        (void) cpu->memoryWrite(romAddress, romData);
     }
 
     return error;

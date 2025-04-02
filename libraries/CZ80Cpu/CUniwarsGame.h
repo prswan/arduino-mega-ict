@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015, Paul R. Swan
+// Copyright (c) 2024, Paul R. Swan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,55 +22,38 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CGalaxianBaseGame_h
-#define CGalaxianBaseGame_h
+#ifndef CUniwarsGame_h
+#define CUniwarsGame_h
 
-#include "CGame.h"
+#include "CGalaxianBaseGame.h"
 
-
-class CGalaxianBaseGame : public CGame
+class CUniwarsGame : public CGalaxianBaseGame
 {
     public:
 
         //
-        // CGalaxianBaseGame
+        // Constructors for this game.
         //
 
-        virtual PERROR interruptCheck(
+        static IGame* createInstanceSet1(
         );
 
         //
-        // Custom function to clear the video display to blank.
+        // IGame Interface - wholly implemented in the Base game.
         //
-        static PERROR clearVideo(
-            void *context
-        );
+
+    private:
 
         //
-        // Custom function for testing the shell/missile hardware.
+        // Different ROM sets supplied.
         //
-        static PERROR shellMissileTest(
-            void *context
-        );
-
-        //
-        // Custom function for testing the effect of writes in the ROM region
-        //
-        static PERROR romWriteTest(
-            void *context
-        );
-
-    protected:
-
-        CGalaxianBaseGame(
+        CUniwarsGame(
             const ROM_DATA2N *romData2n,
             const ROM_REGION *romRegion
-        );
-
-        ~CGalaxianBaseGame(
         );
 
 };
 
 #endif
+
 
