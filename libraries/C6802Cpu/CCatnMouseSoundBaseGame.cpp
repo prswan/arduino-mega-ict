@@ -118,11 +118,13 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
 // Custom functions implemented for this game.
 //
 //
-// Custom functions implemented for this game.
+// NOTE: This implementation uses Money Money schematic IC designators that may not match the CnM PCB !!!!
 //
 static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = { //                                    "0123456789"
                                                             {CCatnMouseSoundBaseGame::ayIdle,     "AY Idle   "},
-                                                            {CCatnMouseSoundBaseGame::ayCheck,    "AY Check  "},
+                                                            {CCatnMouseSoundBaseGame::mcCheck,    "MC Check  "},
+                                                            {CCatnMouseSoundBaseGame::ay4GCheck,  "AY4G Check"}, // Money Money designator
+                                                            {CCatnMouseSoundBaseGame::ay4HCheck,  "AY4H Check"}, // Money Money designator
                                                             {NO_CUSTOM_FUNCTION}}; // end of list
 
 
@@ -145,10 +147,10 @@ CCatnMouseSoundBaseGame::CCatnMouseSoundBaseGame(
     m_6821ProxyCpu = new C6821ProxyCpu(m_cpu, 0x500CL, 0x00);
     m_6821ProxyCpu->idle();
 
-    // AY #0 4G
+    // AY #0 4G Money Money designator
     m_ay[0] = new CAY38910(m_6821ProxyCpu, AY_4G_WRITE_ADDRESS, AY_4G_READ_PSG, AY_4G_WRITE_PSG);
 
-    // AY #1 4H
+    // AY #1 4H Money Money designator
     m_ay[1] = new CAY38910(m_6821ProxyCpu, AY_4H_WRITE_ADDRESS, AY_4H_READ_PSG, AY_4H_WRITE_PSG);
 
     // The interrupt is on the IRQ pin.
@@ -204,21 +206,37 @@ CCatnMouseSoundBaseGame::ayIdle(
 }
 
 
-// Check (test) the AY-3-8910's.
+// Check (test) the MC6821 by itself.
 PERROR
-CCatnMouseSoundBaseGame::ayCheck(
+CCatnMouseSoundBaseGame::mcCheck(
     void *cCatnMouseSoundBaseGame
 )
 {
     CCatnMouseSoundBaseGame *pThis = (CCatnMouseSoundBaseGame *) cCatnMouseSoundBaseGame;
-    PERROR error = errorSuccess;
 
-    error = pThis->m_ay[0]->check();
-    if (SUCCESS(error))
-    {
-        error = pThis->m_ay[1]->check();
-    }
+    return pThis->m_6821ProxyCpu->check();
+}
 
-    return error;
+
+// Check (test) the AY-3-8910's.
+PERROR
+CCatnMouseSoundBaseGame::ay4GCheck(
+    void *cCatnMouseSoundBaseGame
+)
+{
+    CCatnMouseSoundBaseGame *pThis = (CCatnMouseSoundBaseGame *) cCatnMouseSoundBaseGame;
+
+    return pThis->m_ay[0]->check();
+}
+
+// Check (test) the AY-3-8910's.
+PERROR
+CCatnMouseSoundBaseGame::ay4HCheck(
+    void *cCatnMouseSoundBaseGame
+)
+{
+    CCatnMouseSoundBaseGame *pThis = (CCatnMouseSoundBaseGame *) cCatnMouseSoundBaseGame;
+
+    return pThis->m_ay[1]->check();
 }
 

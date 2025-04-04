@@ -100,9 +100,30 @@ C6821ProxyCpu::check(
     PERROR error = errorSuccess;
     UINT16 data16 = 0;
 
-    // Part A data set for input has a strong pullup
+    // Port A data set for input has a strong pullup
     CHECK_CPU_READ_EXIT(error, m_cpu, m_address + MC6821_PR_DDR_A, &data16);
-    CHECK_UINT8_VALUE_EXIT(error, "PA", data16, 0xFF);
+    CHECK_UINT8_VALUE_EXIT(error, "PAf", data16, 0xFF);
+
+    // Set Port A output data
+    CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_PR_DDR_A, 0xFF);
+    CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_CR_A,     MC6821_CR_DDR);
+    CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_PR_DDR_A, 0xFF);
+    CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_CR_A,     MC6821_CR_PR);
+
+    // Output bus test walk - Port A read of an output pin returns the pin state
+    for (UINT16 outData16 = 1 ; outData16 < 0xFF ; outData16 = outData16 * 2)
+    {
+        CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_PR_DDR_A, outData16);
+
+        CHECK_CPU_READ_EXIT(error, m_cpu, m_address + MC6821_PR_DDR_A, &data16);
+        CHECK_UINT8_VALUE_EXIT(error, "PAx", data16, outData16);
+    }
+
+    // Set Port A back to default input
+    CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_PR_DDR_A, 0xFF);
+    CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_CR_A,     MC6821_CR_DDR);
+    CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_PR_DDR_A, 0x00);
+    CHECK_CPU_WRITE_EXIT(error, m_cpu, m_address + MC6821_CR_A,     MC6821_CR_PR);
 
 Exit:
 

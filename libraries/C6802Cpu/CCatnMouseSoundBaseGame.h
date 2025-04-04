@@ -45,7 +45,15 @@ class CCatnMouseSoundBaseGame : public CGame
             void *cScrambleSoundBaseGame
         );
 
-        static PERROR ayCheck(
+        static PERROR mcCheck(
+            void *cScrambleSoundBaseGame
+        );
+
+        static PERROR ay4GCheck(
+            void *cScrambleSoundBaseGame
+        );
+
+        static PERROR ay4HCheck(
             void *cScrambleSoundBaseGame
         );
 
