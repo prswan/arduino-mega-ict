@@ -29,6 +29,7 @@
 #include <CCvsSoundGame.h>
 #include <CGalaxiaGame.h>
 #include <CQuasarGame.h>
+#include <CSoccerKingsGame.h>
 #include <CTheInvadersGame.h>
 
 //
@@ -52,6 +53,8 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Quasar      (1)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet1),           false},
                                                   {"Quasar      (2)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet2),           false},
                                                   {"Quasar      (3)",  onSelectGame,    (void*) (CQuasarGame::createInstanceSet3),           false},
+                                                  {"Soccer Kings(1)",  onSelectGame,    (void*) (CSoccerKingsGame::createInstanceSet1),      false},
+                                                  {"Soccer Kings(A)",  onSelectGame,    (void*) (CSoccerKingsGame::createInstanceSetA),      false},
                                                   {"The Invaders(1)",  onSelectGame,    (void*) (CTheInvadersGame::createInstanceSet1),      false},
                                                   { 0, 0 }
                                                  };
