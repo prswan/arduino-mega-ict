@@ -19,21 +19,44 @@ static int DEFAULT_THRESHOLD = 20;
 	If further values are added in the future then of course adjust the name
 	of the define that you specify accordingly.
 */
+//
+// The keys are read via a resistor ladder on one analog input. Each key is
+// classified as everything up to the midpoint between it and the next key,
+// rather than a narrow window around the nominal value, so that resistor
+// tolerance and supply variation don't cause keys to be missed. LEFT, being
+// far up the ladder, was the most affected by the narrow windows.
+//
 #ifdef DF_ROBOT_V1
-	static int RIGHTKEY_ARV = 0;	//that's read "analogue read value"
-	static int UPKEY_ARV	= 98;
-	static int DOWNKEY_ARV	= 254;
-	static int LEFTKEY_ARV	= 407;
-	static int SELKEY_ARV	= 638;
-	static int NOKEY_ARV	= 1023;
+	// Nominal: RIGHT 0, UP 98, DOWN 254, LEFT 407, SELECT 638, none 1023
+	static int RIGHTKEY_MAX = 49;
+	static int UPKEY_MAX    = 176;
+	static int DOWNKEY_MAX  = 330;
+	static int LEFTKEY_MAX  = 522;
+	static int SELKEY_MAX   = 830;
 #else
-	static int RIGHTKEY_ARV = 0;
-	static int UPKEY_ARV	= 144;
-	static int DOWNKEY_ARV	= 329;
-	static int LEFTKEY_ARV	= 505;
-	static int SELKEY_ARV	= 742;
-	static int NOKEY_ARV	= 1023;
+	// Nominal: RIGHT 0, UP 144, DOWN 329, LEFT 505, SELECT 742, none 1023
+	static int RIGHTKEY_MAX = 72;
+	static int UPKEY_MAX    = 236;
+	static int DOWNKEY_MAX  = 417;
+	static int LEFTKEY_MAX  = 623;
+	static int SELKEY_MAX   = 882;
 #endif
+
+//
+// The number of back to back samples that must agree, to reject noise and
+// readings taken while a key contact is settling.
+//
+static const int SAMPLE_COUNT = 3;
+
+static int classifyKey(int input)
+{
+  if (input <= RIGHTKEY_MAX) return RIGHT_KEY;
+  if (input <= UPKEY_MAX)    return UP_KEY;
+  if (input <= DOWNKEY_MAX)  return DOWN_KEY;
+  if (input <= LEFTKEY_MAX)  return LEFT_KEY;
+  if (input <= SELKEY_MAX)   return SELECT_KEY;
+  return NO_KEY;
+}
 
 DFR_Key::DFR_Key()
 {
@@ -48,34 +71,46 @@ DFR_Key::DFR_Key()
   _oldTime = 0;
 }
 
+//
+// Returns the key when it changes (including NO_KEY on release), otherwise
+// SAMPLE_WAIT.
+//
 int DFR_Key::getKey()
 {
- if (millis() > _oldTime + _refreshRate)
- {
-    _prevInput = _curInput;
+  if ((millis() - _oldTime) < (unsigned long) _refreshRate)
+  {
+    return SAMPLE_WAIT;
+  }
+
+  _oldTime = millis();
+
+  _curInput = analogRead(_keyPin);
+  int key = classifyKey(_curInput);
+
+  for (int i = 1 ; i < SAMPLE_COUNT ; i++)
+  {
+    delay(1);
+
     _curInput = analogRead(_keyPin);
 
-    if (_curInput == _prevInput)
+    if (classifyKey(_curInput) != key)
     {
-      _change = false;
-      _curKey = _prevKey;
+      // Still settling, try again next time.
+      return SAMPLE_WAIT;
     }
-    else
-    {
-      _change = true;
-      _prevKey = _curKey;
+  }
 
-      if (_curInput > UPKEY_ARV - _threshold && _curInput < UPKEY_ARV + _threshold ) _curKey = UP_KEY;
-      else if (_curInput > DOWNKEY_ARV - _threshold && _curInput < DOWNKEY_ARV + _threshold ) _curKey = DOWN_KEY;
-      else if (_curInput > RIGHTKEY_ARV - _threshold && _curInput < RIGHTKEY_ARV + _threshold ) _curKey = RIGHT_KEY;
-      else if (_curInput > LEFTKEY_ARV - _threshold && _curInput < LEFTKEY_ARV + _threshold ) _curKey = LEFT_KEY;
-      else if (_curInput > SELKEY_ARV - _threshold && _curInput < SELKEY_ARV + _threshold ) _curKey = SELECT_KEY;
-      else _curKey = NO_KEY;
-   }
+  _change = (key != _curKey);
 
-   if (_change) return _curKey; else return SAMPLE_WAIT;
-   _oldTime = millis();
- }
+  if (!_change)
+  {
+    return SAMPLE_WAIT;
+  }
+
+  _prevKey = _curKey;
+  _curKey = key;
+
+  return _curKey;
 }
 
 void DFR_Key::setRate(int rate)

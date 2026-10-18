@@ -41,6 +41,9 @@ class CScrambleGame : public CScrambleBaseGame
         static IGame* createInstanceZacSet1(
         );
 
+        static IGame* createInstanceNoProtSet1(
+        );
+
         //
         // IGame Interface - wholly implemented in the Base game.
         //

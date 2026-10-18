@@ -314,6 +314,14 @@ CZ80ACpu::CZ80ACpu(
 {
 };
 
+bool
+CZ80ACpu::isResetActive(
+)
+{
+    return (digitalRead(g_pinMap40DIL[s__RESET_i.pin]) == LOW);
+}
+
+
 //
 // The idle function sets up the pins into the correct direction (input/output)
 // and idle state ready for the next bus cycle.
@@ -577,6 +585,10 @@ CZ80ACpu::memoryRead(
         {
             error = MREQreadLadybug(data);
         }
+        else if (m_cycleType == CYCLE_TYPE_KIKIKAI)
+        {
+            error = MREQreadKikiKaikai(data);
+        }
         else
         {
             error = MREQread(data);
@@ -684,6 +696,10 @@ CZ80ACpu::memoryWrite(
             }
 
             error = MREQwriteCrazyKong(data);
+        }
+        else if (m_cycleType == CYCLE_TYPE_KIKIKAI)
+        {
+            error = MREQwriteKikiKaikai(data);
         }
         else
         {
@@ -1082,6 +1098,122 @@ CZ80ACpu::MREQwriteCrazyKong(
     // Wait for WAIT to be deasserted.
     // Port L requires an "lds" to access so no wait state needed from above.
     WAIT_FOR_WAIT_HI(r1,r2);
+
+    // This is a write but we keep these here to match the read cycle timing.
+    r1 = *g_portInL;
+    r2 = *g_portInG;
+    r3 = *g_portInD;
+    r4 = *g_portInC;
+    r5 = *g_portInA;
+
+    // Terminate the cycle
+    *g_portOutB = ~(0);
+
+Exit:
+
+    return error;
+}
+
+
+//
+// KiKi KaiKai holds off CPU access to the RAM shared with the video using WAIT.
+// This is the Crazy Kong cycle with additional wait states after WAIT is
+// released. On a PCB the Crazy Kong cycle read D0 & D1 (the first bits sampled)
+// incorrectly as the data wasn't yet valid when WAIT was released.
+//
+PERROR
+CZ80ACpu::MREQreadKikiKaikai(
+    UINT16 *data
+)
+{
+    PERROR error = errorSuccess;
+
+    register UINT8 r1;
+    register UINT8 r2;
+    register UINT8 r3;
+    register UINT8 r4;
+    register UINT8 r5;
+
+    // Start the cycle by assert the control lines
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD);
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state +
+
+    // Wait for WAIT to be deasserted.
+    // Port L requires an "lds" to access so no wait state needed from above.
+    WAIT_FOR_WAIT_HI(r1,r2);
+
+    // Let the data settle after WAIT is released.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B0_BIT_OUT_RD); // Wait state.
+
+    // Read in reverse order - port L is a slower access.
+    r1 = *g_portInL;
+    r2 = *g_portInG;
+    r3 = *g_portInD;
+    r4 = *g_portInC;
+    r5 = *g_portInA;
+
+    // Terminate the cycle
+    *g_portOutB = ~(0);
+
+    // Populate the output data word
+    *data = (((r2 & s_G1_BIT_D0) >> 1) << 0) |
+            (((r1 & s_L7_BIT_D1) >> 7) << 1) |
+            (((r4 & s_C1_BIT_D2) >> 1) << 2) |
+            (((r5 & s_A6_BIT_D3) >> 6) << 3) |
+            (((r5 & s_A4_BIT_D4) >> 4) << 4) |
+            (((r4 & s_C7_BIT_D5) >> 7) << 5) |
+            (((r4 & s_C5_BIT_D6) >> 5) << 6) |
+            (((r3 & s_D7_BIT_D7) >> 7) << 7);
+
+Exit:
+
+    return error;
+}
+
+
+PERROR
+CZ80ACpu::MREQwriteKikiKaikai(
+    UINT16 *data
+)
+{
+    PERROR error = errorSuccess;
+
+    register UINT8 r1;
+    register UINT8 r2;
+    register UINT8 r3;
+    register UINT8 r4;
+    register UINT8 r5;
+
+    // Start the cycle by assert the control lines
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ);
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // wait state
+
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state +
+    // Write one less wait state than Read
+
+    // Wait for WAIT to be deasserted.
+    // Port L requires an "lds" to access so no wait state needed from above.
+    WAIT_FOR_WAIT_HI(r1,r2);
+
+    // Hold the write for longer after WAIT is released.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
+    *g_portOutB = ~(s_B3_BIT_OUT_MREQ | s_B2_BIT_OUT_WR); // Wait state.
 
     // This is a write but we keep these here to match the read cycle timing.
     r1 = *g_portInL;

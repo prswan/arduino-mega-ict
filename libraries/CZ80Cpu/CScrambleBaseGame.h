@@ -26,6 +26,7 @@
 #define CScrambleBaseGame_h
 
 #include "CGame.h"
+#include "CZ80ACpu.h"
 
 
 class CScrambleBaseGame : public CGame
@@ -40,6 +41,9 @@ class CScrambleBaseGame : public CGame
         //
         // CScrambleBaseGame
         //
+
+        virtual PERROR busCheck(
+        );
 
         virtual PERROR interruptCheck(
         );
@@ -90,11 +94,36 @@ class CScrambleBaseGame : public CGame
     private:
 
         //
+        // Used to read the watchdog reset regularly during all bus accesses.
+        //
+        static PERROR onAddressRemap(
+            void   *cScrambleBaseGame,
+            UINT32  addressIn,
+            UINT32 *addressOut
+        );
+
+        //
+        // Read the watchdog reset until the board is out of reset.
+        //
+        PERROR watchdogSettle(
+        );
+
+    private:
+
+        //
         // These are used internally and vary between platforms.
         //
         UINT32 m_intMaskWriteAddress;
         UINT32 m_8255WriteBaseAddress0;
         UINT32 m_8255WriteBaseAddress1;
+
+        //
+        // The watchdog is read regularly by the tester if this is non-zero.
+        //
+        UINT32         m_watchdogReadAddress;
+        unsigned long  m_watchdogTime;
+        bool           m_inWatchdogRead;
+        CZ80ACpu      *m_z80Cpu;
 
 };
 

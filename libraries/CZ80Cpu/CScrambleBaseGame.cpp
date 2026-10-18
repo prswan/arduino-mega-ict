@@ -31,6 +31,12 @@
 //   Z80 GND Pin 29
 //
 // Watchdog Disable:
+//   Not needed for the boards using the SCRAMBLE/HUSTLER_SCRAMBLE base (Scramble,
+//   Hustler & Scorpion) as the tester reads the watchdog reset at least every 5ms
+//   during bus accesses, and after the bus has been idle (when the board will have
+//   been reset by the watchdog) it waits for RESET to be released before going
+//   ahead. The interrupt check waits up to 1s without bus accesses so may still
+//   see the watchdog, in which case or for other boards:
 //   Tie CPU board IC 5C (74LS00) pin 13 to GND.
 //
 // Board Designations:
@@ -69,6 +75,16 @@ static const UINT32 s_scramble8255IoBase1     = 0x008200L;
 // on Hustler but is on Super Cobra).
 //
 static const UINT32 s_hustlerScrambleBaseOffset = 0x4000L;
+
+//
+// The interval the watchdog is read at during bus accesses, how long the bus
+// can be idle before the board may be resetting, how long RESET must then be
+// released for before continuing and the maximum time to wait for that.
+//
+static const unsigned long s_watchdogIntervalInMs = 5;
+static const unsigned long s_watchdogIdleInMs     = 50;
+static const unsigned long s_watchdogSettleInMs   = 100;
+static const unsigned long s_watchdogTimeoutInMs  = 3000;
 
 
 //
@@ -153,6 +169,9 @@ CScrambleBaseGame::CScrambleBaseGame(
 ) : m_intMaskWriteAddress(s_scrambleCtrlOutputBase + 0x001),
     m_8255WriteBaseAddress0(s_scramble8255IoBase0),
     m_8255WriteBaseAddress1(s_scramble8255IoBase1),
+    m_watchdogReadAddress(s_scrambleWdResInputBase),
+    m_watchdogTime(0),
+    m_inWatchdogRead(false),
     CGame( romData2n,
            romRegion,
            s_ramRegion,
@@ -162,7 +181,10 @@ CScrambleBaseGame::CScrambleBaseGame(
            s_outputRegion,
            s_customFunction)
 {
-    m_cpu = new CZ80ACpu();
+    m_z80Cpu = new CZ80ACpu(0,
+                            onAddressRemap,
+                            this);
+    m_cpu = m_z80Cpu;
     m_cpu->idle();
 
     // The VBLANK interrupt is on the NMI pin.
@@ -180,6 +202,7 @@ CScrambleBaseGame::CScrambleBaseGame(
             m_intMaskWriteAddress   += s_hustlerScrambleBaseOffset;
             m_8255WriteBaseAddress0 += s_hustlerScrambleBaseOffset;
             m_8255WriteBaseAddress1 += s_hustlerScrambleBaseOffset;
+            m_watchdogReadAddress   += s_hustlerScrambleBaseOffset;
 
             addAddressOffset(m_ramRegion,          s_hustlerScrambleBaseOffset);
             addAddressOffset(m_ramRegionByteOnly,  s_hustlerScrambleBaseOffset);
@@ -211,6 +234,9 @@ CScrambleBaseGame::CScrambleBaseGame(
 ) : m_intMaskWriteAddress(intMaskWriteAddress),
     m_8255WriteBaseAddress0(i8255WriteBaseAddress0),
     m_8255WriteBaseAddress1(i8255WriteBaseAddress1),
+    m_watchdogReadAddress(0),
+    m_watchdogTime(0),
+    m_inWatchdogRead(false),
     CGame( romData2n,
            romRegion,
            ramRegion,
@@ -220,7 +246,8 @@ CScrambleBaseGame::CScrambleBaseGame(
            outputRegion,
            s_customFunction)
 {
-    m_cpu = new CZ80ACpu();
+    m_z80Cpu = new CZ80ACpu();
+    m_cpu = m_z80Cpu;
     m_cpu->idle();
 
     // The VBLANK interrupt is on the NMI pin.
@@ -236,6 +263,111 @@ CScrambleBaseGame::~CScrambleBaseGame(
 {
     delete m_cpu;
     m_cpu = (ICpu *) NULL;
+}
+
+
+//
+// The bus check looks at the RESET pin before any bus access, so let the
+// board come out of reset first.
+//
+PERROR
+CScrambleBaseGame::busCheck(
+)
+{
+    if (m_watchdogReadAddress != 0)
+    {
+        (void) watchdogSettle();
+    }
+
+    return CGame::busCheck();
+}
+
+
+//
+// No address remapping is done, this is used to read the watchdog reset at
+// least every s_watchdogIntervalInMs during bus accesses. If the bus has been
+// idle long enough for the board to be resetting then it is given time to come
+// out of reset first. The watchdog reads come back through here so it is
+// guarded against recursion.
+//
+PERROR
+CScrambleBaseGame::onAddressRemap(
+    void   *cScrambleBaseGame,
+    UINT32  addressIn,
+    UINT32 *addressOut
+)
+{
+    CScrambleBaseGame *thisGame = (CScrambleBaseGame *) cScrambleBaseGame;
+    PERROR error = errorSuccess;
+
+    *addressOut = addressIn;
+
+    if ((thisGame->m_watchdogReadAddress != 0) && !thisGame->m_inWatchdogRead)
+    {
+        unsigned long idleTime = millis() - thisGame->m_watchdogTime;
+
+        if (idleTime >= s_watchdogIdleInMs)
+        {
+            error = thisGame->watchdogSettle();
+        }
+        else if (idleTime >= s_watchdogIntervalInMs)
+        {
+            UINT16 data;
+
+            thisGame->m_inWatchdogRead = true;
+
+            error = thisGame->m_cpu->memoryRead(thisGame->m_watchdogReadAddress, &data);
+
+            thisGame->m_watchdogTime = millis();
+            thisGame->m_inWatchdogRead = false;
+        }
+    }
+
+    return error;
+}
+
+
+PERROR
+CScrambleBaseGame::watchdogSettle(
+)
+{
+    PERROR error = errorSuccess;
+    unsigned long startTime = millis();
+    unsigned long releaseTime = startTime;
+
+    m_inWatchdogRead = true;
+
+    //
+    // Read the watchdog reset until RESET has been released for s_watchdogSettleInMs.
+    // If it's never released the access goes ahead anyway and the bus check
+    // will report the RESET pin.
+    //
+    while ((millis() - startTime) < s_watchdogTimeoutInMs)
+    {
+        UINT16 data;
+
+        error = m_cpu->memoryRead(m_watchdogReadAddress, &data);
+        if (FAILED(error))
+        {
+            break;
+        }
+
+        if (m_z80Cpu->isResetActive())
+        {
+            releaseTime = millis();
+        }
+        else if ((millis() - releaseTime) >= s_watchdogSettleInMs)
+        {
+            break;
+        }
+
+        delay(1);
+    }
+
+    m_watchdogTime = millis();
+    m_inWatchdogRead = false;
+
+    return error;
 }
 
 

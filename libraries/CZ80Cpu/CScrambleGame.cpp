@@ -58,6 +58,32 @@ static const ROM_REGION s_romRegionSet1[] PROGMEM = { //
 
 
 //
+// No protection set. This is MAME "scramble" with s1.2d & s2.2e patched and
+// s4.2h replaced (it matches 4.2h from MAME "strfbomb"), CRCs & data2n
+// generated from the ROM images. Same PCB locations as Stern Set 1.
+static const ROM_DATA2N s_romData2nNoProtSet1[] PROGMEM  = { // 01   02   04   08   10   20   40   80  100  200  400
+                                                             {0x32,0x01,0xc3,0x77,0x77,0x85,0x7e,0x07,0x32,0x35,0x21}, // 0 - 2C
+                                                             {0x00,0xdd,0x08,0x7e,0x77,0x28,0x0e,0x3a,0xff,0xb6,0x40}, // 1 - 2E
+                                                             {0x12,0x21,0x41,0x01,0x2c,0xd7,0x0f,0x40,0x23,0x32,0x77}, // 2 - 2F
+                                                             {0x01,0xdd,0x22,0xc9,0xdd,0x2e,0x06,0x10,0x08,0xf3,0x00}, // 3 - 2H
+                                                             {0xfd,0x7e,0x2f,0xfd,0x3a,0xdd,0xf4,0x83,0x08,0x0f,0x03}, // 4 - 2J
+                                                             {0x07,0xff,0x3a,0xc0,0x21,0x47,0x68,0x26,0xc3,0x70,0x98}, // 5 - 2L
+                                                             {0xd0,0x36,0x36,0x3a,0x5f,0x5f,0xc8,0x36,0x36,0xe0,0xe0}, // 6 - 2M
+                                                             {0x50,0xd1,0xd1,0xd1,0xd1,0xd1,0xd1,0x37,0x00,0xd1,0xd8}, // 7 - 2P
+                                                             {0} };  // end of list
+
+static const ROM_REGION s_romRegionNoProtSet1[] PROGMEM = { //
+                                                            {NO_BANK_SWITCH, 0x0000, 0x0800, s_romData2nNoProtSet1[0].data2n, 0x58d80c55, " 2C"}, // s1.2d (patched)
+                                                            {NO_BANK_SWITCH, 0x0800, 0x0800, s_romData2nNoProtSet1[1].data2n, 0x34ee4cc1, " 2E"}, // s2.2e (patched)
+                                                            {NO_BANK_SWITCH, 0x1000, 0x0800, s_romData2nNoProtSet1[2].data2n, 0x12d7fc3e, " 2F"}, // s3.2f
+                                                            {NO_BANK_SWITCH, 0x1800, 0x0800, s_romData2nNoProtSet1[3].data2n, 0x663b6c35, " 2H"}, // s4.2h (strfbomb 4.2h)
+                                                            {NO_BANK_SWITCH, 0x2000, 0x0800, s_romData2nNoProtSet1[4].data2n, 0x4919a91c, " 2J"}, // s5.2j
+                                                            {NO_BANK_SWITCH, 0x2800, 0x0800, s_romData2nNoProtSet1[5].data2n, 0x26a4547b, " 2L"}, // s6.2l
+                                                            {NO_BANK_SWITCH, 0x3000, 0x0800, s_romData2nNoProtSet1[6].data2n, 0x0bb49470, " 2M"}, // s7.2m
+                                                            {NO_BANK_SWITCH, 0x3800, 0x0800, s_romData2nNoProtSet1[7].data2n, 0x6a5740e5, " 2P"}, // s8.2p
+                                                            {0} }; // end of list
+
+
 // Found on a Zaccaria Scramble PCB set that uses 2708 EPROMS.
 // Maps to "scramblebb" in MAME.
 //
@@ -114,6 +140,14 @@ CScrambleGame::createInstanceZacSet1(
 )
 {
     return (new CScrambleGame(s_romData2nZacSet1, s_romRegionZacSet1));
+}
+
+
+IGame*
+CScrambleGame::createInstanceNoProtSet1(
+)
+{
+    return (new CScrambleGame(s_romData2nNoProtSet1, s_romRegionNoProtSet1));
 }
 
 

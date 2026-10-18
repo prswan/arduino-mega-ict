@@ -44,7 +44,8 @@ class CZ80ACpu : public ICpu
             CYCLE_TYPE_DEFAULT,
             CYCLE_TYPE_PUCKMAN,
             CYCLE_TYPE_CRAZYKONG,
-            CYCLE_TYPE_LADYBUG
+            CYCLE_TYPE_LADYBUG,
+            CYCLE_TYPE_KIKIKAI
         } CycleType;
 
         //
@@ -79,6 +80,22 @@ class CZ80ACpu : public ICpu
             DataRemapCallback     dataRemapCallback           = NO_DATA_REMAP,
             void                 *dataRemapCallbackContext    = NULL,
             CycleType             cycleType                   = CYCLE_TYPE_DEFAULT
+        );
+
+        //
+        // Change the cycle implementation in use, e.g. to try them on a new PCB.
+        //
+        void setCycleType(
+            CycleType cycleType
+        ) { m_cycleType = cycleType; }
+
+        CycleType getCycleType(
+        ) { return m_cycleType; }
+
+        //
+        // Returns true if the target is holding the CPU in reset.
+        //
+        bool isResetActive(
         );
 
         // ICpu Interface
@@ -178,6 +195,16 @@ class CZ80ACpu : public ICpu
 
         PERROR
         MREQwriteCrazyKong(
+            UINT16 *data
+        );
+
+        PERROR
+        MREQreadKikiKaikai(
+            UINT16 *data
+        );
+
+        PERROR
+        MREQwriteKikiKaikai(
             UINT16 *data
         );
 
